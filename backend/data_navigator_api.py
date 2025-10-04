@@ -365,7 +365,7 @@ def create_data_navigator_router(db: AsyncIOMotorDatabase) -> APIRouter:
         )
         return await service.get_items_by_type(data_type, page, page_size, filters)
     
-    @router.get("/{data_type}/{item_id}")
+    @router.get("/api/data/{data_type}/{item_id}")
     async def get_data_item(
         data_type: DataType,
         item_id: str,
