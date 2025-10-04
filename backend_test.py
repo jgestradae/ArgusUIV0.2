@@ -97,7 +97,7 @@ class ArgusAPITester:
         measurement_data = {
             "measurement_name": "Test Measurement",
             "suborder_task": "FFM",
-            "result_type": "LEVEL",
+            "result_type": "MR",
             "custom_config": {
                 "freq_mode": "S",
                 "freq_single": 100000000,
