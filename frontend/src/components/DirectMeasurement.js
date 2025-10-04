@@ -315,7 +315,7 @@ export default function DirectMeasurement() {
                     </SelectTrigger>
                     <SelectContent>
                       {demodOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        <SelectItem key={option.value} value={option.value || "default"}>{option.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
