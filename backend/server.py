@@ -450,8 +450,12 @@ async def health_check():
         "version": "1.0.0"
     }
 
-# Include router in app
+# Include routers in app
 app.include_router(api_router)
+
+# Add Data Navigator router
+data_router = create_data_navigator_router(db)
+app.include_router(data_router)
 
 # CORS middleware
 app.add_middleware(
