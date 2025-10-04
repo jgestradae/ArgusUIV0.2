@@ -186,7 +186,7 @@ export default function DirectMeasurement() {
                     </SelectTrigger>
                     <SelectContent>
                       {taskOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
+                        <SelectItem key={option.value} value={option.value || "default"}>
                           <div>
                             <div className="font-medium">{option.label}</div>
                             <div className="text-xs text-slate-400">{option.description}</div>
