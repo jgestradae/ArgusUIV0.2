@@ -24,6 +24,9 @@ class AuthManager:
     
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify a password against its hash"""
+        # Limit password to 72 bytes for bcrypt compatibility
+        if len(plain_password.encode('utf-8')) > 72:
+            plain_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
         return pwd_context.verify(plain_password, hashed_password)
     
     def get_password_hash(self, password: str) -> str:
