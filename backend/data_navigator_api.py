@@ -400,7 +400,7 @@ def create_data_navigator_router(db: AsyncIOMotorDatabase) -> APIRouter:
             raise HTTPException(status_code=404, detail="Item not found")
         return {"success": True, "message": "Item deleted successfully"}
     
-    @router.post("/sample-data")
+    @router.post("/api/data/sample-data")
     async def create_sample_data(current_user: User = Depends(get_current_user)):
         """Create sample data for development (admin only)"""
         if current_user.role != "admin":
