@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import SystemStatus from './components/SystemStatus';
 import DirectMeasurement from './components/DirectMeasurement';
+import AutomaticMode from './components/AutomaticMode';
 import Configuration from './components/Configuration';
 import SystemLogs from './components/SystemLogs';
 import DataNavigator from './components/DataNavigator';
