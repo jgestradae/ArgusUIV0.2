@@ -180,6 +180,7 @@ class AMMScheduler:
             # Create XML order
             xml_content = self.xml_processor.create_measurement_order(order_id, xml_params)
             xml_file = self.xml_processor.save_request(xml_content, order_id)
+            logger.debug(f"XML order saved to: {xml_file}")
             
             # Update execution with generated order
             await self.db.amm_executions.update_one(
