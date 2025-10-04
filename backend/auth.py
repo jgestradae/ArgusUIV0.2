@@ -91,19 +91,21 @@ class AuthManager:
     
     async def create_default_admin(self):
         """Create default admin user if none exists"""
-        admin_exists = await self.db.users.find_one({"role": UserRole.ADMIN})
-        if not admin_exists:
-            admin_user = {
-                "id": "admin-001",
-                "username": "admin",
-                "password_hash": self.get_password_hash("admin123"),
-                "role": UserRole.ADMIN,
-                "auth_provider": "local",
-                "is_active": True,
-                "created_at": datetime.utcnow()
-            }
-            await self.db.users.insert_one(admin_user)
-            print("Default admin user created (username: admin, password: admin123)")
+        # Delete existing admin users first (for development)
+        await self.db.users.delete_many({"username": "admin"})
+        
+        admin_user = {
+            "id": "admin-001",
+            "username": "admin",
+            "password_hash": self.get_password_hash("admin123"),
+            "role": UserRole.ADMIN,
+            "auth_provider": "local",
+            "is_active": True,
+            "created_at": datetime.utcnow()
+        }
+        await self.db.users.insert_one(admin_user)
+        print("Default admin user created (username: admin, password: admin123)")
+        print(f"Password hash: {admin_user['password_hash']}")
 
 # Global auth manager instance (will be initialized in main app)
 auth_manager: Optional[AuthManager] = None
