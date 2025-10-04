@@ -466,6 +466,10 @@ app.include_router(api_router)
 data_router = create_data_navigator_router(db)
 app.include_router(data_router)
 
+# Add AMM router
+amm_router = create_amm_router(db, amm_scheduler)
+app.include_router(amm_router)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
