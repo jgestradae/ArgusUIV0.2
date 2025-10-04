@@ -105,7 +105,7 @@ class AMMScheduler:
             if time_since_last.total_seconds() < 60:  # Less than 1 minute
                 return False
                 
-        return self._check_timing_conditions(timing_def, current_time)
+        return self._check_timing_conditions(timing_def, current_time, amm_config)
         
     def _check_timing_conditions(self, timing_def: TimingDefinition, current_time: datetime, amm_config: AMMConfiguration) -> bool:
         """Check if timing conditions are met for execution"""
