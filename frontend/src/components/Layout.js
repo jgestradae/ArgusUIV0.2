@@ -14,7 +14,8 @@ import {
   X,
   User,
   Shield,
-  Database
+  Database,
+  Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
 
