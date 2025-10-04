@@ -337,6 +337,20 @@ async def get_measurement_configs(current_user: User = Depends(get_current_user)
     configs = await db.measurement_configs.find().to_list(100)
     return [MeasurementConfig(**config) for config in configs]
 
+@api_router.delete("/config/measurements/{template_id}")
+async def delete_measurement_config(template_id: str, current_user: User = Depends(get_current_user)):
+    """Delete measurement configuration template"""
+    result = await db.measurement_configs.delete_one({"id": template_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return ApiResponse(success=True, message="Template deleted successfully")
+
+@api_router.get("/auth/users", response_model=List[User])
+async def get_users(admin_user: User = Depends(require_admin)):
+    """Get all users (admin only)"""
+    users = await db.users.find().to_list(100)
+    return [User(**user) for user in users]
+
 # ============================================================================
 # SYSTEM LOGS ENDPOINTS
 # ============================================================================
