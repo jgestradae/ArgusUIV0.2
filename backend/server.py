@@ -1,16 +1,27 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi.security import HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+from contextlib import asynccontextmanager
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field
-from typing import List
-import uuid
-from datetime import datetime
+from typing import List, Optional
+from datetime import datetime, timedelta
 
+# Import our models and utilities
+from models import (
+    User, UserCreate, UserRole, 
+    ArgusOrder, OrderType, SubOrderTask, ResultType,
+    ArgusSystemState, MeasurementConfig, DirectMeasurementRequest,
+    SystemLog, ApiResponse, SystemStatusResponse
+)
+from xml_processor import ArgusXMLProcessor
+from auth import AuthManager, get_current_user, require_admin
+import auth as auth_module
 
+# Configuration
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -19,49 +30,8 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
-app = FastAPI()
-
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
-
-
-# Define Models
-class StatusCheck(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.dict()
-    status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    status_checks = await db.status_checks.find().to_list(1000)
-    return [StatusCheck(**status_check) for status_check in status_checks]
-
-# Include the router in the main app
-app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Argus XML processor (will be configured via environment or API)
+xml_processor: Optional[ArgusXMLProcessor] = None
 
 # Configure logging
 logging.basicConfig(
@@ -70,6 +40,413 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan manager"""
+    # Startup
+    logger.info("Starting ArgusUI Backend...")
+    
+    # Initialize auth manager
+    auth_module.auth_manager = AuthManager(db)
+    await auth_module.auth_manager.create_default_admin()
+    
+    # Initialize XML processor with default paths (can be overridden via API)
+    global xml_processor
+    inbox_path = os.getenv("ARGUS_INBOX_PATH", "/tmp/argus_inbox")
+    outbox_path = os.getenv("ARGUS_OUTBOX_PATH", "/tmp/argus_outbox")
+    data_path = os.getenv("ARGUS_DATA_PATH", "/tmp/argus_data")
+    
+    xml_processor = ArgusXMLProcessor(inbox_path, outbox_path, data_path)
+    logger.info(f"XML Processor initialized - Inbox: {inbox_path}, Outbox: {outbox_path}")
+    
+    yield
+    
+    # Shutdown
+    logger.info("Shutting down ArgusUI Backend...")
     client.close()
+
+# Create FastAPI app
+app = FastAPI(
+    title="ArgusUI Backend",
+    description="Web interface for R&S Argus spectrum monitoring system",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Create API router with prefix
+api_router = APIRouter(prefix="/api")
+
+# ============================================================================
+# AUTHENTICATION ENDPOINTS
+# ============================================================================
+
+from pydantic import BaseModel
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: User
+
+@api_router.post("/auth/login", response_model=LoginResponse)
+async def login(credentials: LoginRequest):
+    """Authenticate user and return JWT token"""
+    user = await auth_module.auth_manager.authenticate_user(
+        credentials.username, credentials.password
+    )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password"
+        )
+    
+    access_token_expires = timedelta(minutes=auth_module.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth_module.auth_manager.create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=user
+    )
+
+@api_router.get("/auth/me", response_model=User)
+async def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Get current user information"""
+    return current_user
+
+@api_router.post("/auth/users", response_model=User)
+async def create_user(user_data: UserCreate, admin_user: User = Depends(require_admin)):
+    """Create new user (admin only)"""
+    # Check if username already exists
+    existing_user = await db.users.find_one({"username": user_data.username})
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already exists"
+        )
+    
+    # Create user
+    user_dict = user_data.dict(exclude={"password"})
+    user_dict["password_hash"] = auth_module.auth_manager.get_password_hash(user_data.password)
+    user_dict["created_at"] = datetime.utcnow()
+    
+    user = User(**user_dict)
+    await db.users.insert_one(user.dict())
+    
+    return user
+
+# ============================================================================
+# SYSTEM STATUS ENDPOINTS
+# ============================================================================
+
+@api_router.get("/system/status", response_model=SystemStatusResponse)
+async def get_system_status(current_user: User = Depends(get_current_user)):
+    """Get current Argus system status"""
+    try:
+        # Generate GSS request
+        order_id = xml_processor.generate_order_id("GSS")
+        xml_content = xml_processor.create_system_state_request(order_id)
+        
+        # Save request
+        xml_file = xml_processor.save_request(xml_content, order_id)
+        
+        # Create order record
+        order = ArgusOrder(
+            order_id=order_id,
+            order_type=OrderType.GSS,
+            order_name="System State Query",
+            created_by=current_user.id,
+            xml_request_file=xml_file
+        )
+        await db.argus_orders.insert_one(order.dict())
+        
+        # For demo purposes, return mock data immediately
+        # In production, you'd poll for responses or use async processing
+        mock_response = xml_processor.create_mock_response("GSS", order_id)
+        
+        # Save mock system state
+        system_state = ArgusSystemState(
+            is_running=mock_response["is_running"],
+            current_user=mock_response.get("current_user"),
+            monitoring_time=mock_response.get("monitoring_time"),
+            stations=mock_response.get("stations", []),
+            devices=mock_response.get("devices", [])
+        )
+        await db.system_states.insert_one(system_state.dict())
+        
+        # Count active measurements
+        active_measurements = await db.argus_orders.count_documents({
+            "order_state": {"$in": ["Open", "In Process"]}
+        })
+        
+        return SystemStatusResponse(
+            argus_running=system_state.is_running,
+            last_update=system_state.timestamp,
+            active_measurements=active_measurements,
+            system_health="Good" if system_state.is_running else "Warning",
+            stations=system_state.stations,
+            devices=system_state.devices
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting system status: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get system status: {str(e)}"
+        )
+
+@api_router.get("/system/parameters")
+async def get_system_parameters(current_user: User = Depends(get_current_user)):
+    """Get Argus system parameters (GSP)"""
+    try:
+        order_id = xml_processor.generate_order_id("GSP")
+        xml_content = xml_processor.create_system_params_request(order_id)
+        xml_file = xml_processor.save_request(xml_content, order_id)
+        
+        order = ArgusOrder(
+            order_id=order_id,
+            order_type=OrderType.GSP,
+            order_name="System Parameters Query",
+            created_by=current_user.id,
+            xml_request_file=xml_file
+        )
+        await db.argus_orders.insert_one(order.dict())
+        
+        return ApiResponse(
+            success=True,
+            message="System parameters request sent",
+            data={"order_id": order_id}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error requesting system parameters: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to request system parameters: {str(e)}"
+        )
+
+# ============================================================================
+# DIRECT MEASUREMENT ENDPOINTS
+# ============================================================================
+
+@api_router.post("/measurements/direct")
+async def start_direct_measurement(request: DirectMeasurementRequest, 
+                                 current_user: User = Depends(get_current_user)):
+    """Start a direct measurement"""
+    try:
+        # Get configuration
+        config = {}
+        if request.config_id:
+            config_doc = await db.measurement_configs.find_one({"id": request.config_id})
+            if config_doc:
+                config = MeasurementConfig(**config_doc).dict()
+        elif request.custom_config:
+            config = request.custom_config
+        
+        # Build measurement parameters
+        meas_params = {
+            "name": request.measurement_name,
+            "task": request.suborder_task.value,
+            "result_type": request.result_type.value,
+            "suborder_name": request.measurement_name
+        }
+        
+        # Add frequency parameters
+        if config.get("freq_mode"):
+            meas_params["freq_mode"] = config["freq_mode"]
+            if config["freq_mode"] == "S":
+                meas_params["freq_single"] = config.get("freq_single")
+            elif config["freq_mode"] == "R":
+                meas_params["freq_range_low"] = config.get("freq_range_low")
+                meas_params["freq_range_high"] = config.get("freq_range_high")
+                meas_params["freq_step"] = config.get("freq_step")
+            elif config["freq_mode"] == "L":
+                meas_params["freq_list"] = config.get("freq_list", [])
+        
+        # Add other parameters
+        for param in ["if_bandwidth", "rf_attenuation", "demodulation", "measurement_time"]:
+            if config.get(param):
+                meas_params[param] = config[param]
+        
+        # Generate order
+        order_id = xml_processor.generate_order_id("MEAS")
+        xml_content = xml_processor.create_measurement_order(order_id, meas_params)
+        xml_file = xml_processor.save_request(xml_content, order_id)
+        
+        # Create order record
+        order = ArgusOrder(
+            order_id=order_id,
+            order_type=OrderType.OR,
+            order_name=request.measurement_name,
+            suborder_task=request.suborder_task,
+            result_type=request.result_type,
+            created_by=current_user.id,
+            xml_request_file=xml_file,
+            parameters=meas_params
+        )
+        await db.argus_orders.insert_one(order.dict())
+        
+        return ApiResponse(
+            success=True,
+            message="Measurement started",
+            data={"order_id": order_id, "order": order.dict()}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error starting measurement: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to start measurement: {str(e)}"
+        )
+
+@api_router.get("/measurements/orders")
+async def get_measurement_orders(current_user: User = Depends(get_current_user)):
+    """Get measurement orders"""
+    orders = await db.argus_orders.find().sort("created_at", -1).limit(50).to_list(50)
+    return [ArgusOrder(**order) for order in orders]
+
+@api_router.get("/measurements/orders/{order_id}")
+async def get_measurement_order(order_id: str, current_user: User = Depends(get_current_user)):
+    """Get specific measurement order"""
+    order_doc = await db.argus_orders.find_one({"order_id": order_id})
+    if not order_doc:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    return ArgusOrder(**order_doc)
+
+# ============================================================================
+# CONFIGURATION ENDPOINTS
+# ============================================================================
+
+@api_router.post("/config/measurements", response_model=MeasurementConfig)
+async def create_measurement_config(config: MeasurementConfig, 
+                                  current_user: User = Depends(get_current_user)):
+    """Create measurement configuration template"""
+    config.created_by = current_user.id
+    await db.measurement_configs.insert_one(config.dict())
+    return config
+
+@api_router.get("/config/measurements", response_model=List[MeasurementConfig])
+async def get_measurement_configs(current_user: User = Depends(get_current_user)):
+    """Get measurement configuration templates"""
+    configs = await db.measurement_configs.find().to_list(100)
+    return [MeasurementConfig(**config) for config in configs]
+
+# ============================================================================
+# SYSTEM LOGS ENDPOINTS
+# ============================================================================
+
+@api_router.get("/logs", response_model=List[SystemLog])
+async def get_system_logs(limit: int = 100, level: Optional[str] = None,
+                         current_user: User = Depends(get_current_user)):
+    """Get system logs"""
+    query = {}
+    if level:
+        query["level"] = level
+    
+    logs = await db.system_logs.find(query).sort("timestamp", -1).limit(limit).to_list(limit)
+    return [SystemLog(**log) for log in logs]
+
+async def log_system_event(level: str, source: str, message: str, 
+                          user_id: Optional[str] = None, order_id: Optional[str] = None,
+                          details: Optional[dict] = None):
+    """Helper function to log system events"""
+    log_entry = SystemLog(
+        level=level,
+        source=source,
+        message=message,
+        user_id=user_id,
+        order_id=order_id,
+        details=details
+    )
+    await db.system_logs.insert_one(log_entry.dict())
+
+# ============================================================================
+# BACKGROUND TASKS (Response Processing)
+# ============================================================================
+
+@api_router.post("/system/process-responses")
+async def process_xml_responses(admin_user: User = Depends(require_admin)):
+    """Process pending XML responses from Argus (admin only)"""
+    try:
+        responses = xml_processor.check_responses()
+        processed_count = 0
+        
+        for response in responses:
+            order_id = response.get("order_id")
+            if order_id:
+                # Update order in database
+                update_data = {
+                    "order_state": response.get("order_state", "Finished"),
+                    "completed_at": datetime.utcnow(),
+                    "xml_response_file": response.get("xml_file")
+                }
+                
+                if response.get("error"):
+                    update_data["error_message"] = response["error"].get("message")
+                
+                await db.argus_orders.update_one(
+                    {"order_id": order_id},
+                    {"$set": update_data}
+                )
+                
+                # Save system state if GSS response
+                if response.get("order_type") == "GSS":
+                    system_state = ArgusSystemState(
+                        is_running=response.get("is_running", False),
+                        current_user=response.get("current_user"),
+                        monitoring_time=response.get("monitoring_time"),
+                        stations=response.get("stations", []),
+                        devices=response.get("devices", []),
+                        raw_xml_file=response.get("xml_file")
+                    )
+                    await db.system_states.insert_one(system_state.dict())
+                
+                processed_count += 1
+        
+        return ApiResponse(
+            success=True,
+            message=f"Processed {processed_count} responses",
+            data={"processed_count": processed_count}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error processing responses: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process responses: {str(e)}"
+        )
+
+# ============================================================================
+# HEALTH CHECK
+# ============================================================================
+
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow(),
+        "version": "1.0.0"
+    }
+
+# Include router in app
+app.include_router(api_router)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
