@@ -13,7 +13,8 @@ import {
   Menu, 
   X,
   User,
-  Shield
+  Shield,
+  Database
 } from 'lucide-react';
 import { toast } from 'sonner';
 
