@@ -43,6 +43,12 @@ export default function Layout({ children }) {
       description: 'Real-time measurements'
     },
     {
+      name: 'Data Navigator',
+      path: '/data-navigator',
+      icon: Database,
+      description: 'Browse measurement data'
+    },
+    {
       name: 'Configuration',
       path: '/configuration',
       icon: Settings,
