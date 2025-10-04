@@ -21,17 +21,13 @@ class AuthManager:
     
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify a password against its hash"""
-        # Limit password to 72 bytes for bcrypt compatibility
-        if len(plain_password.encode('utf-8')) > 72:
-            plain_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-        return pwd_context.verify(plain_password, hashed_password)
+        # Simple SHA-256 hash for development/demo purposes
+        return self.get_password_hash(plain_password) == hashed_password
     
     def get_password_hash(self, password: str) -> str:
         """Hash a password"""
-        # Limit password to 72 bytes for bcrypt compatibility
-        if len(password.encode('utf-8')) > 72:
-            password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-        return pwd_context.hash(password)
+        # Simple SHA-256 hash for development/demo purposes
+        return hashlib.sha256(password.encode()).hexdigest()
     
     def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
         """Create JWT access token"""
