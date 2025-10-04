@@ -44,6 +44,12 @@ export default function Layout({ children }) {
       description: 'Real-time measurements'
     },
     {
+      name: 'Automatic Mode',
+      path: '/automatic-mode',
+      icon: Clock,
+      description: 'Scheduled measurements'
+    },
+    {
       name: 'Data Navigator',
       path: '/data-navigator',
       icon: Database,
