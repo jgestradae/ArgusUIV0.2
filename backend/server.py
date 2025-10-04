@@ -36,6 +36,9 @@ db = client[os.environ['DB_NAME']]
 # Argus XML processor (will be configured via environment or API)
 xml_processor: Optional[ArgusXMLProcessor] = None
 
+# AMM Scheduler
+amm_scheduler: Optional[AMMScheduler] = None
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
