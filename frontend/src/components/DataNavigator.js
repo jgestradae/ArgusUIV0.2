@@ -388,7 +388,7 @@ export default function DataNavigator() {
             const stat = getStatForType(key);
             return (
               <TabsTrigger key={key} value={key} className="flex flex-col items-center space-y-1">
-                <typeInfo.icon className="w-4 h-4" />
+                {React.createElement(typeInfo.icon, { className: "w-4 h-4" })}
                 <span className="text-xs">{typeInfo.label}</span>
                 <span className="text-xs text-slate-400">({stat.count})</span>
               </TabsTrigger>
