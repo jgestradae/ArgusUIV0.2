@@ -21,6 +21,8 @@ from xml_processor import ArgusXMLProcessor
 from auth import AuthManager, get_current_user, require_admin
 import auth as auth_module
 from data_navigator_api import create_data_navigator_router
+from amm_api import create_amm_router
+from amm_scheduler import AMMScheduler
 
 # Configuration
 ROOT_DIR = Path(__file__).parent
