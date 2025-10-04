@@ -48,6 +48,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/data-navigator" element={
+              <ProtectedRoute>
+                <Layout>
+                  <DataNavigator />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/configuration" element={
               <ProtectedRoute>
                 <Layout>
