@@ -388,7 +388,7 @@ def create_data_navigator_router(db: AsyncIOMotorDatabase) -> APIRouter:
         item_data.type = data_type
         return await service.create_item(item_data, current_user.id)
     
-    @router.delete("/{data_type}/{item_id}")
+    @router.delete("/api/data/{data_type}/{item_id}")
     async def delete_data_item(
         data_type: DataType,
         item_id: str,
