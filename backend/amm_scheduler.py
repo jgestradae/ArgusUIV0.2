@@ -107,7 +107,7 @@ class AMMScheduler:
                 
         return self._check_timing_conditions(timing_def, current_time)
         
-    def _check_timing_conditions(self, timing_def: TimingDefinition, current_time: datetime) -> bool:
+    def _check_timing_conditions(self, timing_def: TimingDefinition, current_time: datetime, amm_config: AMMConfiguration) -> bool:
         """Check if timing conditions are met for execution"""
         
         if timing_def.schedule_type == ScheduleType.ALWAYS:
