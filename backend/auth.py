@@ -28,6 +28,9 @@ class AuthManager:
     
     def get_password_hash(self, password: str) -> str:
         """Hash a password"""
+        # Limit password to 72 bytes for bcrypt compatibility
+        if len(password.encode('utf-8')) > 72:
+            password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
         return pwd_context.hash(password)
     
     def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
