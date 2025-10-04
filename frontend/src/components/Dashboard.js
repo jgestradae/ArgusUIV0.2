@@ -12,7 +12,8 @@ import {
   Clock,
   TrendingUp,
   Settings,
-  FileText
+  FileText,
+  Database
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
