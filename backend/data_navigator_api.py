@@ -345,7 +345,7 @@ def create_data_navigator_router(db: AsyncIOMotorDatabase) -> APIRouter:
         """Get statistics for all data types"""
         return await service.get_statistics()
     
-    @router.get("/{data_type}", response_model=DataNavigatorResponse)
+    @router.get("/api/data/{data_type}", response_model=DataNavigatorResponse)
     async def get_data_by_type(
         data_type: DataType,
         page: int = Query(1, ge=1),
