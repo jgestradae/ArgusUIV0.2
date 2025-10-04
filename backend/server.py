@@ -57,13 +57,17 @@ async def lifespan(app: FastAPI):
     await auth_module.auth_manager.create_default_admin()
     
     # Initialize XML processor with default paths (can be overridden via API)
-    global xml_processor
+    global xml_processor, amm_scheduler
     inbox_path = os.getenv("ARGUS_INBOX_PATH", "/tmp/argus_inbox")
     outbox_path = os.getenv("ARGUS_OUTBOX_PATH", "/tmp/argus_outbox")
     data_path = os.getenv("ARGUS_DATA_PATH", "/tmp/argus_data")
     
     xml_processor = ArgusXMLProcessor(inbox_path, outbox_path, data_path)
     logger.info(f"XML Processor initialized - Inbox: {inbox_path}, Outbox: {outbox_path}")
+    
+    # Initialize AMM scheduler
+    amm_scheduler = AMMScheduler(db, xml_processor)
+    logger.info("AMM Scheduler initialized")
     
     yield
     
