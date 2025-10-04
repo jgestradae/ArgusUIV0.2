@@ -8,6 +8,7 @@ import SystemStatus from './components/SystemStatus';
 import DirectMeasurement from './components/DirectMeasurement';
 import Configuration from './components/Configuration';
 import SystemLogs from './components/SystemLogs';
+import DataNavigator from './components/DataNavigator';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
