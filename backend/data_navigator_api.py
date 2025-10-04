@@ -340,7 +340,7 @@ def create_data_navigator_router(db: AsyncIOMotorDatabase) -> APIRouter:
     router = APIRouter(tags=["Data Navigator"])
     service = DataNavigatorService(db)
     
-    @router.get("/statistics", response_model=List[DataStatistics])
+    @router.get("/api/data/statistics", response_model=List[DataStatistics])
     async def get_data_statistics(current_user: User = Depends(get_current_user)):
         """Get statistics for all data types"""
         return await service.get_statistics()
