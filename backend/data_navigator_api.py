@@ -337,7 +337,7 @@ class DataNavigatorService:
                 await collection.insert_one(item.dict())
 
 def create_data_navigator_router(db: AsyncIOMotorDatabase) -> APIRouter:
-    router = APIRouter(prefix="/api/data", tags=["Data Navigator"])
+    router = APIRouter(tags=["Data Navigator"])
     service = DataNavigatorService(db)
     
     @router.get("/statistics", response_model=List[DataStatistics])
