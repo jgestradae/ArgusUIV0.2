@@ -126,9 +126,9 @@ class ArgusAPITester:
         """Test accessing protected endpoint without token"""
         old_token = self.token
         self.token = None
-        success, _ = self.run_test("Unauthorized Access", "GET", "auth/me", 401, auth_required=True)
+        success, _ = self.run_test("Unauthorized Access", "GET", "auth/me", 403, auth_required=True)
         self.token = old_token
-        # For unauthorized test, success means we got the expected 401
+        # For unauthorized test, success means we got the expected 403
         return success
 
 def main():
