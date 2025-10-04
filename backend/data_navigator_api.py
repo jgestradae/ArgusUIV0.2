@@ -377,7 +377,7 @@ def create_data_navigator_router(db: AsyncIOMotorDatabase) -> APIRouter:
             raise HTTPException(status_code=404, detail="Item not found")
         return item
     
-    @router.post("/{data_type}")
+    @router.post("/api/data/{data_type}")
     async def create_data_item(
         data_type: DataType,
         item_data: DataItemCreate,
