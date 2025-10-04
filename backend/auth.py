@@ -105,7 +105,6 @@ class AuthManager:
         }
         await self.db.users.insert_one(admin_user)
         print("Default admin user created (username: admin, password: admin123)")
-        print(f"Password hash: {admin_user['password_hash']}")
 
 # Global auth manager instance (will be initialized in main app)
 auth_manager: Optional[AuthManager] = None
