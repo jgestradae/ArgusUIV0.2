@@ -345,6 +345,15 @@ def create_data_navigator_router(db: AsyncIOMotorDatabase) -> APIRouter:
         """Get statistics for all data types"""
         return await service.get_statistics()
     
+    @router.post("/api/data/create-sample")
+    async def create_sample_data(current_user: User = Depends(get_current_user)):
+        """Create sample data for development (admin only)"""
+        if current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        await service.create_sample_data()
+        return {"success": True, "message": "Sample data created"}
+    
     @router.get("/api/data/{data_type}", response_model=DataNavigatorResponse)
     async def get_data_by_type(
         data_type: DataType,
