@@ -184,7 +184,7 @@ export default function Dashboard() {
           <CardDescription>Common spectrum monitoring tasks</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Link to="/direct-measurement">
               <Button className="w-full h-20 btn-spectrum flex-col space-y-2">
                 <Zap className="w-6 h-6" />
@@ -195,6 +195,12 @@ export default function Dashboard() {
               <Button variant="secondary" className="w-full h-20 btn-secondary flex-col space-y-2">
                 <Activity className="w-6 h-6" />
                 <span>System Status</span>
+              </Button>
+            </Link>
+            <Link to="/data-navigator">
+              <Button variant="secondary" className="w-full h-20 btn-secondary flex-col space-y-2">
+                <Database className="w-6 h-6" />
+                <span>Data Navigator</span>
               </Button>
             </Link>
             <Link to="/configuration">
