@@ -401,7 +401,7 @@ export default function DataNavigator() {
             <Card className="glass-card border-0">
               <CardHeader>
                 <CardTitle className="text-xl text-white flex items-center">
-                  <DATA_TYPES[dataType].icon className="w-5 h-5 mr-2" />
+                  {React.createElement(DATA_TYPES[dataType].icon, { className: "w-5 h-5 mr-2" })}
                   {DATA_TYPES[dataType].label}
                 </CardTitle>
                 <CardDescription>{DATA_TYPES[dataType].description}</CardDescription>
