@@ -49,6 +49,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/automatic-mode" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AutomaticMode />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/data-navigator" element={
               <ProtectedRoute>
                 <Layout>
