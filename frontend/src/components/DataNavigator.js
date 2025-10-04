@@ -120,7 +120,7 @@ export default function DataNavigator() {
 
   const createSampleData = async () => {
     try {
-      await axios.post(`${API}/data/sample-data`);
+      await axios.post(`${API}/data/create-sample`);
       toast.success('Sample data created successfully');
       loadStatistics();
       loadDataForType(activeTab);
