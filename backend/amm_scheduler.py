@@ -8,7 +8,6 @@ from amm_models import (
     ScheduleType, AMMStatus
 )
 from xml_processor import ArgusXMLProcessor
-import croniter
 from croniter import croniter
 
 logger = logging.getLogger(__name__)
