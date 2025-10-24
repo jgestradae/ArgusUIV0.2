@@ -256,6 +256,11 @@ export default function SystemStatus() {
                   <p className="text-slate-400">No devices detected</p>
                 </div>
               )}
+              {systemStatus?.devices && systemStatus.devices.length > 10 && (
+                <p className="text-center text-sm text-slate-400 mt-4">
+                  Showing 10 of {systemStatus.devices.length} total devices
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
