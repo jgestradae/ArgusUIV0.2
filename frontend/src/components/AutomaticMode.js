@@ -72,7 +72,12 @@ export default function AutomaticMode() {
   
   // AMM Wizard State
   const [wizardStep, setWizardStep] = useState(1);
+  const [availableStations, setAvailableStations] = useState([]);
+  const [loadingStations, setLoadingStations] = useState(false);
   const [wizardData, setWizardData] = useState({
+    // Station Selection (New Step 1)
+    selected_station: null,
+    
     // Basic Info
     name: '',
     description: '',
