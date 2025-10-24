@@ -227,47 +227,86 @@ export default function SystemStatus() {
         {/* System Devices */}
         <Card className="glass-card border-0">
           <CardHeader>
-            <CardTitle className="text-xl text-white flex items-center">
-              <Server className="w-5 h-5 mr-2" />
-              System Devices
-            </CardTitle>
-            <CardDescription>Connected measurement equipment</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl text-white flex items-center">
+                  <Server className="w-5 h-5 mr-2" />
+                  System Devices
+                </CardTitle>
+                <CardDescription>
+                  {selectedStation 
+                    ? `Showing devices for ${selectedStation}`
+                    : 'Click a station to view its devices'
+                  }
+                </CardDescription>
+              </div>
+              {selectedStation && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedStation(null)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  Clear Selection
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {systemStatus?.devices && systemStatus.devices.length > 0 ? (
-                systemStatus.devices.slice(0, 10).map((device, index) => {
-                  const isOnline = device.state === 'physical';
-                  return (
-                    <div key={index} className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
-                        <div>
-                          <h4 className="font-medium text-white">{device.name}</h4>
-                          <p className="text-sm text-slate-400 capitalize flex items-center">
-                            <Wifi className="w-3 h-3 mr-1" />
-                            {device.driver} • {device.station}
-                          </p>
+              {(() => {
+                // Filter devices by selected station
+                const filteredDevices = selectedStation
+                  ? systemStatus?.devices?.filter(device => device.station === selectedStation)
+                  : systemStatus?.devices?.slice(0, 10);
+
+                return filteredDevices && filteredDevices.length > 0 ? (
+                  filteredDevices.map((device, index) => {
+                    const isOnline = device.state === 'physical';
+                    return (
+                      <div key={index} className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-3 h-3 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
+                          <div>
+                            <h4 className="font-medium text-white">{device.name}</h4>
+                            <p className="text-sm text-slate-400 capitalize flex items-center">
+                              <Wifi className="w-3 h-3 mr-1" />
+                              {device.driver}
+                            </p>
+                          </div>
                         </div>
+                        <Badge className={isOnline 
+                          ? 'bg-green-500/20 text-green-300 border-green-500/30'
+                          : 'bg-red-500/20 text-red-300 border-red-500/30'
+                        }>
+                          {isOnline ? 'Online' : 'Offline'}
+                        </Badge>
                       </div>
-                      <Badge className={isOnline 
-                        ? 'bg-green-500/20 text-green-300 border-green-500/30'
-                        : 'bg-red-500/20 text-red-300 border-red-500/30'
-                      }>
-                        {isOnline ? 'Online' : 'Offline'}
-                      </Badge>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="text-center py-8">
-                  <Server className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">No devices detected</p>
-                </div>
-              )}
-              {systemStatus?.devices && systemStatus.devices.length > 10 && (
+                    );
+                  })
+                ) : selectedStation ? (
+                  <div className="text-center py-8">
+                    <Server className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-400">No devices found for this station</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Server className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-400">Select a station to view devices</p>
+                  </div>
+                );
+              })()}
+              {selectedStation && systemStatus?.devices && (
                 <p className="text-center text-sm text-slate-400 mt-4">
-                  Showing 10 of {systemStatus.devices.length} total devices
+                  Showing {systemStatus.devices.filter(d => d.station === selectedStation).length} device(s) for {selectedStation}
+                </p>
+              )}
+              {!selectedStation && systemStatus?.devices && systemStatus.devices.length > 10 && (
+                <p className="text-center text-sm text-slate-400 mt-4">
+                  Showing 10 of {systemStatus.devices.length} total devices • Select a station to view all its devices
+                </p>
+              )}
+            </div>
                 </p>
               )}
             </div>
