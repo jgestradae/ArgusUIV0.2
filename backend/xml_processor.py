@@ -26,11 +26,13 @@ class ArgusXMLProcessor:
         (self.data_path / "xml_responses").mkdir(exist_ok=True)
         (self.data_path / "measurement_results").mkdir(exist_ok=True)
 
-    def generate_order_id(self, prefix: str = "ARGUSUI") -> str:
-        """Generate unique order ID"""
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        unique_id = str(uuid.uuid4())[:8]
-        return f"{prefix}_{timestamp}_{unique_id}"
+    def generate_order_id(self, prefix: str = "GSS") -> str:
+        """Generate unique order ID in Argus format: PREFIX + DDMMYY + HHMMSS + XXX"""
+        now = datetime.now()
+        date_part = now.strftime("%d%m%y")  # DDMMYY format
+        time_part = now.strftime("%H%M%S")  # HHMMSS format
+        counter = now.strftime("%f")[:3]    # Milliseconds as 3-digit counter
+        return f"{prefix}{date_part}{time_part}{counter}"
 
     def create_system_state_request(self, order_id: str, sender: str = "HQ4", sender_pc: str = "SRVARGUS") -> str:
         """Create GSS (Get System State) XML request"""
