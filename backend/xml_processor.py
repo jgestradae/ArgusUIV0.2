@@ -200,18 +200,20 @@ class ArgusXMLProcessor:
                 "raw_xml_file": xml_file_path
             }
             
-            # Extract order information
-            order_id_elem = root.find(".//order_id")
-            if order_id_elem is not None:
-                result["order_id"] = order_id_elem.text
-            
-            order_type_elem = root.find(".//order_type")
-            if order_type_elem is not None:
-                result["order_type"] = order_type_elem.text
-            
-            order_state_elem = root.find(".//order_state")
-            if order_state_elem is not None:
-                result["order_state"] = order_state_elem.text
+            # Extract order information (UPPERCASE elements)
+            order_def = root.find(".//ORDER_DEF")
+            if order_def is not None:
+                order_id_elem = order_def.find("ORDER_ID")
+                if order_id_elem is not None:
+                    result["order_id"] = order_id_elem.text
+                
+                order_type_elem = order_def.find("ORDER_TYPE")
+                if order_type_elem is not None:
+                    result["order_type"] = order_type_elem.text
+                
+                order_state_elem = order_def.find("ORDER_STATE")
+                if order_state_elem is not None:
+                    result["order_state"] = order_state_elem.text
             
             # Parse system state responses (GSS)
             if result.get("order_type") == "GSS":
@@ -223,11 +225,11 @@ class ArgusXMLProcessor:
                 result["measurement_results"] = self._parse_measurement_data(measurement_data)
             
             # Parse error information
-            error_elem = root.find(".//acd_err")
-            if error_elem is not None and error_elem.text not in ["S", "Success"]:
+            error_elem = root.find(".//ACD_ERR")
+            if error_elem is not None and error_elem.text not in ["", "S", "Success", None]:
                 result["error"] = {
                     "code": error_elem.text,
-                    "message": root.find(".//acd_err_mess").text if root.find(".//acd_err_mess") is not None else "Unknown error"
+                    "message": "Error in order execution"
                 }
             
             return result
