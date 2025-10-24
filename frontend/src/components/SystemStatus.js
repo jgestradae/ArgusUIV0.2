@@ -29,8 +29,8 @@ export default function SystemStatus() {
 
   useEffect(() => {
     loadSystemStatus();
-    // Auto-refresh every 15 seconds
-    const interval = setInterval(loadSystemStatus, 15000);
+    // Auto-refresh every 60 seconds (GSS queries are heavy on Argus)
+    const interval = setInterval(loadSystemStatus, 60000);
     return () => clearInterval(interval);
   }, []);
 
