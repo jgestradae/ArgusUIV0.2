@@ -139,6 +139,13 @@ export default function AutomaticMode() {
     return () => clearInterval(interval);
   }, []);
 
+  // Load available stations when wizard tab is opened
+  useEffect(() => {
+    if (activeTab === 'wizard' && wizardStep === 1) {
+      loadAvailableStations();
+    }
+  }, [activeTab, wizardStep]);
+
   const loadAvailableStations = async () => {
     setLoadingStations(true);
     try {
