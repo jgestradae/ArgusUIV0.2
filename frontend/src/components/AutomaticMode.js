@@ -591,10 +591,10 @@ export default function AutomaticMode() {
               </div>
               
               <div className="flex justify-between">
-                <Button variant="secondary" onClick={() => setWizardStep(1)}>
+                <Button variant="secondary" onClick={() => setWizardStep(2)}>
                   Previous
                 </Button>
-                <Button onClick={() => setWizardStep(3)} className="btn-spectrum">
+                <Button onClick={() => setWizardStep(4)} className="btn-spectrum">
                   Next: Measurement Definition
                 </Button>
               </div>
@@ -602,12 +602,13 @@ export default function AutomaticMode() {
           </Card>
         );
 
-      case 3:
+      case 4:
+        // MOVED TO STEP 4: Measurement Definition
         return (
           <Card className="glass-card border-0">
             <CardHeader>
-              <CardTitle className="text-xl text-white">Step 3: Measurement Definition</CardTitle>
-              <CardDescription>Configure the measurement parameters and settings</CardDescription>
+              <CardTitle className="text-xl text-white">Step 4: Measurement Definition</CardTitle>
+              <CardDescription>Configure the measurement parameters based on {wizardData.selected_station?.name}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
