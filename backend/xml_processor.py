@@ -240,44 +240,77 @@ class ArgusXMLProcessor:
 
     def _parse_system_state(self, root: ET.Element) -> Dict[str, Any]:
         """Parse system state information from GSS response"""
-        state = {}
+        state = {
+            "stations": [],
+            "devices": [],
+            "is_running": False,
+            "total_stations": 0,
+            "online_stations": 0,
+            "offline_stations": 0
+        }
         
-        # System running status
-        run_elem = root.find(".//mss_run")
-        if run_elem is not None:
-            state["is_running"] = run_elem.text.upper() == "Y"
+        # Parse all MONSYS_STRUCTURE elements (one per station)
+        for monsys in root.findall(".//MONSYS_STRUCTURE"):
+            station_data = {}
+            
+            # Basic station info
+            station_name = monsys.find("MSS_ST_NAME")
+            station_type = monsys.find("MSS_ST_TYPE")
+            station_pc = monsys.find("MSS_RMC_PC")
+            run_status = monsys.find("MSS_RUN")
+            user = monsys.find("MSS_USER")
+            longitude = monsys.find("MSS_LONG")
+            latitude = monsys.find("MSS_LAT")
+            req_time = monsys.find("MSS_REQ_TIME")
+            
+            if station_name is not None:
+                station_data["name"] = station_name.text
+                station_data["type"] = station_type.text if station_type is not None else "F"
+                station_data["pc"] = station_pc.text if station_pc is not None else ""
+                station_data["running"] = run_status.text == "Y" if run_status is not None else False
+                station_data["user"] = user.text if user is not None and user.text else ""
+                station_data["longitude"] = float(longitude.text) if longitude is not None else 0
+                station_data["latitude"] = float(latitude.text) if latitude is not None else 0
+                station_data["last_request"] = req_time.text if req_time is not None else ""
+                
+                # Parse devices for this station
+                station_devices = []
+                for dev in monsys.findall("MSS_DEV"):
+                    dev_name = dev.find("D_NAME")
+                    dev_driver = dev.find("D_DRIVER")
+                    dev_state = dev.find("D_STATE")
+                    
+                    if dev_name is not None:
+                        device_info = {
+                            "name": dev_name.text,
+                            "driver": dev_driver.text if dev_driver is not None else "",
+                            "state": dev_state.text if dev_state is not None else "unknown",
+                            "station": station_data["name"]
+                        }
+                        station_devices.append(device_info)
+                        state["devices"].append(device_info)
+                
+                station_data["device_count"] = len(station_devices)
+                station_data["devices"] = station_devices
+                
+                # Check if station has active measurements
+                mss_state = monsys.find("MSS_STATE")
+                if mss_state is not None:
+                    mode = mss_state.find("MODE")
+                    station_data["active_mode"] = mode.text if mode is not None else ""
+                else:
+                    station_data["active_mode"] = ""
+                
+                state["stations"].append(station_data)
+                state["total_stations"] += 1
+                
+                if station_data["running"]:
+                    state["online_stations"] += 1
+                    state["is_running"] = True  # At least one station is running
+                else:
+                    state["offline_stations"] += 1
         
-        # Current user
-        user_elem = root.find(".//mss_user")
-        if user_elem is not None:
-            state["current_user"] = user_elem.text
-        
-        # Timing information
-        monitor_time_elem = root.find(".//mss_monitor_time")
-        if monitor_time_elem is not None:
-            state["monitoring_time"] = int(monitor_time_elem.text)
-        
-        # Stations
-        stations = []
-        for station in root.findall(".//mss_st_name"):
-            if station.text:
-                stations.append({
-                    "name": station.text,
-                    "type": "fixed"  # Default, could be parsed from mss_st_type
-                })
-        state["stations"] = stations
-        
-        # Devices
-        devices = []
-        for device in root.findall(".//mss_dev"):
-            device_name = device.find("d_name")
-            device_state = device.find("d_state")
-            if device_name is not None:
-                devices.append({
-                    "name": device_name.text,
-                    "state": device_state.text if device_state is not None else "unknown"
-                })
-        state["devices"] = devices
+        return state
         
         return state
 
