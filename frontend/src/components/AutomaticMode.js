@@ -739,11 +739,11 @@ export default function AutomaticMode() {
               </div>
               
               <div className="flex justify-between">
-                <Button variant="secondary" onClick={() => setWizardStep(2)}>
+                <Button variant="secondary" onClick={() => setWizardStep(3)}>
                   Previous
                 </Button>
-                <Button onClick={() => setWizardStep(4)} className="btn-spectrum">
-                  Next: Finish
+                <Button onClick={() => setWizardStep(5)} className="btn-spectrum">
+                  Next: Review & Create
                 </Button>
               </div>
             </CardContent>
