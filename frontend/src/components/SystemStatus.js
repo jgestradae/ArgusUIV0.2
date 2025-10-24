@@ -227,8 +227,8 @@ export default function SystemStatus() {
           <CardContent>
             <div className="space-y-4">
               {systemStatus?.devices && systemStatus.devices.length > 0 ? (
-                systemStatus.devices.map((device, index) => {
-                  const isOnline = device.state === 'operational';
+                systemStatus.devices.slice(0, 10).map((device, index) => {
+                  const isOnline = device.state === 'physical';
                   return (
                     <div key={index} className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
                       <div className="flex items-center space-x-3">
@@ -237,7 +237,7 @@ export default function SystemStatus() {
                           <h4 className="font-medium text-white">{device.name}</h4>
                           <p className="text-sm text-slate-400 capitalize flex items-center">
                             <Wifi className="w-3 h-3 mr-1" />
-                            {device.state}
+                            {device.driver} • {device.station}
                           </p>
                         </div>
                       </div>
