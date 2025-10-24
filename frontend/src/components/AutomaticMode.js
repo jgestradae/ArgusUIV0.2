@@ -138,6 +138,21 @@ export default function AutomaticMode() {
     return () => clearInterval(interval);
   }, []);
 
+  const loadAvailableStations = async () => {
+    setLoadingStations(true);
+    try {
+      const response = await axios.get(`${API}/system/available-stations`);
+      if (response.data.success) {
+        setAvailableStations(response.data.data.stations);
+      }
+    } catch (error) {
+      console.error('Error loading available stations:', error);
+      toast.error('Failed to load available stations');
+    } finally {
+      setLoadingStations(false);
+    }
+  };
+
   const loadData = async () => {
     try {
       const [configsResponse, statsResponse, executionsResponse] = await Promise.all([
