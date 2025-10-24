@@ -307,9 +307,6 @@ export default function SystemStatus() {
                 </p>
               )}
             </div>
-                </p>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>
