@@ -158,53 +158,86 @@ async def create_user(user_data: UserCreate, admin_user: User = Depends(require_
 async def get_system_status(current_user: User = Depends(get_current_user)):
     """Get current Argus system status"""
     try:
-        # Get control station configuration from environment
-        control_station = os.getenv("ARGUS_CONTROL_STATION", "HQ4")
-        sender_pc = os.getenv("ARGUS_SENDER_PC", "SRVARGUS")
+        # Check for recent responses in outbox
+        responses = xml_processor.check_responses()
         
-        # Generate GSS request
-        order_id = xml_processor.generate_order_id("GSS")
-        xml_content = xml_processor.create_system_state_request(order_id, sender=control_station, sender_pc=sender_pc)
+        system_state_data = None
         
-        # Save request
-        xml_file = xml_processor.save_request(xml_content, order_id)
+        # Process any new GSS responses
+        for response in responses:
+            if response.get("order_type") == "GSS" and response.get("order_state") == "Finished":
+                system_state_data = response
+                
+                # Update order record
+                await db.argus_orders.update_one(
+                    {"order_id": response["order_id"]},
+                    {"$set": {
+                        "order_state": "Finished",
+                        "xml_response_file": response.get("xml_file"),
+                        "updated_at": datetime.now()
+                    }}
+                )
+                
+                # Save system state to database
+                system_state = ArgusSystemState(
+                    is_running=response.get("is_running", False),
+                    current_user=response.get("current_user", ""),
+                    monitoring_time=response.get("monitoring_time", 0),
+                    stations=response.get("stations", []),
+                    devices=response.get("devices", [])
+                )
+                await db.system_states.insert_one(system_state.dict())
+                break
         
-        # Create order record
-        order = ArgusOrder(
-            order_id=order_id,
-            order_type=OrderType.GSS,
-            order_name="System State Query",
-            created_by=current_user.id,
-            xml_request_file=xml_file
-        )
-        await db.argus_orders.insert_one(order.dict())
-        
-        # For demo purposes, return mock data immediately
-        # In production, you'd poll for responses or use async processing
-        mock_response = xml_processor.create_mock_response("GSS", order_id)
-        
-        # Save mock system state
-        system_state = ArgusSystemState(
-            is_running=mock_response["is_running"],
-            current_user=mock_response.get("current_user"),
-            monitoring_time=mock_response.get("monitoring_time"),
-            stations=mock_response.get("stations", []),
-            devices=mock_response.get("devices", [])
-        )
-        await db.system_states.insert_one(system_state.dict())
+        # If no new response, get most recent from database
+        if not system_state_data:
+            latest_state = await db.system_states.find_one(sort=[("timestamp", -1)])
+            if latest_state:
+                system_state_data = latest_state
+            else:
+                # No data yet, generate a new request
+                control_station = os.getenv("ARGUS_CONTROL_STATION", "HQ4")
+                sender_pc = os.getenv("ARGUS_SENDER_PC", "SRVARGUS")
+                
+                order_id = xml_processor.generate_order_id("GSS")
+                xml_content = xml_processor.create_system_state_request(order_id, sender=control_station, sender_pc=sender_pc)
+                xml_file = xml_processor.save_request(xml_content, order_id)
+                
+                order = ArgusOrder(
+                    order_id=order_id,
+                    order_type=OrderType.GSS,
+                    order_name="System State Query",
+                    created_by=current_user.id,
+                    xml_request_file=xml_file
+                )
+                await db.argus_orders.insert_one(order.dict())
+                
+                # Return empty state indicating waiting for response
+                return SystemStatusResponse(
+                    argus_running=False,
+                    last_update=datetime.now(),
+                    active_measurements=0,
+                    system_health="Waiting for Argus response...",
+                    stations=[],
+                    devices=[]
+                )
         
         # Count active measurements
         active_measurements = await db.argus_orders.count_documents({
             "order_state": {"$in": ["Open", "In Process"]}
         })
         
+        # Count stations with active modes
+        online_stations = system_state_data.get("online_stations", 0)
+        total_stations = system_state_data.get("total_stations", 0)
+        
         return SystemStatusResponse(
-            argus_running=system_state.is_running,
-            last_update=system_state.timestamp,
+            argus_running=system_state_data.get("is_running", False),
+            last_update=system_state_data.get("timestamp", datetime.now()),
             active_measurements=active_measurements,
-            system_health="Good" if system_state.is_running else "Warning",
-            stations=system_state.stations,
-            devices=system_state.devices
+            system_health=f"{online_stations}/{total_stations} stations online" if total_stations > 0 else "No data",
+            stations=system_state_data.get("stations", []),
+            devices=system_state_data.get("devices", [])
         )
         
     except Exception as e:
