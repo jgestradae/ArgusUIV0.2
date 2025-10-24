@@ -281,6 +281,78 @@ async def get_system_parameters(current_user: User = Depends(get_current_user)):
             detail=f"Failed to request system parameters: {str(e)}"
         )
 
+@api_router.get("/system/available-stations")
+async def get_available_stations(current_user: User = Depends(get_current_user)):
+    """Get list of available online stations with their devices and capabilities for AMM configuration"""
+    try:
+        # Get the most recent system state from database
+        latest_state = await db.system_states.find_one(sort=[("timestamp", -1)])
+        
+        if not latest_state:
+            return ApiResponse(
+                success=True,
+                message="No system state available yet. Please wait for GSS response.",
+                data={"stations": []}
+            )
+        
+        # Filter only online stations and format for AMM
+        available_stations = []
+        for station in latest_state.get("stations", []):
+            if station.get("running"):  # Only include online stations
+                station_info = {
+                    "name": station.get("name"),
+                    "pc": station.get("pc"),
+                    "type": station.get("type"),
+                    "device_count": station.get("device_count", 0),
+                    "devices": station.get("devices", []),
+                    "coordinates": {
+                        "latitude": station.get("latitude", 0),
+                        "longitude": station.get("longitude", 0)
+                    },
+                    # Available measurement types based on devices
+                    "available_measurement_types": _get_measurement_types_for_station(station.get("devices", []))
+                }
+                available_stations.append(station_info)
+        
+        return ApiResponse(
+            success=True,
+            message=f"Found {len(available_stations)} online stations",
+            data={"stations": available_stations}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting available stations: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get available stations: {str(e)}"
+        )
+
+def _get_measurement_types_for_station(devices: list) -> list:
+    """Determine available measurement types based on station's devices"""
+    measurement_types = set()
+    
+    # Map device drivers to measurement capabilities
+    driver_capabilities = {
+        "EB500": ["FFM", "SCAN", "DSCAN", "LOCATION"],
+        "DDF550": ["FFM", "SCAN", "DSCAN"],
+        "ANTENNA08": ["FFM", "SCAN"],
+        "ZS12x": ["FFM", "SCAN"],
+        "S_UMS300": ["FFM", "SCAN", "PSCAN"],
+        "AU600Ctrl": ["FFM", "SCAN"],
+        "EM100": ["FFM", "SCAN"]
+    }
+    
+    for device in devices:
+        driver = device.get("driver", "")
+        if driver in driver_capabilities:
+            measurement_types.update(driver_capabilities[driver])
+    
+    # If no specific capabilities found, provide basic types
+    if not measurement_types:
+        measurement_types = ["FFM", "SCAN"]
+    
+    return sorted(list(measurement_types))
+
 # ============================================================================
 # DIRECT MEASUREMENT ENDPOINTS
 # ============================================================================
