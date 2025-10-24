@@ -52,19 +52,23 @@ class ArgusXMLProcessor:
         
         return self._format_xml(root)
 
-    def create_system_params_request(self, order_id: str, sender: str = "ArgusUI") -> str:
+    def create_system_params_request(self, order_id: str, sender: str = "HQ4", sender_pc: str = "SRVARGUS") -> str:
         """Create GSP (Get System Parameters) XML request"""
-        root = ET.Element("order_def")
+        # Create root with proper namespace
+        root = ET.Element("XMLSchema1")
+        root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
         
         # Order definition
-        ET.SubElement(root, "order_id").text = order_id
-        ET.SubElement(root, "order_type").text = "GSP"
-        ET.SubElement(root, "order_name").text = "System Parameters Query"
-        ET.SubElement(root, "order_sender").text = sender
-        ET.SubElement(root, "order_state").text = "Open"
-        ET.SubElement(root, "order_creator").text = "External"
-        ET.SubElement(root, "execution_type").text = "A"
-        ET.SubElement(root, "order_ver").text = "200"
+        order_def = ET.SubElement(root, "ORDER_DEF")
+        ET.SubElement(order_def, "ORDER_ID").text = order_id
+        ET.SubElement(order_def, "ORDER_TYPE").text = "GSP"
+        ET.SubElement(order_def, "ORDER_NAME").text = "SystemParametersQuery"
+        ET.SubElement(order_def, "ORDER_SENDER").text = sender
+        ET.SubElement(order_def, "ORDER_SENDER_PC").text = sender_pc
+        ET.SubElement(order_def, "ORDER_STATE").text = "Open"
+        ET.SubElement(order_def, "ORDER_CREATOR").text = "Extern"
+        ET.SubElement(order_def, "EXECUTION_TYPE").text = "A"
+        ET.SubElement(order_def, "ORDER_VER").text = "200"
         
         return self._format_xml(root)
 
