@@ -26,6 +26,7 @@ export default function SystemStatus() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(null);
+  const [selectedStation, setSelectedStation] = useState(null);
 
   useEffect(() => {
     loadSystemStatus();
