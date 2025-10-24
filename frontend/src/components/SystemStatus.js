@@ -188,17 +188,20 @@ export default function SystemStatus() {
                 systemStatus.stations.map((station, index) => (
                   <div key={index} className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
                     <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                      <div className={`w-3 h-3 rounded-full ${station.running ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
                       <div>
                         <h4 className="font-medium text-white">{station.name}</h4>
                         <p className="text-sm text-slate-400 capitalize flex items-center">
                           <MapPin className="w-3 h-3 mr-1" />
-                          {station.type} station
+                          {station.pc} • {station.device_count} devices
                         </p>
                       </div>
                     </div>
-                    <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                      Online
+                    <Badge className={station.running
+                      ? 'bg-green-500/20 text-green-300 border-green-500/30'
+                      : 'bg-red-500/20 text-red-300 border-red-500/30'
+                    }>
+                      {station.running ? 'Online' : 'Offline'}
                     </Badge>
                   </div>
                 ))
