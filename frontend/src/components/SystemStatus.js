@@ -187,10 +187,18 @@ export default function SystemStatus() {
             <div className="space-y-4">
               {systemStatus?.stations && systemStatus.stations.length > 0 ? (
                 systemStatus.stations.map((station, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                  <button
+                    key={index}
+                    onClick={() => setSelectedStation(station.name)}
+                    className={`w-full flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
+                      selectedStation === station.name
+                        ? 'bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30'
+                        : 'bg-slate-800/30 border-slate-700/30 hover:bg-slate-800/50 hover:border-slate-600/50'
+                    }`}
+                  >
                     <div className="flex items-center space-x-3">
                       <div className={`w-3 h-3 rounded-full ${station.running ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
-                      <div>
+                      <div className="text-left">
                         <h4 className="font-medium text-white">{station.name}</h4>
                         <p className="text-sm text-slate-400 capitalize flex items-center">
                           <MapPin className="w-3 h-3 mr-1" />
@@ -204,7 +212,7 @@ export default function SystemStatus() {
                     }>
                       {station.running ? 'Online' : 'Offline'}
                     </Badge>
-                  </div>
+                  </button>
                 ))
               ) : (
                 <div className="text-center py-8">
