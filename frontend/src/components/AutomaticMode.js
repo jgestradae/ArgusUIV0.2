@@ -358,11 +358,97 @@ export default function AutomaticMode() {
   const renderWizardStep = () => {
     switch (wizardStep) {
       case 1:
+        // NEW STEP 1: Station Selection
         return (
           <Card className="glass-card border-0">
             <CardHeader>
-              <CardTitle className="text-xl text-white">Step 1: Basic Information</CardTitle>
-              <CardDescription>Define the basic details for your AMM configuration</CardDescription>
+              <CardTitle className="text-xl text-white flex items-center">
+                <Radio className="w-5 h-5 mr-2" />
+                Step 1: Select Monitoring Station
+              </CardTitle>
+              <CardDescription>Choose an online station with available devices for measurements</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {loadingStations ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto"></div>
+                  <p className="text-slate-400 mt-3">Loading available stations...</p>
+                </div>
+              ) : availableStations.length === 0 ? (
+                <div className="text-center py-8">
+                  <Radio className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-400 mb-3">No online stations available</p>
+                  <Button onClick={loadAvailableStations} variant="outline" className="btn-spectrum">
+                    Refresh Stations
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {availableStations.map((station, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setWizardData(prev => ({ ...prev, selected_station: station }))}
+                      className={`w-full p-4 rounded-lg border-2 transition-all ${
+                        wizardData.selected_station?.name === station.name
+                          ? 'border-cyan-500 bg-cyan-500/10'
+                          : 'border-slate-700 bg-slate-800/30 hover:border-slate-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="text-left">
+                          <h4 className="font-medium text-white text-lg">{station.name}</h4>
+                          <p className="text-sm text-slate-400 mt-1">
+                            {station.pc} • {station.device_count} devices
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {station.available_measurement_types.map((type) => (
+                              <Badge key={type} className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                                {type}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          wizardData.selected_station?.name === station.name
+                            ? 'border-cyan-500 bg-cyan-500'
+                            : 'border-slate-600'
+                        }`}>
+                          {wizardData.selected_station?.name === station.name && (
+                            <CheckCircle className="w-4 h-4 text-white" />
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              <div className="flex justify-between pt-4">
+                <Button onClick={loadAvailableStations} variant="outline" disabled={loadingStations}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loadingStations ? 'animate-spin' : ''}`} />
+                  Refresh Stations
+                </Button>
+                <Button 
+                  onClick={() => setWizardStep(2)} 
+                  disabled={!wizardData.selected_station}
+                  className="btn-spectrum"
+                >
+                  Next: Basic Information
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 2:
+        // MOVED TO STEP 2: Basic Information
+        return (
+          <Card className="glass-card border-0">
+            <CardHeader>
+              <CardTitle className="text-xl text-white">Step 2: Basic Information</CardTitle>
+              <CardDescription>
+                Define the basic details for your AMM configuration on {wizardData.selected_station?.name}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -388,9 +474,12 @@ export default function AutomaticMode() {
                 />
               </div>
               
-              <div className="flex justify-end">
+              <div className="flex justify-between">
+                <Button onClick={() => setWizardStep(1)} variant="outline">
+                  Back
+                </Button>
                 <Button 
-                  onClick={() => setWizardStep(2)} 
+                  onClick={() => setWizardStep(3)} 
                   disabled={!wizardData.name.trim()}
                   className="btn-spectrum"
                 >
@@ -401,7 +490,8 @@ export default function AutomaticMode() {
           </Card>
         );
 
-      case 2:
+      case 3:
+        // MOVED TO STEP 3: Timing Definition
         return (
           <Card className="glass-card border-0">
             <CardHeader>
