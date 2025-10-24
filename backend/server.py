@@ -218,8 +218,12 @@ async def get_system_status(current_user: User = Depends(get_current_user)):
 async def get_system_parameters(current_user: User = Depends(get_current_user)):
     """Get Argus system parameters (GSP)"""
     try:
+        # Get control station configuration from environment
+        control_station = os.getenv("ARGUS_CONTROL_STATION", "HQ4")
+        sender_pc = os.getenv("ARGUS_SENDER_PC", "SRVARGUS")
+        
         order_id = xml_processor.generate_order_id("GSP")
-        xml_content = xml_processor.create_system_params_request(order_id)
+        xml_content = xml_processor.create_system_params_request(order_id, sender=control_station, sender_pc=sender_pc)
         xml_file = xml_processor.save_request(xml_content, order_id)
         
         order = ArgusOrder(
