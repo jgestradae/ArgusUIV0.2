@@ -750,15 +750,30 @@ export default function AutomaticMode() {
           </Card>
         );
 
-      case 4:
+      case 5:
+        // STEP 5: Review & Create
         return (
           <Card className="glass-card border-0">
             <CardHeader>
-              <CardTitle className="text-xl text-white">Step 4: Review & Create</CardTitle>
+              <CardTitle className="text-xl text-white">Step 5: Review & Create</CardTitle>
               <CardDescription>Review your AMM configuration and create it</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
+                <div className="p-4 bg-slate-800/30 rounded-lg">
+                  <h4 className="font-medium text-white mb-2">Selected Station</h4>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Station:</span>
+                      <span className="text-white">{wizardData.selected_station?.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Devices:</span>
+                      <span className="text-white">{wizardData.selected_station?.device_count}</span>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="p-4 bg-slate-800/30 rounded-lg">
                   <h4 className="font-medium text-white mb-2">Basic Information</h4>
                   <div className="space-y-1 text-sm">
@@ -815,7 +830,7 @@ export default function AutomaticMode() {
               </div>
               
               <div className="flex justify-between">
-                <Button variant="secondary" onClick={() => setWizardStep(3)}>
+                <Button variant="secondary" onClick={() => setWizardStep(4)}>
                   Previous
                 </Button>
                 <Button onClick={handleCreateAMM} className="btn-spectrum">
