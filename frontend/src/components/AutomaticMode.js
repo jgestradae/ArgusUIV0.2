@@ -495,7 +495,7 @@ export default function AutomaticMode() {
         return (
           <Card className="glass-card border-0">
             <CardHeader>
-              <CardTitle className="text-xl text-white">Step 2: Timing Definition</CardTitle>
+              <CardTitle className="text-xl text-white">Step 3: Timing Definition</CardTitle>
               <CardDescription>Configure when the measurements should be performed</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
