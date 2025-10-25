@@ -46,6 +46,86 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# ============================================================================
+# BACKGROUND TASKS
+# ============================================================================
+
+async def periodic_gss_task():
+    """Background task to periodically request system status"""
+    import asyncio
+    
+    while True:
+        try:
+            # Check if we have recent system state (less than 5 minutes old)
+            latest_state = await db.system_states.find_one(sort=[("timestamp", -1)])
+            
+            should_request = False
+            if not latest_state:
+                should_request = True
+                logger.info("No system state found, requesting GSS")
+            else:
+                time_diff = datetime.now() - latest_state.get("timestamp", datetime.min)
+                if time_diff.total_seconds() > 300:  # 5 minutes
+                    should_request = True
+                    logger.info(f"Last system state is {time_diff.total_seconds()}s old, requesting new GSS")
+            
+            if should_request:
+                # Generate and save GSS request
+                control_station = os.getenv("ARGUS_CONTROL_STATION", "HQ4")
+                sender_pc = os.getenv("ARGUS_SENDER_PC", "SRVARGUS")
+                
+                order_id = xml_processor.generate_order_id("GSS")
+                xml_content = xml_processor.create_system_state_request(order_id, sender=control_station, sender_pc=sender_pc)
+                xml_file = xml_processor.save_request(xml_content, order_id)
+                
+                # Create order record
+                order = ArgusOrder(
+                    order_id=order_id,
+                    order_type=OrderType.GSS,
+                    order_name="Auto System State Query",
+                    created_by="system",
+                    xml_request_file=xml_file
+                )
+                await db.argus_orders.insert_one(order.dict())
+                logger.info(f"Auto GSS request sent: {order_id}")
+            
+            # Check for responses
+            responses = xml_processor.check_responses()
+            for response in responses:
+                if response.get("order_type") == "GSS" and response.get("order_state") == "Finished":
+                    logger.info(f"Processing GSS response: {response.get('order_id')}")
+                    
+                    # Update order record
+                    await db.argus_orders.update_one(
+                        {"order_id": response["order_id"]},
+                        {"$set": {
+                            "order_state": "Finished",
+                            "xml_response_file": response.get("xml_file"),
+                            "updated_at": datetime.now()
+                        }}
+                    )
+                    
+                    # Save system state to database
+                    system_state = ArgusSystemState(
+                        is_running=response.get("is_running", False),
+                        current_user=response.get("current_user", ""),
+                        monitoring_time=response.get("monitoring_time", 0),
+                        stations=response.get("stations", []),
+                        devices=response.get("devices", [])
+                    )
+                    await db.system_states.insert_one(system_state.dict())
+                    logger.info(f"System state saved with {len(response.get('stations', []))} stations")
+            
+        except Exception as e:
+            logger.error(f"Error in periodic GSS task: {e}")
+        
+        # Wait 30 seconds before next check
+        await asyncio.sleep(30)
+
+# ============================================================================
+# APPLICATION LIFECYCLE
+# ============================================================================
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
