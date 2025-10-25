@@ -17,7 +17,8 @@ import {
   User,
   Plus,
   Trash2,
-  Edit
+  Edit,
+  Radio
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
@@ -28,6 +29,7 @@ const API = `${BACKEND_URL}/api`;
 
 export default function Configuration() {
   const { isAdmin } = useAuth();
+  const [gssRequesting, setGssRequesting] = useState(false);
   const [systemConfig, setSystemConfig] = useState({
     argus_inbox_path: '/argus/inbox',
     argus_outbox_path: '/argus/outbox',
