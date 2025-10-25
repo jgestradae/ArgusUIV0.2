@@ -1033,16 +1033,48 @@ export default function AutomaticMode() {
                       <span className="text-slate-400">Schedule:</span>
                       <span className="text-white">{SCHEDULE_TYPES[wizardData.timing.schedule_type].label}</span>
                     </div>
-                    {wizardData.timing.start_time && (
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Time Range:</span>
-                        <span className="text-white">{wizardData.timing.start_time} - {wizardData.timing.end_time}</span>
-                      </div>
+                    
+                    {wizardData.timing.schedule_type !== 'always' && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Date Range:</span>
+                          <span className="text-white">{wizardData.timing.start_date} - {wizardData.timing.end_date}</span>
+                        </div>
+                        {wizardData.timing.schedule_type === 'span' && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Time Range:</span>
+                            <span className="text-white">{wizardData.timing.start_time} - {wizardData.timing.end_time}</span>
+                          </div>
+                        )}
+                      </>
                     )}
-                    {wizardData.timing.interval_hours && (
+                    
+                    {wizardData.timing.schedule_type === 'periodic' && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Days:</span>
+                          <span className="text-white">
+                            {wizardData.timing.all_days ? 'All days' : 
+                              Object.entries(wizardData.timing.weekdays)
+                                .filter(([_, selected]) => selected)
+                                .map(([day, _]) => day.substring(0, 3))
+                                .join(', ')
+                            }
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Daily Time:</span>
+                          <span className="text-white">{wizardData.timing.daily_start_time} - {wizardData.timing.daily_end_time}</span>
+                        </div>
+                      </>
+                    )}
+                    
+                    {wizardData.timing.fragmentation_enabled && (
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Interval:</span>
-                        <span className="text-white">Every {wizardData.timing.interval_hours} hours</span>
+                        <span className="text-slate-400">Fragmentation:</span>
+                        <span className="text-white">
+                          {wizardData.timing.fragmentation_count} measurements @ {wizardData.timing.fragmentation_interval} interval
+                        </span>
                       </div>
                     )}
                   </div>
