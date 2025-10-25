@@ -720,8 +720,8 @@ def generate_mock_measurement_data(measurement_type: str) -> Dict[str, Any]:
             "frequency": 100000000,  # 100 MHz
             "unit": "dBm",
             "data": [
-                {"time": float(t), "level": float(l)} 
-                for t, l in zip(times, levels)
+                {"time": float(t), "level": float(level)} 
+                for t, level in zip(times, levels)
             ]
         }
     
