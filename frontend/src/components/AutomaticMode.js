@@ -1156,13 +1156,8 @@ export default function AutomaticMode() {
         );
 
       case 5:
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>RF Attenuation</Label>
-                  <Select 
-                    value={wizardData.measurement.receiver_config.rf_attenuation}
+        // STEP 5: Review & Create
+        return (
                     onValueChange={(value) => setWizardData(prev => ({
                       ...prev,
                       measurement: {
