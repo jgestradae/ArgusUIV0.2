@@ -842,29 +842,50 @@ export default function AutomaticMode() {
         );
 
       case 4:
-        // MOVED TO STEP 4: Measurement Definition
+        // STEP 4: Measurement Definition (Adaptive based on station)
+        const availableMeasurementTypes = wizardData.selected_station?.available_measurement_types || [];
+        const isFixedFrequency = wizardData.measurement.measurement_type === 'FFM';
+        const isScanType = ['SCAN', 'DSCAN', 'PSCAN', 'FLSCAN'].includes(wizardData.measurement.measurement_type);
+        
         return (
           <Card className="glass-card border-0">
             <CardHeader>
               <CardTitle className="text-xl text-white">Step 4: Measurement Definition</CardTitle>
-              <CardDescription>Configure the measurement parameters based on {wizardData.selected_station?.name}</CardDescription>
+              <CardDescription>
+                Configure measurement for {wizardData.selected_station?.name} ({wizardData.selected_station?.device_count} devices available)
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Measurement Type</Label>
-                  <Select 
-                    value={wizardData.measurement.measurement_type}
-                    onValueChange={(value) => setWizardData(prev => ({
-                      ...prev,
-                      measurement: { ...prev.measurement, measurement_type: value }
-                    }))}
-                  >
-                    <SelectTrigger className="input-spectrum">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(MEASUREMENT_TYPES).map(([key, type]) => (
+              {/* Station Info Banner */}
+              <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <div className="flex items-center space-x-2 text-blue-300 text-sm">
+                  <Radio className="w-4 h-4" />
+                  <span>Station: <strong>{wizardData.selected_station?.name}</strong> • Available types: {availableMeasurementTypes.join(', ')}</span>
+                </div>
+              </div>
+              
+              {/* Measurement Type - Filtered by Station */}
+              <div className="space-y-2">
+                <Label>Measurement Type</Label>
+                <Select 
+                  value={wizardData.measurement.measurement_type}
+                  onValueChange={(value) => setWizardData(prev => ({
+                    ...prev,
+                    measurement: { 
+                      ...prev.measurement, 
+                      measurement_type: value,
+                      // Reset frequency mode when changing type
+                      frequency_mode: value === 'FFM' ? 'S' : 'R'
+                    }
+                  }))}
+                >
+                  <SelectTrigger className="input-spectrum">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(MEASUREMENT_TYPES)
+                      .filter(([key, _]) => availableMeasurementTypes.includes(key))
+                      .map(([key, type]) => (
                         <SelectItem key={key} value={key}>
                           <div>
                             <div className="font-medium">{type.label}</div>
@@ -872,31 +893,264 @@ export default function AutomaticMode() {
                           </div>
                         </SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
+                  </SelectContent>
+                </Select>
+                {availableMeasurementTypes.length === 0 && (
+                  <p className="text-xs text-yellow-400">No measurement types available for this station</p>
+                )}
+              </div>
+              
+              {/* Device Selection - From Station's Devices */}
+              <div className="space-y-2">
+                <Label>Device</Label>
+                <Select 
+                  value={wizardData.measurement.device_name}
+                  onValueChange={(value) => setWizardData(prev => ({
+                    ...prev,
+                    measurement: { ...prev.measurement, device_name: value }
+                  }))}
+                >
+                  <SelectTrigger className="input-spectrum">
+                    <SelectValue placeholder="Select device..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {wizardData.selected_station?.devices?.map((device, index) => (
+                      <SelectItem key={index} value={device.name}>
+                        <div>
+                          <div className="font-medium">{device.name}</div>
+                          <div className="text-xs text-slate-400">{device.driver} • {device.state}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Frequency Configuration - Adaptive */}
+              {isFixedFrequency && (
+                <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                  <h4 className="font-medium text-white">Fixed Frequency Mode (FFM)</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="frequency_single">Frequency (Hz)</Label>
+                      <Input
+                        id="frequency_single"
+                        type="number"
+                        value={wizardData.measurement.frequency_single}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          measurement: { ...prev.measurement, frequency_single: parseInt(e.target.value) }
+                        }))}
+                        className="input-spectrum"
+                        placeholder="e.g., 100000000 (100 MHz)"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="if_bandwidth">IF Bandwidth (Hz)</Label>
+                      <Select 
+                        value={wizardData.measurement.receiver_config.if_bandwidth.toString()}
+                        onValueChange={(value) => setWizardData(prev => ({
+                          ...prev,
+                          measurement: {
+                            ...prev.measurement,
+                            receiver_config: { ...prev.measurement.receiver_config, if_bandwidth: parseInt(value) }
+                          }
+                        }))}
+                      >
+                        <SelectTrigger className="input-spectrum">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="200">200 Hz</SelectItem>
+                          <SelectItem value="1000">1 kHz</SelectItem>
+                          <SelectItem value="9000">9 kHz</SelectItem>
+                          <SelectItem value="10000">10 kHz</SelectItem>
+                          <SelectItem value="120000">120 kHz</SelectItem>
+                          <SelectItem value="200000">200 kHz</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="device_name">Device</Label>
-                  <Input
-                    id="device_name"
-                    value={wizardData.measurement.device_name}
-                    onChange={(e) => setWizardData(prev => ({
-                      ...prev,
-                      measurement: { ...prev.measurement, device_name: e.target.value }
-                    }))}
-                    className="input-spectrum"
-                  />
+              )}
+              
+              {/* Scan Configuration - Adaptive */}
+              {isScanType && (
+                <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                  <h4 className="font-medium text-white">
+                    {wizardData.measurement.measurement_type === 'SCAN' ? 'Frequency Scan' : 
+                     wizardData.measurement.measurement_type === 'DSCAN' ? 'Direction Finding Scan' :
+                     wizardData.measurement.measurement_type === 'PSCAN' ? 'Panoramic Scan' : 'Frequency List Scan'}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="freq_start">Start Frequency (Hz)</Label>
+                      <Input
+                        id="freq_start"
+                        type="number"
+                        value={wizardData.measurement.frequency_single}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          measurement: { ...prev.measurement, frequency_single: parseInt(e.target.value) }
+                        }))}
+                        className="input-spectrum"
+                        placeholder="e.g., 88000000 (88 MHz)"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="freq_stop">Stop Frequency (Hz)</Label>
+                      <Input
+                        id="freq_stop"
+                        type="number"
+                        defaultValue="108000000"
+                        className="input-spectrum"
+                        placeholder="e.g., 108000000 (108 MHz)"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="step_size">Step Size (Hz)</Label>
+                      <Input
+                        id="step_size"
+                        type="number"
+                        defaultValue="25000"
+                        className="input-spectrum"
+                        placeholder="e.g., 25000 (25 kHz)"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="scan_if_bandwidth">IF Bandwidth (Hz)</Label>
+                      <Select defaultValue="9000">
+                        <SelectTrigger className="input-spectrum">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="200">200 Hz</SelectItem>
+                          <SelectItem value="1000">1 kHz</SelectItem>
+                          <SelectItem value="9000">9 kHz</SelectItem>
+                          <SelectItem value="10000">10 kHz</SelectItem>
+                          <SelectItem value="120000">120 kHz</SelectItem>
+                          <SelectItem value="200000">200 kHz</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Common Receiver Configuration */}
+              <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                <h4 className="font-medium text-white">Receiver Configuration</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="rf_attenuation">RF Attenuation</Label>
+                    <Select 
+                      value={wizardData.measurement.receiver_config.rf_attenuation}
+                      onValueChange={(value) => setWizardData(prev => ({
+                        ...prev,
+                        measurement: {
+                          ...prev.measurement,
+                          receiver_config: { ...prev.measurement.receiver_config, rf_attenuation: value }
+                        }
+                      }))}
+                    >
+                      <SelectTrigger className="input-spectrum">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Auto">Auto</SelectItem>
+                        <SelectItem value="0">0 dB</SelectItem>
+                        <SelectItem value="10">10 dB</SelectItem>
+                        <SelectItem value="20">20 dB</SelectItem>
+                        <SelectItem value="30">30 dB</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="demodulation">Demodulation</Label>
+                    <Select 
+                      value={wizardData.measurement.receiver_config.demodulation}
+                      onValueChange={(value) => setWizardData(prev => ({
+                        ...prev,
+                        measurement: {
+                          ...prev.measurement,
+                          receiver_config: { ...prev.measurement.receiver_config, demodulation: value }
+                        }
+                      }))}
+                    >
+                      <SelectTrigger className="input-spectrum">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FM">FM</SelectItem>
+                        <SelectItem value="AM">AM</SelectItem>
+                        <SelectItem value="USB">USB</SelectItem>
+                        <SelectItem value="LSB">LSB</SelectItem>
+                        <SelectItem value="CW">CW</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="detector">Detector</Label>
+                    <Select 
+                      value={wizardData.measurement.receiver_config.detector}
+                      onValueChange={(value) => setWizardData(prev => ({
+                        ...prev,
+                        measurement: {
+                          ...prev.measurement,
+                          receiver_config: { ...prev.measurement.receiver_config, detector: value }
+                        }
+                      }))}
+                    >
+                      <SelectTrigger className="input-spectrum">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Average">Average</SelectItem>
+                        <SelectItem value="Peak">Peak</SelectItem>
+                        <SelectItem value="RMS">RMS</SelectItem>
+                        <SelectItem value="Min">Minimum</SelectItem>
+                        <SelectItem value="Max">Maximum</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="measurement_time">Measurement Time (seconds)</Label>
+                    <Input
+                      id="measurement_time"
+                      type="number"
+                      min="1"
+                      max="300"
+                      value={wizardData.measurement.receiver_config.measurement_time}
+                      onChange={(e) => setWizardData(prev => ({
+                        ...prev,
+                        measurement: {
+                          ...prev.measurement,
+                          receiver_config: { ...prev.measurement.receiver_config, measurement_time: parseInt(e.target.value) }
+                        }
+                      }))}
+                      className="input-spectrum"
+                    />
+                  </div>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="frequency_single">Frequency (Hz)</Label>
-                <Input
-                  id="frequency_single"
-                  type="number"
-                  value={wizardData.measurement.frequency_single}
-                  onChange={(e) => setWizardData(prev => ({
+              <div className="flex justify-between">
+                <Button variant="secondary" onClick={() => setWizardStep(3)}>
+                  Previous
+                </Button>
+                <Button 
+                  onClick={() => setWizardStep(5)} 
+                  disabled={!wizardData.measurement.measurement_type || !wizardData.measurement.device_name}
+                  className="btn-spectrum"
+                >
+                  Next: Review & Create
+                </Button>
+              </div>
                     ...prev,
                     measurement: { ...prev.measurement, frequency_single: parseInt(e.target.value) }
                   }))}
