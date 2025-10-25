@@ -650,6 +650,182 @@ async def process_xml_responses(admin_user: User = Depends(require_admin)):
         )
 
 # ============================================================================
+# MEASUREMENT VISUALIZATION ENDPOINTS
+# ============================================================================
+
+@api_router.get("/measurements/{measurement_id}/data")
+async def get_measurement_data(
+    measurement_id: str, 
+    current_user: User = Depends(get_current_user)
+):
+    """Get measurement data for visualization"""
+    try:
+        # Fetch measurement from database
+        measurement = await db.measurements.find_one({"id": measurement_id})
+        
+        if not measurement:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Measurement not found"
+            )
+        
+        # Read data from file
+        file_path = measurement.get("file_path")
+        if not file_path or not os.path.exists(file_path):
+            # Return mock data for demonstration
+            return generate_mock_measurement_data(measurement.get("measurement_type", "FFM"))
+        
+        # Parse file based on format
+        file_format = measurement.get("file_format", "xml")
+        if file_format == "xml":
+            data = parse_xml_measurement_data(file_path)
+        elif file_format == "json":
+            import json
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+        elif file_format == "csv":
+            data = parse_csv_measurement_data(file_path)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported file format: {file_format}"
+            )
+        
+        return ApiResponse(
+            success=True,
+            message="Measurement data retrieved",
+            data=data
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting measurement data: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get measurement data: {str(e)}"
+        )
+
+def generate_mock_measurement_data(measurement_type: str) -> Dict[str, Any]:
+    """Generate mock measurement data for demonstration"""
+    import numpy as np
+    
+    if measurement_type == "FFM":
+        # Fixed frequency mode - time series
+        times = np.arange(0, 300, 1)  # 5 minutes
+        levels = -70 + np.random.normal(0, 2, len(times))  # -70 dBm with noise
+        
+        return {
+            "measurement_type": "FFM",
+            "frequency": 100000000,  # 100 MHz
+            "unit": "dBm",
+            "data": [
+                {"time": float(t), "level": float(l)} 
+                for t, l in zip(times, levels)
+            ]
+        }
+    
+    elif measurement_type in ["SCAN", "PSCAN"]:
+        # Frequency scan - spectrum
+        freq_start = 88000000  # 88 MHz
+        freq_stop = 108000000  # 108 MHz
+        num_points = 800
+        
+        frequencies = np.linspace(freq_start, freq_stop, num_points)
+        # Simulate FM broadcast band with some peaks
+        levels = -90 + np.random.normal(0, 5, num_points)
+        # Add some signal peaks
+        for peak_freq in [90.5e6, 95.2e6, 98.7e6, 103.1e6]:
+            peak_idx = np.argmin(np.abs(frequencies - peak_freq))
+            levels[peak_idx-5:peak_idx+5] = -40 + np.random.normal(0, 2, 10)
+        
+        return {
+            "measurement_type": measurement_type,
+            "frequency_start": float(freq_start),
+            "frequency_stop": float(freq_stop),
+            "unit": "dBm",
+            "data": [
+                {"frequency": float(f), "level": float(l)} 
+                for f, l in zip(frequencies, levels)
+            ]
+        }
+    
+    elif measurement_type == "DSCAN":
+        # Direction finding - polar data
+        angles = np.arange(0, 360, 5)  # Every 5 degrees
+        levels = -80 + np.random.normal(0, 5, len(angles))
+        # Add main signal direction at ~90 degrees
+        peak_idx = 18  # 90 degrees
+        levels[peak_idx-2:peak_idx+2] = -35 + np.random.normal(0, 1, 4)
+        
+        return {
+            "measurement_type": "DSCAN",
+            "frequency": 150000000,  # 150 MHz
+            "unit": "dBm",
+            "data": [
+                {"angle": float(a), "level": float(l)} 
+                for a, l in zip(angles, levels)
+            ]
+        }
+    
+    else:
+        # Generic measurement
+        return {
+            "measurement_type": measurement_type,
+            "data": []
+        }
+
+def parse_xml_measurement_data(file_path: str) -> Dict[str, Any]:
+    """Parse XML measurement data file"""
+    import xml.etree.ElementTree as ET
+    
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    
+    # Extract measurement info
+    meas_type = root.findtext(".//MEAS_TYPE", "UNKNOWN")
+    frequency = root.findtext(".//FREQUENCY")
+    
+    # Parse data points
+    data = []
+    for point in root.findall(".//DATA_POINT"):
+        data_point = {}
+        for child in point:
+            try:
+                data_point[child.tag.lower()] = float(child.text)
+            except (ValueError, TypeError):
+                data_point[child.tag.lower()] = child.text
+        data.append(data_point)
+    
+    return {
+        "measurement_type": meas_type,
+        "frequency": float(frequency) if frequency else None,
+        "data": data
+    }
+
+def parse_csv_measurement_data(file_path: str) -> Dict[str, Any]:
+    """Parse CSV measurement data file"""
+    import csv
+    
+    data = []
+    with open(file_path, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            # Convert numeric fields
+            data_point = {}
+            for key, value in row.items():
+                try:
+                    data_point[key.lower()] = float(value)
+                except (ValueError, TypeError):
+                    data_point[key.lower()] = value
+            data.append(data_point)
+    
+    return {
+        "measurement_type": "UNKNOWN",
+        "data": data
+    }
+
+# ============================================================================
 # HEALTH CHECK
 # ============================================================================
 
