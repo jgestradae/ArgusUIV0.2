@@ -1151,33 +1151,11 @@ export default function AutomaticMode() {
                   Next: Review & Create
                 </Button>
               </div>
-                    ...prev,
-                    measurement: { ...prev.measurement, frequency_single: parseInt(e.target.value) }
-                  }))}
-                  className="input-spectrum"
-                  placeholder="100000000"
-                />
-                <p className="text-xs text-slate-400">Example: 100000000 = 100 MHz</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="if_bandwidth">IF Bandwidth (Hz)</Label>
-                  <Input
-                    id="if_bandwidth"
-                    type="number"
-                    value={wizardData.measurement.receiver_config.if_bandwidth}
-                    onChange={(e) => setWizardData(prev => ({
-                      ...prev,
-                      measurement: {
-                        ...prev.measurement,
-                        receiver_config: {
-                          ...prev.measurement.receiver_config,
-                          if_bandwidth: parseInt(e.target.value)
-                        }
-                      }
-                    }))}
-                    className="input-spectrum"
+            </CardContent>
+          </Card>
+        );
+
+      case 5:
                   />
                 </div>
                 
