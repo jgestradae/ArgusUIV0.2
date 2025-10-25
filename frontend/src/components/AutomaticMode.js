@@ -1158,66 +1158,6 @@ export default function AutomaticMode() {
       case 5:
         // STEP 5: Review & Create
         return (
-                    onValueChange={(value) => setWizardData(prev => ({
-                      ...prev,
-                      measurement: {
-                        ...prev.measurement,
-                        receiver_config: {
-                          ...prev.measurement.receiver_config,
-                          rf_attenuation: value
-                        }
-                      }
-                    }))}
-                  >
-                    <SelectTrigger className="input-spectrum">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Auto">Auto</SelectItem>
-                      <SelectItem value="0">0 dB</SelectItem>
-                      <SelectItem value="10">10 dB</SelectItem>
-                      <SelectItem value="20">20 dB</SelectItem>
-                      <SelectItem value="30">30 dB</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="measurement_time">Measurement Time (s)</Label>
-                  <Input
-                    id="measurement_time"
-                    type="number"
-                    value={wizardData.measurement.receiver_config.measurement_time}
-                    onChange={(e) => setWizardData(prev => ({
-                      ...prev,
-                      measurement: {
-                        ...prev.measurement,
-                        receiver_config: {
-                          ...prev.measurement.receiver_config,
-                          measurement_time: parseInt(e.target.value)
-                        }
-                      }
-                    }))}
-                    className="input-spectrum"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex justify-between">
-                <Button variant="secondary" onClick={() => setWizardStep(3)}>
-                  Previous
-                </Button>
-                <Button onClick={() => setWizardStep(5)} className="btn-spectrum">
-                  Next: Review & Create
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case 5:
-        // STEP 5: Review & Create
-        return (
           <Card className="glass-card border-0">
             <CardHeader>
               <CardTitle className="text-xl text-white">Step 5: Review & Create</CardTitle>
