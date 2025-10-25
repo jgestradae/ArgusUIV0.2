@@ -104,7 +104,7 @@ async def lifespan(app: FastAPI):
     await auth_module.auth_manager.create_default_admin()
     
     # Initialize XML processor with default paths (can be overridden via API)
-    global xml_processor, amm_scheduler
+    global xml_processor, amm_scheduler, file_watcher
     inbox_path = os.getenv("ARGUS_INBOX_PATH", "/tmp/argus_inbox")
     outbox_path = os.getenv("ARGUS_OUTBOX_PATH", "/tmp/argus_outbox")
     data_path = os.getenv("ARGUS_DATA_PATH", "/tmp/argus_data")
@@ -116,20 +116,23 @@ async def lifespan(app: FastAPI):
     amm_scheduler = AMMScheduler(db, xml_processor)
     logger.info("AMM Scheduler initialized")
     
-    # Start background task for periodic GSS requests
-    import asyncio
-    gss_task = asyncio.create_task(periodic_gss_task())
-    logger.info("Started periodic GSS task")
+    # Initialize File Watcher for outbox monitoring
+    from file_watcher import ArgusFileWatcher
+    file_watcher = ArgusFileWatcher(outbox_path, xml_processor, db)
+    file_watcher.start()
+    logger.info("File watcher started for outbox monitoring")
+    
+    # Process any existing response files
+    await file_watcher.process_existing_files()
+    
+    # Send initial GSS request on startup
+    await startup_gss_request()
     
     yield
     
     # Shutdown
     logger.info("Shutting down ArgusUI Backend...")
-    gss_task.cancel()
-    try:
-        await gss_task
-    except asyncio.CancelledError:
-        pass
+    file_watcher.stop()
     client.close()
 
 # Create FastAPI app
