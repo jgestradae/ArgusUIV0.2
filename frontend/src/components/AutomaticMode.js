@@ -80,13 +80,37 @@ export default function AutomaticMode() {
     name: '',
     description: '',
     
-    // Timing Definition
+    // Timing Configuration
     timing: {
-      schedule_type: 'daily',
-      start_time: '09:00',
-      end_time: '17:00',
-      weekdays: [0, 1, 2, 3, 4], // Mon-Fri
-      interval_hours: 1,
+      schedule_type: 'always', // always, span, periodic
+      
+      // For span and periodic
+      start_date: new Date().toISOString().split('T')[0],
+      start_time: '00:00:00',
+      end_date: new Date().toISOString().split('T')[0],
+      end_time: '23:59:59',
+      
+      // For periodic only
+      weekdays: {
+        monday: true,
+        tuesday: true,
+        wednesday: true,
+        thursday: true,
+        friday: true,
+        saturday: false,
+        sunday: false
+      },
+      all_days: false,
+      interval_days: 1,
+      daily_start_time: '00:00:00',
+      daily_end_time: '23:59:59',
+      
+      // Fragmentation
+      fragmentation_enabled: false,
+      fragmentation_interval: '00:00:00',
+      fragmentation_duration: '00:00:00',
+      fragmentation_count: 1,
+      
       continue_after_restart: true
     },
     
