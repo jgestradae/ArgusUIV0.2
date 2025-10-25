@@ -69,10 +69,20 @@ async def lifespan(app: FastAPI):
     amm_scheduler = AMMScheduler(db, xml_processor)
     logger.info("AMM Scheduler initialized")
     
+    # Start background task for periodic GSS requests
+    import asyncio
+    gss_task = asyncio.create_task(periodic_gss_task())
+    logger.info("Started periodic GSS task")
+    
     yield
     
     # Shutdown
     logger.info("Shutting down ArgusUI Backend...")
+    gss_task.cancel()
+    try:
+        await gss_task
+    except asyncio.CancelledError:
+        pass
     client.close()
 
 # Create FastAPI app
