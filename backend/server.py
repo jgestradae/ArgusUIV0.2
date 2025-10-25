@@ -387,6 +387,49 @@ async def get_available_stations(current_user: User = Depends(get_current_user))
             detail=f"Failed to get available stations: {str(e)}"
         )
 
+@api_router.post("/system/request-gss")
+async def request_system_state(current_user: User = Depends(get_current_user)):
+    """Manually request system state (GSS) from Argus"""
+    try:
+        # Get control station configuration from environment
+        control_station = os.getenv("ARGUS_CONTROL_STATION", "HQ4")
+        sender_pc = os.getenv("ARGUS_SENDER_PC", "SRVARGUS")
+        
+        # Generate GSS request
+        order_id = xml_processor.generate_order_id("GSS")
+        xml_content = xml_processor.create_system_state_request(order_id, sender=control_station, sender_pc=sender_pc)
+        
+        # Save request
+        xml_file = xml_processor.save_request(xml_content, order_id)
+        
+        # Create order record
+        order = ArgusOrder(
+            order_id=order_id,
+            order_type=OrderType.GSS,
+            order_name="Manual System State Query",
+            created_by=current_user.id,
+            xml_request_file=xml_file
+        )
+        await db.argus_orders.insert_one(order.dict())
+        
+        logger.info(f"Manual GSS request sent: {order_id}")
+        
+        return ApiResponse(
+            success=True,
+            message="GSS request sent to Argus. Response will be processed automatically.",
+            data={
+                "order_id": order_id,
+                "xml_file": xml_file
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error requesting system state: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to request system state: {str(e)}"
+        )
+
 def _get_measurement_types_for_station(devices: list) -> list:
     """Determine available measurement types based on station's devices"""
     measurement_types = set()
