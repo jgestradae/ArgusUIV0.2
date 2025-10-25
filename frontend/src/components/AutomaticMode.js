@@ -528,85 +528,295 @@ export default function AutomaticMode() {
               <CardDescription>Configure when the measurements should be performed</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Schedule Type Selection */}
               <div className="space-y-2">
-                <Label>Schedule Type</Label>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                <Label>¿Cuándo debe realizarse la medición?</Label>
+                <div className="space-y-2">
                   {Object.entries(SCHEDULE_TYPES).map(([key, type]) => {
                     const Icon = type.icon;
-                    const isSelected = wizardData.timing.schedule_type === key;
-                    
                     return (
-                      <div
+                      <button
                         key={key}
                         onClick={() => setWizardData(prev => ({
                           ...prev,
                           timing: { ...prev.timing, schedule_type: key }
                         }))}
-                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                          isSelected 
-                            ? 'border-blue-500/50 bg-blue-500/10'
-                            : 'border-slate-700/50 hover:border-slate-600/50'
+                        className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                          wizardData.timing.schedule_type === key
+                            ? 'border-cyan-500 bg-cyan-500/10'
+                            : 'border-slate-700 bg-slate-800/30 hover:border-slate-600'
                         }`}
                       >
-                        <div className="flex items-center space-x-2 mb-1">
-                          <Icon className="w-4 h-4" />
-                          <span className="font-medium text-sm">{type.label}</span>
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                            wizardData.timing.schedule_type === key
+                              ? 'border-cyan-500 bg-cyan-500'
+                              : 'border-slate-600'
+                          }`}>
+                            {wizardData.timing.schedule_type === key && (
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <span className="font-medium text-white">{type.label}</span>
                         </div>
-                        <p className="text-xs text-slate-400">{type.description}</p>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
               </div>
               
-              {wizardData.timing.schedule_type === 'daily' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="start_time">Start Time</Label>
-                    <Input
-                      id="start_time"
-                      type="time"
-                      value={wizardData.timing.start_time}
-                      onChange={(e) => setWizardData(prev => ({
-                        ...prev,
-                        timing: { ...prev.timing, start_time: e.target.value }
-                      }))}
-                      className="input-spectrum"
-                    />
+              {/* Span Configuration */}
+              {wizardData.timing.schedule_type === 'span' && (
+                <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="span_start_date">Fecha inic. (Start Date)</Label>
+                      <Input
+                        id="span_start_date"
+                        type="date"
+                        value={wizardData.timing.start_date}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, start_date: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="span_start_time">Hora inicial (Start Time)</Label>
+                      <Input
+                        id="span_start_time"
+                        type="time"
+                        step="1"
+                        value={wizardData.timing.start_time}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, start_time: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="end_time">End Time</Label>
-                    <Input
-                      id="end_time"
-                      type="time"
-                      value={wizardData.timing.end_time}
-                      onChange={(e) => setWizardData(prev => ({
-                        ...prev,
-                        timing: { ...prev.timing, end_time: e.target.value }
-                      }))}
-                      className="input-spectrum"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="span_end_date">Fecha final (End Date)</Label>
+                      <Input
+                        id="span_end_date"
+                        type="date"
+                        value={wizardData.timing.end_date}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, end_date: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="span_end_time">Hora final (End Time)</Label>
+                      <Input
+                        id="span_end_time"
+                        type="time"
+                        step="1"
+                        value={wizardData.timing.end_time}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, end_time: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
               
-              {wizardData.timing.schedule_type === 'interval' && (
-                <div className="space-y-2">
-                  <Label htmlFor="interval_hours">Interval (Hours)</Label>
-                  <Input
-                    id="interval_hours"
-                    type="number"
-                    min="1"
-                    max="24"
-                    value={wizardData.timing.interval_hours}
-                    onChange={(e) => setWizardData(prev => ({
-                      ...prev,
-                      timing: { ...prev.timing, interval_hours: parseInt(e.target.value) }
-                    }))}
-                    className="input-spectrum"
-                  />
+              {/* Periodic Configuration */}
+              {wizardData.timing.schedule_type === 'periodic' && (
+                <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                  {/* Date Range */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="periodic_start_date">Fecha inic. (Start Date)</Label>
+                      <Input
+                        id="periodic_start_date"
+                        type="date"
+                        value={wizardData.timing.start_date}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, start_date: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="periodic_end_date">Fecha final (End Date)</Label>
+                      <Input
+                        id="periodic_end_date"
+                        type="date"
+                        value={wizardData.timing.end_date}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, end_date: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Days of Week */}
+                  <div className="space-y-2">
+                    <Label>Días de la semana (Days of the Week)</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries({
+                        monday: 'Lu',
+                        tuesday: 'Ma',
+                        wednesday: 'Mi',
+                        thursday: 'Ju',
+                        friday: 'Vi',
+                        saturday: 'Sa',
+                        sunday: 'Do'
+                      }).map(([day, label]) => (
+                        <button
+                          key={day}
+                          onClick={() => setWizardData(prev => ({
+                            ...prev,
+                            timing: {
+                              ...prev.timing,
+                              weekdays: {
+                                ...prev.timing.weekdays,
+                                [day]: !prev.timing.weekdays[day]
+                              },
+                              all_days: false
+                            }
+                          }))}
+                          className={`px-3 py-2 rounded-lg border-2 transition-all ${
+                            wizardData.timing.weekdays[day]
+                              ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300'
+                              : 'border-slate-700 bg-slate-800/30 text-slate-400 hover:border-slate-600'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => {
+                          const allSelected = !wizardData.timing.all_days;
+                          setWizardData(prev => ({
+                            ...prev,
+                            timing: {
+                              ...prev.timing,
+                              all_days: allSelected,
+                              weekdays: {
+                                monday: allSelected,
+                                tuesday: allSelected,
+                                wednesday: allSelected,
+                                thursday: allSelected,
+                                friday: allSelected,
+                                saturday: allSelected,
+                                sunday: allSelected
+                              }
+                            }
+                          }));
+                        }}
+                        className={`px-3 py-2 rounded-lg border-2 transition-all ${
+                          wizardData.timing.all_days
+                            ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300'
+                            : 'border-slate-700 bg-slate-800/30 text-slate-400 hover:border-slate-600'
+                        }`}
+                      >
+                        Todos
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Daily Time Range */}
+                  <div className="space-y-2">
+                    <Label>Diariamente a las (Daily at)</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        type="time"
+                        step="1"
+                        value={wizardData.timing.daily_start_time}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, daily_start_time: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                      <Input
+                        type="time"
+                        step="1"
+                        value={wizardData.timing.daily_end_time}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, daily_end_time: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
+              
+              {/* Fragmentation Section */}
+              <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={wizardData.timing.fragmentation_enabled}
+                    onCheckedChange={(checked) => setWizardData(prev => ({
+                      ...prev,
+                      timing: { ...prev.timing, fragmentation_enabled: checked }
+                    }))}
+                  />
+                  <Label className="text-lg">Fragmentación (Fragmentation)</Label>
+                </div>
+                
+                {wizardData.timing.fragmentation_enabled && (
+                  <div className="grid grid-cols-3 gap-4 pt-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="frag_interval">Intervalo (Interval)</Label>
+                      <Input
+                        id="frag_interval"
+                        type="time"
+                        step="1"
+                        value={wizardData.timing.fragmentation_interval}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, fragmentation_interval: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="frag_duration">Duración (Duration)</Label>
+                      <Input
+                        id="frag_duration"
+                        type="time"
+                        step="1"
+                        value={wizardData.timing.fragmentation_duration}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, fragmentation_duration: e.target.value }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="frag_count">No. de Med. (No. of Measurements)</Label>
+                      <Input
+                        id="frag_count"
+                        type="number"
+                        min="1"
+                        value={wizardData.timing.fragmentation_count}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          timing: { ...prev.timing, fragmentation_count: parseInt(e.target.value) }
+                        }))}
+                        className="input-spectrum"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
               
               <div className="flex items-center space-x-2">
                 <Switch
