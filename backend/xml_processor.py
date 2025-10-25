@@ -147,17 +147,35 @@ class ArgusXMLProcessor:
         return reparsed.toprettyxml(indent="  ")
 
     def save_request(self, xml_content: str, order_id: str) -> str:
-        """Save XML request to both data storage and Argus inbox"""
+        """
+        Save XML request to both data storage and Argus inbox
+        
+        Filename format: PREFIX-DDMMYY-HHMMSSXXX-O.xml
+        Example: GSS-251025-182839822-O.xml
+        Where ORDER_ID inside XML is: GSS251025182839822 (no dashes, no suffix)
+        """
+        # Parse order_id to create proper filename
+        # order_id format: GSS251025182839822 (PREFIX + DDMMYY + HHMMSSXXX)
+        prefix = order_id[:3]  # GSS
+        date_part = order_id[3:9]  # 251025 (DDMMYY)
+        time_part = order_id[9:]  # 182839822 (HHMMSSXXX)
+        
+        # Create filename with dashes and -O suffix for outgoing
+        filename = f"{prefix}-{date_part}-{time_part}-O.xml"
+        
         # Save to data storage for archival
-        data_file = self.data_path / "xml_requests" / f"{order_id}.xml"
+        data_file = self.data_path / "xml_requests" / filename
+        data_file.parent.mkdir(parents=True, exist_ok=True)
         with open(data_file, 'w', encoding='utf-8') as f:
             f.write(xml_content)
         
         # Save to Argus inbox for processing
-        inbox_file = self.inbox_path / f"{order_id}.xml"
+        inbox_file = self.inbox_path / filename
         with open(inbox_file, 'w', encoding='utf-8') as f:
             f.write(xml_content)
         
+        logger.info(f"Saved request to inbox: {filename}")
+        return str(inbox_file)
         logger.info(f"XML request saved: {order_id}")
         return str(data_file)
 
