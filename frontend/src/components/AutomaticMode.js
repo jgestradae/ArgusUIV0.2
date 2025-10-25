@@ -37,12 +37,9 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const SCHEDULE_TYPES = {
-  always: { label: 'Always Running', icon: Activity, description: 'Continuous measurement' },
-  span: { label: 'Time Span', icon: Calendar, description: 'Between start and end dates' },
-  periodic: { label: 'Periodic', icon: Timer, description: 'Regular intervals' },
-  daily: { label: 'Daily', icon: Clock, description: 'Same time each day' },
-  weekdays: { label: 'Weekdays', icon: Calendar, description: 'Specific days of week' },
-  interval: { label: 'Interval', icon: Timer, description: 'Fixed time intervals' }
+  always: { label: 'Siempre (Always)', icon: Activity, description: 'Continuous measurement' },
+  span: { label: 'Span (Time Span)', icon: Calendar, description: 'Between start and end dates/times' },
+  periodic: { label: 'Periódico (Periodic)', icon: Timer, description: 'Recurring on specific days and times' }
 };
 
 const MEASUREMENT_TYPES = {
