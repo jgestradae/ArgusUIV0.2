@@ -567,6 +567,62 @@ export default function Configuration() {
                   <p className="text-xs text-slate-400">Directory for archiving measurement results and logs</p>
                 </div>
               </div>
+
+              {/* GSS Request Section */}
+              <div className="pt-4 border-t border-slate-700/30">
+                <h3 className="text-lg font-medium text-white mb-4 flex items-center">
+                  <Radio className="w-5 h-5 mr-2 text-cyan-400" />
+                  Argus System Queries
+                </h3>
+                
+                <div className="p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-white mb-2">
+                        Request System State (GSS)
+                      </h4>
+                      <p className="text-sm text-slate-400 mb-3">
+                        Query Argus for current system status, online stations, and available devices. 
+                        The response will be automatically processed when received.
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        ✓ Response processed automatically by file watcher
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={async () => {
+                        setGssRequesting(true);
+                        try {
+                          const response = await axios.post(`${API}/system/request-gss`);
+                          if (response.data.success) {
+                            toast.success('GSS request sent to Argus');
+                            toast.info('Response will be processed automatically');
+                          }
+                        } catch (error) {
+                          console.error('Error requesting GSS:', error);
+                          toast.error('Failed to send GSS request');
+                        } finally {
+                          setGssRequesting(false);
+                        }
+                      }}
+                      disabled={gssRequesting}
+                      className="btn-spectrum ml-4 whitespace-nowrap"
+                    >
+                      {gssRequesting ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Radio className="w-4 h-4 mr-2" />
+                          Request GSS
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
               
               <div className="flex justify-end pt-4 border-t border-slate-700/50">
                 <Button 
