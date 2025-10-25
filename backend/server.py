@@ -745,8 +745,8 @@ def generate_mock_measurement_data(measurement_type: str) -> Dict[str, Any]:
             "frequency_stop": float(freq_stop),
             "unit": "dBm",
             "data": [
-                {"frequency": float(f), "level": float(l)} 
-                for f, l in zip(frequencies, levels)
+                {"frequency": float(freq), "level": float(level)} 
+                for freq, level in zip(frequencies, levels)
             ]
         }
     
