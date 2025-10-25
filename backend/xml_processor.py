@@ -176,22 +176,42 @@ class ArgusXMLProcessor:
         
         logger.info(f"Saved request to inbox: {filename}")
         return str(inbox_file)
-        logger.info(f"XML request saved: {order_id}")
-        return str(data_file)
 
     def check_responses(self) -> List[Dict[str, Any]]:
-        """Check for new responses in Argus outbox"""
+        """
+        Check for new responses in Argus outbox
+        
+        Response filename format: PREFIX-DDMMYY-HHMMSSXXX-R.xml
+        Example: GSS-251025-182839822-R.xml (note -R suffix for response)
+        """
         responses = []
         
         if not self.outbox_path.exists():
             return responses
         
-        for xml_file in self.outbox_path.glob("*.xml"):
+        # Look for XML files with -R suffix (responses)
+        for xml_file in self.outbox_path.glob("*-R.xml"):
             try:
-                order_id = xml_file.stem
+                # Parse filename to extract order_id
+                # Format: PREFIX-DDMMYY-HHMMSSXXX-R.xml
+                filename = xml_file.stem  # Remove .xml
+                parts = filename.split('-')
+                
+                if len(parts) >= 4:
+                    # Reconstruct order_id without dashes and suffix
+                    prefix = parts[0]
+                    date_part = parts[1]
+                    time_part = parts[2]
+                    order_id = f"{prefix}{date_part}{time_part}"
+                else:
+                    # Fallback for old format
+                    order_id = filename.replace('-R', '')
+                
+                logger.info(f"Processing response file: {xml_file.name}, order_id: {order_id}")
                 
                 # Move to data storage
                 response_file = self.data_path / "xml_responses" / xml_file.name
+                response_file.parent.mkdir(parents=True, exist_ok=True)
                 xml_file.rename(response_file)
                 
                 # Parse response
