@@ -5,7 +5,7 @@ import App from "./App";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  // StrictMode temporarily disabled to fix Leaflet map initialization issues
+  // Re-enable after implementing proper error boundary for the map component
+  <App />
 );
