@@ -79,6 +79,7 @@ export default function GeolocationMap({
   const [loading, setLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState(initialCenter);
   const [mapZoom, setMapZoom] = useState(initialZoom);
+  const [mapKey, setMapKey] = useState(Date.now()); // Unique key for hot-reload fix
   
   // Layer visibility toggles
   const [showStations, setShowStations] = useState(true);
