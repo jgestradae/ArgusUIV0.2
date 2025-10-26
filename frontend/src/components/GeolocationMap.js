@@ -79,8 +79,6 @@ export default function GeolocationMap({
   const [loading, setLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState(initialCenter);
   const [mapZoom, setMapZoom] = useState(initialZoom);
-  const [mapKey, setMapKey] = useState(Date.now()); // Unique key for hot-reload fix
-  const mapContainerRef = useRef(null);
   
   // Layer visibility toggles
   const [showStations, setShowStations] = useState(true);
@@ -88,19 +86,7 @@ export default function GeolocationMap({
   const [showTDOA, setShowTDOA] = useState(true);
   const [showIntersections, setShowIntersections] = useState(true);
 
-  // Cleanup on unmount to prevent "already initialized" error
-  useEffect(() => {
-    return () => {
-      // Force cleanup of any lingering map instances
-      if (mapContainerRef.current) {
-        const container = mapContainerRef.current;
-        if (container._leaflet_id) {
-          // Remove Leaflet's internal reference
-          delete container._leaflet_id;
-        }
-      }
-    };
-  }, []);
+  // Remove the cleanup useEffect as it's not needed with the key approach
 
   useEffect(() => {
     loadStations();
