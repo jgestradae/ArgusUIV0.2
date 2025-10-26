@@ -391,12 +391,14 @@ export default function GeolocationMap({
       {/* Map */}
       <Card className="glass-card border-0">
         <CardContent className="p-0">
-          {!loading && (
+          {!loading ? (
             <div 
-              key={`map-wrapper-${mapKey}`}
+              key={mapKey}
+              id={`leaflet-map-container-${mapKey}`}
               style={{ height: '600px', width: '100%' }}
             >
               <LeafletMapWrapper
+                key={mapKey}
                 center={mapCenter}
                 zoom={mapZoom}
                 style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
