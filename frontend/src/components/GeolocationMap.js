@@ -376,12 +376,9 @@ export default function GeolocationMap({
       <Card className="glass-card border-0">
         <CardContent className="p-0">
           {!loading ? (
-            <div 
-              key={`map-container-${mapKey}`}
-              style={{ height: '600px', width: '100%' }}
-            >
-              <LeafletMapWrapper
-                key={`map-${mapKey}`}
+            <div style={{ height: '600px', width: '100%' }}>
+              <MapContainer
+                key={Date.now()} // Force remount on every render - fixes HMR issues
                 center={mapCenter}
                 zoom={mapZoom}
                 style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
