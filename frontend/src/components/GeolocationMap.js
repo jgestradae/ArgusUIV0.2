@@ -162,11 +162,7 @@ export default function GeolocationMap({
   };
 
   const handleRefresh = () => {
-    setLoading(true); // Force unmount
-    setMapKey(Date.now()); // Generate new key
-    setTimeout(() => {
-      loadStations();
-    }, 100); // Small delay to ensure unmount completes
+    loadStations();
   };
 
   const loadBearingData = async (measId) => {
