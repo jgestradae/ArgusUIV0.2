@@ -177,8 +177,11 @@ export default function GeolocationMap({
   };
 
   const handleRefresh = () => {
-    setMapKey(Date.now()); // Force map remount
-    loadStations();
+    setLoading(true); // Force unmount
+    setMapKey(Date.now()); // Generate new key
+    setTimeout(() => {
+      loadStations();
+    }, 100); // Small delay to ensure unmount completes
   };
 
   const loadBearingData = async (measId) => {
