@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle } from 'react-leaflet';
-import L from 'leaflet';
+import { MapContainer } from 'react-leaflet';
 
 // Wrapper component to properly manage Leaflet lifecycle
 export default function LeafletMapWrapper({ 
@@ -23,14 +22,22 @@ export default function LeafletMapWrapper({
           delete container._leaflet_id;
         }
         
-        // If there's a map instance, properly dispose it
-        if (mapRef.current) {
-          try {
-            mapRef.current.remove();
-            mapRef.current = null;
-          } catch (e) {
-            console.log('Map cleanup error (can be ignored):', e);
+        // Find all child elements with Leaflet IDs and clean them
+        const leafletContainers = container.querySelectorAll('[class*="leaflet"]');
+        leafletContainers.forEach(el => {
+          if (el._leaflet_id) {
+            delete el._leaflet_id;
           }
+        });
+      }
+      
+      // If there's a map instance, properly dispose it
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove();
+          mapRef.current = null;
+        } catch (e) {
+          // Silently ignore cleanup errors
         }
       }
     };
@@ -44,9 +51,6 @@ export default function LeafletMapWrapper({
         zoom={zoom}
         style={style || { height: '100%', width: '100%' }}
         scrollWheelZoom={scrollWheelZoom}
-        whenCreated={(mapInstance) => {
-          mapRef.current = mapInstance;
-        }}
       >
         {children}
       </MapContainer>
