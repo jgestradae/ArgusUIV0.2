@@ -80,12 +80,27 @@ export default function GeolocationMap({
   const [mapCenter, setMapCenter] = useState(initialCenter);
   const [mapZoom, setMapZoom] = useState(initialZoom);
   const [mapKey, setMapKey] = useState(Date.now()); // Unique key for hot-reload fix
+  const mapContainerRef = useRef(null);
   
   // Layer visibility toggles
   const [showStations, setShowStations] = useState(true);
   const [showBearings, setShowBearings] = useState(true);
   const [showTDOA, setShowTDOA] = useState(true);
   const [showIntersections, setShowIntersections] = useState(true);
+
+  // Cleanup on unmount to prevent "already initialized" error
+  useEffect(() => {
+    return () => {
+      // Force cleanup of any lingering map instances
+      if (mapContainerRef.current) {
+        const container = mapContainerRef.current;
+        if (container._leaflet_id) {
+          // Remove Leaflet's internal reference
+          delete container._leaflet_id;
+        }
+      }
+    };
+  }, []);
 
   useEffect(() => {
     loadStations();
