@@ -10,9 +10,11 @@ import AutomaticMode from './components/AutomaticMode';
 import Configuration from './components/Configuration';
 import SystemLogs from './components/SystemLogs';
 import DataNavigator from './components/DataNavigator';
+import GeolocationMap from './components/GeolocationMap';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
+import 'leaflet/dist/leaflet.css';
 
 function App() {
   return (
