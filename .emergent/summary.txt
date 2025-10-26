@@ -1,278 +1,102 @@
 <analysis>
-The AI engineer initiated the project by clarifying the user's requirements, specifically regarding the R&S Argus XML interface and desired features. After an initial technology stack mismatch (Vue.js/PostgreSQL vs. React/FastAPI/MongoDB), the user agreed to the supported stack. The engineer prioritized System Status and Direct Measurement, then focused on a hybrid data storage (MongoDB for metadata, files for results). A key phase involved implementing core application components, including robust authentication, which required extensive debugging for bcrypt password handling and JWT token validation.
-
-Subsequently, the Data Navigator and Automatic Mode (AMM) features were built, including backend APIs and frontend components, along with necessary dependency updates. The project then shifted to preparing the application for local Windows server deployment, which involved creating detailed setup scripts ( files), fixing dependency conflicts (, ), and addressing batch script syntax errors. The current interaction revolves around debugging the local installation process on the user's Windows server, tackling Python and Node.js dependency issues and ensuring the startup scripts function correctly. The AI engineer is methodically guiding the user through troubleshooting installation errors.
+The previous AI engineer effectively navigated the initial setup and deployment challenges of the ArgusUI application, transitioning from conceptual requirements to a functional MVP on a React/FastAPI/MongoDB stack. A significant portion of the work focused on resolving local Windows server deployment issues, specifically Python () and Node.js (, , ) dependency conflicts, demonstrating strong troubleshooting capabilities. Critical progress was made in integrating with the R&S Argus system by refining XML request/response formats for System Status, establishing a file watcher for Argus outbox, and making GSS requests configurable. The AMM workflow was enhanced with a station selection step and a redesigned timing definition UI. Currently, the engineer is addressing a persistent login issue (though deferred by the user) and is actively implementing a new Geolocation Map module for visualizing stations and measurement results, with the latest interaction addressing a Leaflet hot-reload bug.
 </analysis>
 
 <product_requirements>
-The user seeks a web application, ArgusUI, to control the R&S Argus spectrum monitoring system via an XML interface. The primary objective is to provide a modern web interface for scheduling, visualizing, and managing measurement results, replacing direct desktop access. The initial architecture proposed Vue.js/PostgreSQL, but it was revised to **React frontend, FastAPI backend, and MongoDB database** due to environment limitations.
+The user requires a web application, ArgusUI, to interface with the R&S Argus spectrum monitoring system. The application needs to control Argus via an XML interface, replacing existing desktop access. Initial architecture was revised to React (frontend), FastAPI (backend), and MongoDB (database).
 
-Core modules for Phase 1 include:
-1.  **Automatic Mode:** Schedule and manage measurement requests to Argus via ORM interface.
-2.  **Report Generation:** Produce Word reports based on stored measurements.
-3.  **System Logs:** Access and view system event logs.
-4.  **System Status:** Query Argus operational status through ORM GSS and GSP.
-5.  **Configuration:** Manage system parameters, directories, and communication settings.
-6.  **Direct Measurement:** (Initially planned for future, then prioritized).
-7.  **Database Navigator:** A comprehensive data management system for various content types (measurements, graphs, audio, logs, auto definitions) with MongoDB metadata and local file storage.
+Key features to implement:
+-   **Automatic Mode (AMM):** Schedule and manage measurement requests.
+-   **System Status:** Query Argus operational status via ORM GSS/GSP.
+-   **Data Navigator:** Comprehensive data management for measurement results (metadata in MongoDB, files on disk).
+-   **Direct Measurement:** Trigger real-time measurements.
+-   **Configuration:** Manage system parameters, Argus communication paths (, ).
+-   **Report Generation:** Produce Word reports (pending).
+-   **System Logs:** Access and view logs (pending).
+-   **Authentication:** Admin/operator roles, Active Directory (LDAP) integration, local user creation.
+-   **Deployment:** Local Windows server without Nginx.
+-   **Geolocation Map:** Display station positions, radio location (ALA, TDOA), and other overlays using OpenStreetMap/Google Maps.
+-   **Language Switching:** (English/Spanish - future).
+-   **ACD Module:** Backend UDP listener for real-time measurement results for Direct Mode (future).
 
-Authentication requires admin/operator levels, connection to Active Directory (LDAP), and a local user creation mechanism. The backend will generate XML requests in  and read responses from , parsing XML to JSON. Security must adhere to OWASP Top 10. The application should be deployable to an internal Windows server for local use, without Nginx.
+The application should generate XML requests to Argus's inbox and read responses from the outbox, parsing XML to JSON. Security (OWASP Top 10) is a key concern.
 </product_requirements>
 
 <key_technical_concepts>
-- **React/FastAPI/MongoDB Stack:** Core technologies for frontend, backend, and database.
-- **XML File Exchange:** Primary communication protocol with R&S Argus system.
-- **JWT Authentication:** Token-based authentication for secure API access.
-- **Active Directory (LDAP) Integration:** Planned authentication mechanism for user roles.
-- **Shadcn UI & Tailwind CSS:** Frontend component library and styling framework.
-- **Python Virtual Environments & npm/yarn:** Dependency management for backend and frontend.
-- **Windows Batch Scripting:** Automation for local deployment setup and service management.
-- **Hybrid Data Storage:** MongoDB for metadata, local file system for measurement results.
+-   **React/FastAPI/MongoDB:** Core technologies for full-stack development.
+-   **XML File Exchange:** Primary communication for Argus integration.
+-   **JWT Authentication:** Token-based security.
+-   **Active Directory (LDAP):** Planned external authentication.
+-   **Shadcn UI & Tailwind CSS:** Frontend UI components and styling.
+-   **Windows Batch Scripting:** Local deployment automation.
+-   **:** Python library for file system monitoring (outbox).
+-   **Leaflet.js/react-leaflet:** Geospatial mapping for frontend visualization.
+-   **Pydantic:** Data validation for FastAPI.
 </key_technical_concepts>
 
 <code_architecture>
 
 
-
--   ****: Main FastAPI application.
-    -   Handles API routing, initializes database connection, includes routers for authentication, data navigation, and AMM. Manages CORS and middleware.
-    -   **Changes:** Integrated authentication, data navigator, and AMM APIs; updated for bcrypt password handling; refined error handling.
--   ****: Pydantic models for user management and general data.
-    -   Defines  model, including fields for username, email, password hash, roles, and timestamps. Crucial for data validation and MongoDB interaction.
--   ****: Handles user authentication, password hashing, and JWT token generation/validation.
-    -   Manages user creation, login, and token issuance. Contains  class for security.
-    -   **Changes:** Updated bcrypt password handling to address length limitations; integrated placeholder for Active Directory authentication.
--   ****: (Not explicitly modified but implied role) Handles generation and parsing of XML files for Argus communication.
-    -   Essential for translating internal application data to Argus-compatible XML and vice-versa.
--   ****: Pydantic models for various data types in the Data Navigator.
-    -   Defines models for , , , , , and , including metadata fields and file paths.
--   ****: FastAPI endpoints for Data Navigator.
-    -   Provides APIs for fetching data statistics and creating sample data across different content types.
-    -   **Changes:** Implemented API endpoints for  and .
--   ****: Pydantic models for Automatic Measurement Mode (AMM) configurations.
-    -   Defines models for AMM configurations, schedules, measurement definitions, and execution tracking.
--   ****: Logic for scheduling and executing AMM tasks.
-    -   Manages cron-based scheduling, execution logging, and interaction with Argus XML.
-    -   **Changes:** Corrected linting error, implemented core scheduling logic.
--   ****: FastAPI endpoints for Automatic Measurement Mode.
-    -   Provides APIs for AMM status and configuration management.
--   ****: Placeholder for Active Directory (LDAP) authentication logic.
-    -   Contains a  class to handle user authentication and role mapping against an AD server.
-    -   **Changes:** New file created with AD authentication boilerplate.
--   ****: Main React application component.
-    -   Sets up routing, , and integrates main layouts and pages.
-    -   **Changes:** Configured React Router for , , , , , and  routes.
--   ****: Login page component.
-    -   Handles user input for credentials and calls backend authentication API.
-    -   **Changes:** Login form and submission logic.
--   ****: Main dashboard for quick access and overview.
-    -   Provides navigation links and quick action buttons.
-    -   **Changes:** Added quick actions for System Status, Direct Measurement, AMM, and Data Navigator with appropriate icons.
--   ****: Frontend component for browsing various data types.
-    -   Displays data using a tabbed interface with statistics cards for each type.
-    -   **Changes:** Implemented core tabbed structure, data fetching, and display. Fixed syntax errors related to icon components.
--   ****: Frontend component for configuring and managing AMM.
-    -   Provides a multi-step wizard for defining automatic measurements.
--   ** files**: Various batch scripts for Windows server deployment.
-    -   : Automates environment setup, dependency installation, and configuration.
-    -   /: Starts MongoDB, FastAPI backend, and React frontend.
-    -   : Kills Node.js and Python processes.
-    -   : Configures Windows Firewall rules.
-    -   : Creates necessary data directories.
-    -   : Provides a quick system test.
-    -   **Changes:** Extensive modifications to  and  for robustness and Windows compatibility, fixing syntax and logic issues.
--   ****: A new requirements file specifically tailored for Windows.
-    -   Contains tested versions of Python packages (e.g., , , ) compatible with Windows.
--   ****: A new  with adjusted versions for Windows compatibility.
-    -   Addresses peer dependency conflicts (e.g., ) for .
+-   ****: Main FastAPI app.
+    -   **Changes:**  function updated for one-time GSS request at startup and  integration. New  endpoint added.  removed.
+-   ****: XML generation/parsing.
+    -   **Changes:** Updated  and  methods for correct XML format (dashes in filename, , , uppercase tags).  method rewritten to parse real GSS response structure including .  method updated for correct XML filename format (e.g., ).  updated to look for  suffix.
+-   ****: New file.
+    -   Contains logic for monitoring the Argus outbox folder using , processing response XMLs, and saving to the database.
+-   ****: New file.
+    -   Placeholder for Automatic Control Data (ACD) UDP protocol handling.
+-   ****: Python dependencies.
+    -   **Changes:**  library added.
+-   ****: Backend environment variables.
+    -   **Changes:** Added  and  for XML requests.
+-   ****: HTML entry point.
+    -   **Changes:** Browser tab title changed to ArgusUI - Spectrum Monitoring Control.
+-   ****: Frontend styling.
+    -   **Changes:** Added CSS for Leaflet map integration ().
+-   ****: Main React router.
+    -   **Changes:** Added a new route  for the Geolocation Map component.
+-   ****: Navigation layout.
+    -   **Changes:** Added a navigation link for the new Geolocation Map feature.
+-   ****: System Status UI.
+    -   **Changes:** Polling interval changed from 15s to 60s. Updated to display real station data and make station cards clickable to filter device displays. Fixed a syntax error (duplicate closing tags).
+-   ****: AMM UI.
+    -   **Changes:** Added  icon import. Redesigned the AMM wizard to include a new Step 1: Select Monitoring Station. Shifted subsequent steps and updated navigation logic. Redesigned the Timing Definition (Step 3) UI to match the Argus AMM interface with new  and  structure. Redesigned the Measurement Definition (Step 4) to be intelligent and adaptive. The Review step (Case 5) updated to display the new timing format. Cleaned up multiple instances of duplicate/leftover code.
+-   ****: System Configuration UI.
+    -   **Changes:** Added a Request GSS button to trigger a manual GSS request.
+-   ****: New file.
+    -   Contains components for visualizing various measurement result types (FFM, SCAN, DSCAN, Waterfall) using charting libraries.
+-   ****: New file.
+    -   Contains the main React-Leaflet map component, intended for displaying stations and measurement results.
+-   ****: Frontend dependencies.
+    -   **Changes:** Added , , , .
+-   ****: New batch script.
+    -   A diagnostic script to help troubleshoot local login issues.
 </code_architecture>
 
 <pending_tasks>
--   Full implementation and integration of Active Directory (LDAP) authentication into the login module.
--   Detailed file viewers with previews for the Data Navigator.
--   Advanced filtering options for the Data Navigator.
--   File upload/import capabilities for the Data Navigator.
--   Data relationship linking within the Data Navigator.
--   Export/download features for Data Navigator entries.
--   Improvements to the Direct Measurement module (requested but deferred for deployment).
--   Implementation of Report Generation and System Logs modules (Phase 1, not yet started).
+-   Full implementation and integration of Active Directory (LDAP) authentication.
+-   Detailed file viewers with previews, advanced filtering, and upload capabilities for the Data Navigator.
+-   Data relationship linking, export/download features for Data Navigator.
+-   Improvements to the Direct Measurement module.
+-   Implementation of Report Generation and System Logs modules.
+-   Complete backend ACD module integration with frontend Direct Mode.
+-   Implementation of a Remote Connection Module tab for managing stations and sending GSS/GSP requests.
+-   Frontend language switching (English/Spanish).
+-   Resolution of the persistent login issue on the user's local Windows server.
+-   Further development of the Geolocation Map (station markers, ALA, TDOA layers, control panel).
 </pending_tasks>
 
 <current_work>
-The AI engineer has developed ArgusUI v0.2, which includes the core features: System Status, Direct Measurement, Automatic Mode (AMM), and the Database Navigator. Authentication with a local admin user (/) is functional after several backend fixes for bcrypt password hashing and JWT token handling. The application is designed for internal network deployment on a Windows server without Nginx.
-
-The current work focuses entirely on assisting the user in deploying this v0.2 version locally. The AI engineer has provided a comprehensive set of installation instructions, including:
--   Guidance on installing Python, Node.js, MongoDB, and Git on Windows.
--   Automated setup scripts () and runtime scripts (, ).
--   Windows-specific  and  to mitigate dependency conflicts (, ).
--   Detailed instructions for creating and populating  files for both backend and frontend, including Argus paths and server IP configuration.
--   A  script to address initial syntax errors in the startup script.
-
-The user is actively attempting to install, and has reported issues:
-1.  An initial syntax error in , now addressed by .
-2.  A  error during  (or ), indicating a Python version mismatch.
-3.  npm <command>
-
-Usage:
-
-npm install        install all the dependencies in your project
-npm install <foo>  add the <foo> dependency to your project
-npm test           run this project's tests
-npm run <foo>      run the script named <foo>
-npm <command> -h   quick help on <command>
-npm -l             display usage info for all commands
-npm help <term>    search for help on <term>
-npm help npm       more involved overview
-
-All commands:
-
-    access, adduser, audit, bugs, cache, ci, completion,
-    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
-    edit, exec, explain, explore, find-dupes, fund, get, help,
-    help-search, hook, init, install, install-ci-test,
-    install-test, link, ll, login, logout, ls, org, outdated,
-    owner, pack, ping, pkg, prefix, profile, prune, publish,
-    query, rebuild, repo, restart, root, run-script, sbom,
-    search, set, shrinkwrap, star, stars, start, stop, team,
-    test, token, uninstall, unpublish, unstar, update, version,
-    view, whoami
-
-Specify configs in the ini-formatted file:
-    /root/.npmrc
-or on the command line via: npm <command> --key=value
-
-More configuration info: npm help config
-Configuration fields: npm help 7 config
-
-npm@10.8.2 /usr/lib/node_modules/npm dependency conflicts and vulnerabilities when running  for the frontend.
-
-The AI engineer has provided specific commands to fix the  version (Looking in indexes: https://pypi.org/simple, https://d33sy5i8bnduwe.cloudfront.net/simple/
-Collecting numpy==1.24.4
-  Downloading numpy-1.24.4-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (5.6 kB)
-Downloading numpy-1.24.4-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (14.0 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.0/14.0 MB 21.6 MB/s  0:00:00
-Installing collected packages: numpy
-  Attempting uninstall: numpy
-    Found existing installation: numpy 2.3.3
-    Uninstalling numpy-2.3.3:
-      Successfully uninstalled numpy-2.3.3
-Successfully installed numpy-1.24.4, Looking in indexes: https://pypi.org/simple, https://d33sy5i8bnduwe.cloudfront.net/simple/
-Collecting pandas==2.0.3
-  Downloading pandas-2.0.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (18 kB)
-Requirement already satisfied: python-dateutil>=2.8.2 in /root/.venv/lib/python3.11/site-packages (from pandas==2.0.3) (2.9.0.post0)
-Requirement already satisfied: pytz>=2020.1 in /root/.venv/lib/python3.11/site-packages (from pandas==2.0.3) (2025.2)
-Requirement already satisfied: tzdata>=2022.1 in /root/.venv/lib/python3.11/site-packages (from pandas==2.0.3) (2025.2)
-Requirement already satisfied: numpy>=1.21.0 in /root/.venv/lib/python3.11/site-packages (from pandas==2.0.3) (1.24.4)
-Requirement already satisfied: six>=1.5 in /root/.venv/lib/python3.11/site-packages (from python-dateutil>=2.8.2->pandas==2.0.3) (1.17.0)
-Downloading pandas-2.0.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (11.6 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.6/11.6 MB 12.0 MB/s  0:00:01
-Installing collected packages: pandas
-  Attempting uninstall: pandas
-    Found existing installation: pandas 2.3.2
-    Uninstalling pandas-2.3.2:
-      Successfully uninstalled pandas-2.3.2
-Successfully installed pandas-2.0.3) and the npm <command>
-
-Usage:
-
-npm install        install all the dependencies in your project
-npm install <foo>  add the <foo> dependency to your project
-npm test           run this project's tests
-npm run <foo>      run the script named <foo>
-npm <command> -h   quick help on <command>
-npm -l             display usage info for all commands
-npm help <term>    search for help on <term>
-npm help npm       more involved overview
-
-All commands:
-
-    access, adduser, audit, bugs, cache, ci, completion,
-    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
-    edit, exec, explain, explore, find-dupes, fund, get, help,
-    help-search, hook, init, install, install-ci-test,
-    install-test, link, ll, login, logout, ls, org, outdated,
-    owner, pack, ping, pkg, prefix, profile, prune, publish,
-    query, rebuild, repo, restart, root, run-script, sbom,
-    search, set, shrinkwrap, star, stars, start, stop, team,
-    test, token, uninstall, unpublish, unstar, update, version,
-    view, whoami
-
-Specify configs in the ini-formatted file:
-    /root/.npmrc
-or on the command line via: npm <command> --key=value
-
-More configuration info: npm help config
-Configuration fields: npm help 7 config
-
-npm@10.8.2 /usr/lib/node_modules/npm peer dependency issue (), along with manual startup commands and verification steps. The user's last message indicates they ran  again, which reported the  error and npm <command>
-
-Usage:
-
-npm install        install all the dependencies in your project
-npm install <foo>  add the <foo> dependency to your project
-npm test           run this project's tests
-npm run <foo>      run the script named <foo>
-npm <command> -h   quick help on <command>
-npm -l             display usage info for all commands
-npm help <term>    search for help on <term>
-npm help npm       more involved overview
-
-All commands:
-
-    access, adduser, audit, bugs, cache, ci, completion,
-    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
-    edit, exec, explain, explore, find-dupes, fund, get, help,
-    help-search, hook, init, install, install-ci-test,
-    install-test, link, ll, login, logout, ls, org, outdated,
-    owner, pack, ping, pkg, prefix, profile, prune, publish,
-    query, rebuild, repo, restart, root, run-script, sbom,
-    search, set, shrinkwrap, star, stars, start, stop, team,
-    test, token, uninstall, unpublish, unstar, update, version,
-    view, whoami
-
-Specify configs in the ini-formatted file:
-    /root/.npmrc
-or on the command line via: npm <command> --key=value
-
-More configuration info: npm help config
-Configuration fields: npm help 7 config
-
-npm@10.8.2 /usr/lib/node_modules/npm issues, but also claimed Python packages were installed and Node.js packages up to date despite the errors. The AI has responded with further fixes and troubleshooting steps for these persistent dependency issues.
+The AI engineer is currently working on developing the **Geolocation Map module**.
+Specifically, the last actions involved:
+1.  Installing necessary frontend dependencies: , , .
+2.  Creating the core  component, which uses React-Leaflet to display an OpenStreetMap base layer.
+3.  Adding the required Leaflet CSS to .
+4.  Integrating the  route into .
+5.  Adding a navigation link for the Geolocation module in the  component.
+Immediately before this summary request, the AI engineer attempted to take a screenshot of the newly integrated map component and encountered a runtime error: Map container is already initialized. This indicates a common issue with Leaflet and React's hot-reloading mechanism, where the map instance is not properly cleaned up between component renders. The engineer has identified this problem and is about to apply a fix.
 </current_work>
 
 <optional_next_step>
-Guide the user to successfully resolve the  and npm <command>
-
-Usage:
-
-npm install        install all the dependencies in your project
-npm install <foo>  add the <foo> dependency to your project
-npm test           run this project's tests
-npm run <foo>      run the script named <foo>
-npm <command> -h   quick help on <command>
-npm -l             display usage info for all commands
-npm help <term>    search for help on <term>
-npm help npm       more involved overview
-
-All commands:
-
-    access, adduser, audit, bugs, cache, ci, completion,
-    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
-    edit, exec, explain, explore, find-dupes, fund, get, help,
-    help-search, hook, init, install, install-ci-test,
-    install-test, link, ll, login, logout, ls, org, outdated,
-    owner, pack, ping, pkg, prefix, profile, prune, publish,
-    query, rebuild, repo, restart, root, run-script, sbom,
-    search, set, shrinkwrap, star, stars, start, stop, team,
-    test, token, uninstall, unpublish, unstar, update, version,
-    view, whoami
-
-Specify configs in the ini-formatted file:
-    /root/.npmrc
-or on the command line via: npm <command> --key=value
-
-More configuration info: npm help config
-Configuration fields: npm help 7 config
-
-npm@10.8.2 /usr/lib/node_modules/npm dependency issues during local setup, and verify the application launches using the fixed startup script.
+Fix the Map container is already initialized error in  by adding a unique key to the  component to ensure proper re-initialization during hot-reload.
 </optional_next_step>
