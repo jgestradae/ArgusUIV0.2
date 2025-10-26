@@ -510,7 +510,7 @@ export default function GeolocationMap({
                   />
                 </>
               )}
-            </MapContainer>
+            </LeafletMapWrapper>
           </div>
           )}
           {loading && (
