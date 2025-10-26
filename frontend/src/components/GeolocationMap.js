@@ -401,17 +401,18 @@ export default function GeolocationMap({
       {/* Map */}
       <Card className="glass-card border-0">
         <CardContent className="p-0">
-          <div 
-            ref={mapContainerRef} 
-            style={{ height: '600px', width: '100%' }}
-          >
-            <MapContainer
-              key={`geolocation-map-${mapKey}`}
-              center={mapCenter}
-              zoom={mapZoom}
-              style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
-              scrollWheelZoom={true}
+          {!loading && (
+            <div 
+              ref={mapContainerRef} 
+              key={`map-wrapper-${mapKey}`}
+              style={{ height: '600px', width: '100%' }}
             >
+              <MapContainer
+                center={mapCenter}
+                zoom={mapZoom}
+                style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
+                scrollWheelZoom={true}
+              >
               <ChangeView center={mapCenter} zoom={mapZoom} />
               
               {/* Base Layer - OpenStreetMap */}
