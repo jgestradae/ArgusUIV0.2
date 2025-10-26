@@ -277,17 +277,6 @@ export default function GeolocationMap({
 
   const intersection = showIntersections ? calculateIntersections() : null;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-3" />
-          <p className="text-slate-400">Loading map...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       {/* Controls */}
