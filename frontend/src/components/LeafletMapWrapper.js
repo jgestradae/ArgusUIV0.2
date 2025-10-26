@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer } from 'react-leaflet';
 
 // Wrapper component to properly manage Leaflet lifecycle
+// This handles React 18 StrictMode double-rendering
 export default function LeafletMapWrapper({ 
   center, 
   zoom, 
@@ -9,44 +10,53 @@ export default function LeafletMapWrapper({
   style,
   scrollWheelZoom = true
 }) {
-  const mapRef = useRef(null);
+  const [containerId] = useState(() => `map-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   const containerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
 
   useEffect(() => {
-    // Cleanup function to remove Leaflet instance
+    // Cleanup function to properly dispose of Leaflet map
     return () => {
-      if (containerRef.current) {
-        // Remove all Leaflet-specific properties
-        const container = containerRef.current;
-        if (container._leaflet_id) {
-          delete container._leaflet_id;
+      // Small delay to allow React to finish unmounting
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          try {
+            mapInstanceRef.current.remove();
+            mapInstanceRef.current = null;
+          } catch (e) {
+            // Ignore cleanup errors
+          }
         }
         
-        // Find all child elements with Leaflet IDs and clean them
-        const leafletContainers = container.querySelectorAll('[class*="leaflet"]');
-        leafletContainers.forEach(el => {
-          if (el._leaflet_id) {
-            delete el._leaflet_id;
+        if (containerRef.current) {
+          // Clean all Leaflet artifacts
+          const container = containerRef.current;
+          const leafletContainer = container.querySelector('.leaflet-container');
+          
+          if (leafletContainer && leafletContainer._leaflet_id) {
+            delete leafletContainer._leaflet_id;
           }
-        });
-      }
-      
-      // If there's a map instance, properly dispose it
-      if (mapRef.current) {
-        try {
-          mapRef.current.remove();
-          mapRef.current = null;
-        } catch (e) {
-          // Silently ignore cleanup errors
+          
+          if (container._leaflet_id) {
+            delete container._leaflet_id;
+          }
         }
-      }
+      }, 0);
     };
   }, []);
 
   return (
-    <div ref={containerRef} style={{ height: '100%', width: '100%' }}>
+    <div 
+      ref={containerRef} 
+      id={containerId}
+      style={{ height: '100%', width: '100%' }}
+    >
       <MapContainer
-        ref={mapRef}
+        ref={(map) => {
+          if (map) {
+            mapInstanceRef.current = map;
+          }
+        }}
         center={center}
         zoom={zoom}
         style={style || { height: '100%', width: '100%' }}
