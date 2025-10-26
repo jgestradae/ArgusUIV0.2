@@ -492,7 +492,7 @@ export default function GeolocationMap({
                   />
                 </>
               )}
-            </LeafletMapWrapper>
+            </MapContainer>
           </div>
           ) : (
             <div className="flex items-center justify-center" style={{ height: '600px', width: '100%' }}>
