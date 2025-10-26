@@ -393,12 +393,11 @@ export default function GeolocationMap({
         <CardContent className="p-0">
           {!loading ? (
             <div 
-              key={mapKey}
-              id={`leaflet-map-container-${mapKey}`}
+              key={`map-container-${mapKey}`}
               style={{ height: '600px', width: '100%' }}
             >
               <LeafletMapWrapper
-                key={mapKey}
+                key={`map-${mapKey}`}
                 center={mapCenter}
                 zoom={mapZoom}
                 style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
