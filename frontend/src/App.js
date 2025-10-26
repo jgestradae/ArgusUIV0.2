@@ -79,6 +79,27 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/geolocation" element={
+              <ProtectedRoute>
+                <Layout>
+                  <GeolocationMap />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/geolocation/ala/:measurementId" element={
+              <ProtectedRoute>
+                <Layout>
+                  <GeolocationMap mode="ALA" />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/geolocation/tdoa/:measurementId" element={
+              <ProtectedRoute>
+                <Layout>
+                  <GeolocationMap mode="TDOA" />
+                </Layout>
+              </ProtectedRoute>
+            } />
           </Routes>
           <Toaster position="top-right" />
         </div>
