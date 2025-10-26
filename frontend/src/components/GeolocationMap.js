@@ -382,9 +382,11 @@ export default function GeolocationMap({
         <CardContent className="p-0">
           <div style={{ height: '600px', width: '100%' }}>
             <MapContainer
+              key="geolocation-map"
               center={mapCenter}
               zoom={mapZoom}
               style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
+              scrollWheelZoom={true}
             >
               <ChangeView center={mapCenter} zoom={mapZoom} />
               
