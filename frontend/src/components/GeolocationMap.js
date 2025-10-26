@@ -160,6 +160,11 @@ export default function GeolocationMap({
     }
   };
 
+  const handleRefresh = () => {
+    setMapKey(Date.now()); // Force map remount
+    loadStations();
+  };
+
   const loadBearingData = async (measId) => {
     try {
       // Mock ALA bearing data for demonstration
