@@ -401,7 +401,10 @@ export default function GeolocationMap({
       {/* Map */}
       <Card className="glass-card border-0">
         <CardContent className="p-0">
-          <div style={{ height: '600px', width: '100%' }}>
+          <div 
+            ref={mapContainerRef} 
+            style={{ height: '600px', width: '100%' }}
+          >
             <MapContainer
               key={`geolocation-map-${mapKey}`}
               center={mapCenter}
