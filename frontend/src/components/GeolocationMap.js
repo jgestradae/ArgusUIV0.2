@@ -514,8 +514,7 @@ export default function GeolocationMap({
               )}
             </LeafletMapWrapper>
           </div>
-          )}
-          {loading && (
+          ) : (
             <div className="flex items-center justify-center" style={{ height: '600px', width: '100%' }}>
               <div className="text-center">
                 <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-3" />
