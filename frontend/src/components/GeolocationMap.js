@@ -291,7 +291,7 @@ export default function GeolocationMap({
               </CardDescription>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={loadStations}>
+              <Button variant="outline" size="sm" onClick={handleRefresh}>
                 <RefreshCw className="w-4 h-4 mr-1" />
                 Refresh
               </Button>
