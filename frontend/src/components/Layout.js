@@ -15,7 +15,8 @@ import {
   User,
   Shield,
   Database,
-  Clock
+  Clock,
+  Map
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -37,6 +38,12 @@ export default function Layout({ children }) {
       path: '/system-status',
       icon: Activity,
       description: 'Live Argus monitoring'
+    },
+    {
+      name: 'Geolocation',
+      path: '/geolocation',
+      icon: Map,
+      description: 'Station map & direction finding'
     },
     {
       name: 'Direct Measurement',
