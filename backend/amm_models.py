@@ -60,9 +60,9 @@ class TimingDefinition(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     
-    # Daily/Periodic scheduling
-    start_time: Optional[time] = None
-    end_time: Optional[time] = None
+    # Daily/Periodic scheduling - stored as strings (HH:MM:SS format)
+    start_time: Optional[str] = None  # Changed from time to str for MongoDB compatibility
+    end_time: Optional[str] = None    # Changed from time to str for MongoDB compatibility
     
     # Weekdays scheduling
     weekdays: List[int] = []  # 0=Monday, 6=Sunday
