@@ -172,7 +172,7 @@ class AMMScheduler:
             measurement_def = MeasurementDefinition(**measurement_def_data)
             
             # Generate XML order for Argus
-            order_id = self.xml_processor.generate_order_id("AMM")
+            order_id = self.xml_processor.generate_order_id("OR")  # Use OR prefix for measurement orders
             
             # Convert AMM measurement to XML order parameters
             xml_params = self._convert_amm_to_xml_params(measurement_def, order_id)
