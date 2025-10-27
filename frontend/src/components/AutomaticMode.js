@@ -243,28 +243,54 @@ export default function AutomaticMode() {
 
   // Transform wizardData to backend format
   const transformWizardDataToBackend = (data) => {
-    // Create timing definition
+    // Helper function to convert weekdays object to list of integers
+    const getWeekdayIndices = (weekdaysObj) => {
+      const dayMap = {
+        monday: 0,
+        tuesday: 1,
+        wednesday: 2,
+        thursday: 3,
+        friday: 4,
+        saturday: 5,
+        sunday: 6
+      };
+      return Object.entries(weekdaysObj)
+        .filter(([_, enabled]) => enabled)
+        .map(([day]) => dayMap[day]);
+    };
+
+    // Create timing definition - match backend model exactly
     const timingDefinition = {
       id: crypto.randomUUID ? crypto.randomUUID() : `timing-${Date.now()}`,
-      name: `${data.name || 'AMM'} Timing`, // ✅ Added name field
-      schedule_type: data.timing.schedule_type, // ✅ Keep lowercase, don't uppercase
-      start_date: data.timing.start_date,
-      start_time: data.timing.start_time,
-      end_date: data.timing.end_date,
-      end_time: data.timing.end_time,
-      repeat_days: Object.entries(data.timing.weekdays)
-        .filter(([_, enabled]) => enabled)
-        .map(([day]) => day),
+      name: `${data.name || 'AMM'} Timing`,
+      schedule_type: data.timing.schedule_type,
+      
+      // Span scheduling - send as datetime strings (ISO format)
+      start_date: data.timing.start_date ? `${data.timing.start_date}T00:00:00` : null,
+      end_date: data.timing.end_date ? `${data.timing.end_date}T23:59:59` : null,
+      
+      // Daily/Periodic scheduling - send as time strings (HH:MM:SS format)
+      start_time: data.timing.start_time || null,
+      end_time: data.timing.end_time || null,
+      
+      // Weekdays - send as list of integers (0=Monday, 6=Sunday)
+      weekdays: getWeekdayIndices(data.timing.weekdays),
+      
+      // Interval scheduling
+      interval_minutes: null,
+      interval_hours: null,
       interval_days: data.timing.interval_days || null,
-      daily_start_time: data.timing.daily_start_time || null,
-      daily_end_time: data.timing.daily_end_time || null,
+      
+      // Fragmentation
       fragmentation_enabled: data.timing.fragmentation_enabled || false,
-      fragmentation_interval: data.timing.fragmentation_interval || null,
-      fragmentation_duration: data.timing.fragmentation_duration || null,
-      fragmentation_count: data.timing.fragmentation_count || 1,
+      fragment_duration_minutes: null,
+      fragment_interval_minutes: null,
+      
+      // Advanced options
       continue_after_restart: data.timing.continue_after_restart !== false,
+      
       created_at: new Date().toISOString(),
-      created_by: null // Will be set by backend
+      created_by: null
     };
 
     // Create measurement definition
@@ -279,7 +305,7 @@ export default function AutomaticMode() {
       frequency_range_start: data.measurement.frequency_range_start || null,
       frequency_range_end: data.measurement.frequency_range_end || null,
       frequency_step: data.measurement.frequency_step || null,
-      frequency_list: data.measurement.frequency_list || [], // ✅ Changed from null to empty array
+      frequency_list: data.measurement.frequency_list || [],
       receiver_config: {
         if_bandwidth: data.measurement.receiver_config?.if_bandwidth || 9000,
         rf_attenuation: data.measurement.receiver_config?.rf_attenuation || 'Auto',
@@ -288,7 +314,7 @@ export default function AutomaticMode() {
         measurement_time: data.measurement.receiver_config?.measurement_time || 5
       },
       antenna_config: {
-        antenna_path: data.measurement.antenna_config?.antenna_path || 'ANT1', // ✅ Changed from antenna_name to antenna_path
+        antenna_path: data.measurement.antenna_config?.antenna_path || 'ANT1',
         azimuth: data.measurement.antenna_config?.azimuth || 0,
         elevation: data.measurement.antenna_config?.elevation || 0,
         polarization: data.measurement.antenna_config?.polarization || 'V'
@@ -296,13 +322,13 @@ export default function AutomaticMode() {
       measured_parameters: data.measurement.measured_parameters || ['Level'],
       alarm_configs: data.measurement.alarm_configs || [],
       created_at: new Date().toISOString(),
-      created_by: null // Will be set by backend
+      created_by: null
     };
 
     // Create range definition
     const rangeDefinition = {
       id: crypto.randomUUID ? crypto.randomUUID() : `range-${Date.now()}`,
-      name: `${data.name || 'AMM'} Range`, // ✅ Added name field
+      name: `${data.name || 'AMM'} Range`,
       system_path: data.range?.system_path || 'DEFAULT',
       frequency_start: data.range?.frequency_start || 30000000,
       frequency_end: data.range?.frequency_end || 3000000000,
@@ -313,7 +339,7 @@ export default function AutomaticMode() {
     // Create general definition
     const generalDefinition = {
       id: crypto.randomUUID ? crypto.randomUUID() : `general-${Date.now()}`,
-      name: `${data.name || 'AMM'} General`, // ✅ Added name field
+      name: `${data.name || 'AMM'} General`,
       result_config: {
         graphic_type: data.general?.result_config?.graphic_type || 'yt_plot',
         save_measurement_results: data.general?.result_config?.save_measurement_results !== false,
