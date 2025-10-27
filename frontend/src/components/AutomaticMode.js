@@ -401,6 +401,7 @@ export default function AutomaticMode() {
         measurement: {
           measurement_type: 'FFM',
           device_name: 'HE500-PR100-1',
+          signal_path: 'ADD197+075-EB500 DF', // Signal/System path for ORM
           station_names: ['Station_001'],
           frequency_mode: 'S',
           frequency_single: 100000000,
