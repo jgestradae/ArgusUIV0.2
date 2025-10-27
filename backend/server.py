@@ -116,6 +116,10 @@ async def lifespan(app: FastAPI):
     amm_scheduler = AMMScheduler(db, xml_processor)
     logger.info("AMM Scheduler initialized")
     
+    # Start AMM scheduler
+    await amm_scheduler.start_scheduler()
+    logger.info("AMM Scheduler started")
+    
     # Initialize File Watcher for outbox monitoring
     from file_watcher import ArgusFileWatcher
     file_watcher = ArgusFileWatcher(outbox_path, xml_processor, db)
