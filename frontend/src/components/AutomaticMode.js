@@ -241,15 +241,185 @@ export default function AutomaticMode() {
     }
   };
 
+  // Transform wizardData to backend format
+  const transformWizardDataToBackend = (data) => {
+    // Create timing definition
+    const timingDefinition = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `timing-${Date.now()}`,
+      schedule_type: data.timing.schedule_type.toUpperCase(), // Convert to uppercase
+      start_date: data.timing.start_date,
+      start_time: data.timing.start_time,
+      end_date: data.timing.end_date,
+      end_time: data.timing.end_time,
+      repeat_days: Object.entries(data.timing.weekdays)
+        .filter(([_, enabled]) => enabled)
+        .map(([day]) => day),
+      interval_days: data.timing.interval_days || null,
+      daily_start_time: data.timing.daily_start_time || null,
+      daily_end_time: data.timing.daily_end_time || null,
+      fragmentation_enabled: data.timing.fragmentation_enabled || false,
+      fragmentation_interval: data.timing.fragmentation_interval || null,
+      fragmentation_duration: data.timing.fragmentation_duration || null,
+      fragmentation_count: data.timing.fragmentation_count || 1,
+      continue_after_restart: data.timing.continue_after_restart !== false,
+      created_at: new Date().toISOString(),
+      created_by: null // Will be set by backend
+    };
+
+    // Create measurement definition
+    const measurementDefinition = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `measurement-${Date.now()}`,
+      name: data.name || 'AMM Measurement',
+      measurement_type: data.measurement.measurement_type,
+      device_name: data.measurement.device_name,
+      station_names: data.selected_station ? [data.selected_station.pc] : data.measurement.station_names,
+      frequency_mode: data.measurement.frequency_mode,
+      frequency_single: data.measurement.frequency_single || null,
+      frequency_range_start: data.measurement.frequency_range_start || null,
+      frequency_range_end: data.measurement.frequency_range_end || null,
+      frequency_step: data.measurement.frequency_step || null,
+      frequency_list: data.measurement.frequency_list || null,
+      receiver_config: {
+        if_bandwidth: data.measurement.receiver_config?.if_bandwidth || 9000,
+        rf_attenuation: data.measurement.receiver_config?.rf_attenuation || 'Auto',
+        demodulation: data.measurement.receiver_config?.demodulation || null,
+        detector: data.measurement.receiver_config?.detector || 'Average',
+        measurement_time: data.measurement.receiver_config?.measurement_time || 5
+      },
+      antenna_config: {
+        antenna_name: data.measurement.antenna_config?.antenna_path || 'ANT1',
+        azimuth: data.measurement.antenna_config?.azimuth || 0,
+        elevation: data.measurement.antenna_config?.elevation || 0,
+        polarization: data.measurement.antenna_config?.polarization || 'V'
+      },
+      measured_parameters: data.measurement.measured_parameters || ['Level'],
+      alarm_configs: data.measurement.alarm_configs || [],
+      created_at: new Date().toISOString(),
+      created_by: null // Will be set by backend
+    };
+
+    // Create range definition
+    const rangeDefinition = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `range-${Date.now()}`,
+      system_path: data.range?.system_path || 'DEFAULT',
+      frequency_start: data.range?.frequency_start || 30000000,
+      frequency_end: data.range?.frequency_end || 3000000000,
+      created_at: new Date().toISOString(),
+      created_by: null
+    };
+
+    // Create general definition
+    const generalDefinition = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `general-${Date.now()}`,
+      result_config: {
+        graphic_type: data.general?.result_config?.graphic_type || 'yt_plot',
+        save_measurement_results: data.general?.result_config?.save_measurement_results !== false,
+        save_to_database: data.general?.result_config?.save_to_database !== false
+      },
+      created_at: new Date().toISOString(),
+      created_by: null
+    };
+
+    // Return the properly formatted data
+    return {
+      name: data.name || 'Unnamed AMM Configuration',
+      description: data.description || '',
+      timing_definition: timingDefinition,
+      measurement_definition: measurementDefinition,
+      range_definition: rangeDefinition,
+      general_definition: generalDefinition
+    };
+  };
+
   const handleCreateAMM = async () => {
     try {
-      await axios.post(`${API}/amm/configurations`, wizardData);
+      // Transform wizard data to backend format
+      const backendData = transformWizardDataToBackend(wizardData);
+      
+      console.log('Sending AMM data:', backendData);
+      
+      const response = await axios.post(`${API}/api/amm/configurations`, backendData);
+      
       toast.success('AMM configuration created successfully');
       setActiveTab('dashboard');
       setWizardStep(1);
+      
+      // Reset wizard data
+      setWizardData({
+        selected_station: null,
+        name: '',
+        description: '',
+        timing: {
+          schedule_type: 'always',
+          start_date: new Date().toISOString().split('T')[0],
+          start_time: '00:00:00',
+          end_date: new Date().toISOString().split('T')[0],
+          end_time: '23:59:59',
+          weekdays: {
+            monday: true, tuesday: true, wednesday: true,
+            thursday: true, friday: true, saturday: false, sunday: false
+          },
+          all_days: false,
+          interval_days: 1,
+          daily_start_time: '00:00:00',
+          daily_end_time: '23:59:59',
+          fragmentation_enabled: false,
+          fragmentation_interval: '00:00:00',
+          fragmentation_duration: '00:00:00',
+          fragmentation_count: 1,
+          continue_after_restart: true
+        },
+        measurement: {
+          measurement_type: 'FFM',
+          device_name: 'HE500-PR100-1',
+          station_names: ['Station_001'],
+          frequency_mode: 'S',
+          frequency_single: 100000000,
+          receiver_config: {
+            if_bandwidth: 9000,
+            rf_attenuation: 'Auto',
+            demodulation: 'FM',
+            detector: 'Average',
+            measurement_time: 5
+          },
+          antenna_config: {
+            antenna_path: 'ANT1',
+            azimuth: 0
+          },
+          measured_parameters: ['Level'],
+          alarm_configs: []
+        },
+        range: {
+          system_path: 'PATH1',
+          frequency_start: 30000000,
+          frequency_end: 3000000000
+        },
+        general: {
+          result_config: {
+            graphic_type: 'yt_plot',
+            save_measurement_results: true,
+            save_to_database: true
+          }
+        }
+      });
+      
       loadData();
     } catch (error) {
-      toast.error('Failed to create AMM configuration');
+      console.error('AMM creation error:', error);
+      
+      // Show detailed error message
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (Array.isArray(detail)) {
+          // Validation errors
+          const errors = detail.map(err => `${err.loc.join('.')}: ${err.msg}`).join(', ');
+          toast.error(`Validation error: ${errors}`);
+        } else {
+          toast.error(`Error: ${detail}`);
+        }
+      } else {
+        toast.error('Failed to create AMM configuration');
+      }
     }
   };
 
