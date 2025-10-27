@@ -456,8 +456,95 @@ class ArgusXMLProcessor:
                     state["offline_stations"] += 1
         
         return state
+
+    def _parse_system_parameters(self, root: ET.Element) -> Dict[str, Any]:
+        """Parse GSP (Get System Parameters) response to extract signal paths and device details"""
+        params = {
+            "signal_paths": [],
+            "devices": [],
+            "stations": [],
+            "parameter_type": "GSP"
+        }
         
-        return state
+        try:
+            # Find all MONSYS_STRUCTURE elements (monitoring system structure)
+            for monsys in root.findall(".//MONSYS_STRUCTURE"):
+                station_data = {}
+                
+                # Station information
+                station_pc_elem = monsys.find("MONSYS_PC")
+                if station_pc_elem is not None:
+                    station_data["pc"] = station_pc_elem.text
+                
+                station_name_elem = monsys.find("MONSYS_NAME")
+                if station_name_elem is not None:
+                    station_data["name"] = station_name_elem.text
+                
+                # Parse devices
+                devices = []
+                for device in monsys.findall(".//MONSYS_DEVICES"):
+                    device_data = {}
+                    
+                    # Device name
+                    dev_name_elem = device.find("NAME")
+                    if dev_name_elem is not None:
+                        device_data["name"] = dev_name_elem.text
+                    
+                    # Signal paths (system paths)
+                    signal_paths = []
+                    for sig_path in device.findall(".//SIGNAL_PATH"):
+                        path_data = {}
+                        
+                        # Signal path name (this is what we need for MSP_SIG_PATH!)
+                        path_name_elem = sig_path.find("PATH_NAME")
+                        if path_name_elem is not None:
+                            path_data["name"] = path_name_elem.text
+                        
+                        # Path type
+                        path_type_elem = sig_path.find("PATH_TYPE")
+                        if path_type_elem is not None:
+                            path_data["type"] = path_type_elem.text
+                        
+                        # Receiver type
+                        receiver_elem = sig_path.find("RECEIVER")
+                        if receiver_elem is not None:
+                            path_data["receiver"] = receiver_elem.text
+                        
+                        # Antenna
+                        antenna_elem = sig_path.find("ANTENNA")
+                        if antenna_elem is not None:
+                            path_data["antenna"] = antenna_elem.text
+                        
+                        # Frequency range
+                        freq_min_elem = sig_path.find("FREQ_MIN")
+                        freq_max_elem = sig_path.find("FREQ_MAX")
+                        if freq_min_elem is not None:
+                            path_data["freq_min"] = freq_min_elem.text
+                        if freq_max_elem is not None:
+                            path_data["freq_max"] = freq_max_elem.text
+                        
+                        signal_paths.append(path_data)
+                        params["signal_paths"].append({
+                            "station_pc": station_data.get("pc"),
+                            "device_name": device_data.get("name"),
+                            **path_data
+                        })
+                    
+                    device_data["signal_paths"] = signal_paths
+                    devices.append(device_data)
+                    params["devices"].append({
+                        "station_pc": station_data.get("pc"),
+                        **device_data
+                    })
+                
+                station_data["devices"] = devices
+                params["stations"].append(station_data)
+            
+            return params
+            
+        except Exception as e:
+            logger.error(f"Error parsing GSP response: {e}")
+            return params
 
     def _parse_measurement_data(self, measurement_data: List[ET.Element]) -> List[Dict[str, Any]]:
         """Parse measurement result data"""
