@@ -27,9 +27,12 @@ class ArgusXMLProcessor:
         (self.data_path / "measurement_results").mkdir(exist_ok=True)
 
     def generate_order_id(self, prefix: str = "GSS") -> str:
-        """Generate unique order ID in Argus format: PREFIX + DDMMYY + HHMMSS + XXX"""
+        """
+        Generate unique order ID in Argus format: PREFIX + YYMMDD + HHMMSSXXX
+        Example: OR210914162855677 (OR + 210914 + 162855677)
+        """
         now = datetime.now()
-        date_part = now.strftime("%d%m%y")  # DDMMYY format
+        date_part = now.strftime("%y%m%d")  # YYMMDD format (note: YY not DD first!)
         time_part = now.strftime("%H%M%S")  # HHMMSS format
         counter = now.strftime("%f")[:3]    # Milliseconds as 3-digit counter
         return f"{prefix}{date_part}{time_part}{counter}"
