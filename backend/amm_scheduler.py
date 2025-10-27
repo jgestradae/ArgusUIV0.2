@@ -336,8 +336,8 @@ class AMMScheduler:
             
         # Antenna configuration
         antenna = measurement_def.antenna_config
-        if antenna.antenna_name:
-            params["ant_port"] = antenna.antenna_name
+        if antenna.antenna_path:
+            params["ant_port"] = antenna.antenna_path
         else:
             params["ant_port"] = "P1"
         params["ant_mode"] = "FIX"
