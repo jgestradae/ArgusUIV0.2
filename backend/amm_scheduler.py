@@ -231,9 +231,33 @@ class AMMScheduler:
         params = {
             "name": f"AMM_{measurement_def.name}",
             "task": measurement_def.measurement_type.value,
-            "result_type": "MR",
-            "suborder_name": f"AMM_{order_id}"
+            "result_type": "CMR",  # Changed to CMR (Compressed Measurement Result)
+            "priority": "LOW",
+            "creator": "Extern"
         }
+        
+        # Station parameters - CRITICAL for ORM 4.2
+        if measurement_def.station_names and len(measurement_def.station_names) > 0:
+            # Use first station from the list
+            station_pc = measurement_def.station_names[0]
+            params["station_pc"] = station_pc
+            
+        # Signal path (system path) - ORM 4.2: Use MSP_SIG_PATH not device name
+        # The device_name should actually be the signal path (e.g., "ADD197+075-EB500 DF")
+        # For now, we'll construct a default signal path from device
+        if measurement_def.device_name:
+            # If device_name looks like a signal path (contains +, -, etc), use it directly
+            if any(char in measurement_def.device_name for char in ['+', '-', ' ']):
+                params["signal_path"] = measurement_def.device_name
+            else:
+                # Otherwise, construct a basic signal path
+                params["signal_path"] = f"{measurement_def.device_name}"
+        else:
+            params["signal_path"] = "ADD197+075-EB500 DF"  # Default
+            
+        # Station metadata
+        params["station_name"] = params.get("station_pc", "UMS300-100801")
+        params["station_type"] = "F"  # Fixed station
         
         # Frequency parameters
         params["freq_mode"] = measurement_def.frequency_mode
@@ -254,12 +278,31 @@ class AMMScheduler:
             params["if_bandwidth"] = receiver.if_bandwidth
         if receiver.rf_attenuation:
             params["rf_attenuation"] = receiver.rf_attenuation
+        else:
+            params["rf_attenuation"] = "Auto"
+            
         if receiver.demodulation:
-            params["demodulation"] = receiver.demodulation
+            params["demod"] = receiver.demodulation
+        else:
+            params["demod"] = "Off"
+            
         if receiver.measurement_time:
-            params["measurement_time"] = receiver.measurement_time
+            params["meas_time"] = receiver.measurement_time
+        else:
+            params["meas_time"] = -1
+            
         if receiver.detector:
             params["detect_type"] = receiver.detector
+        else:
+            params["detect_type"] = "Peak"
+            
+        # Additional MDT parameters with defaults
+        params["if_attenuation"] = "Normal"
+        params["preamplification"] = "Off"
+        params["mode"] = "Normal"
+        params["if_span"] = 250000
+        params["squelch"] = "Off"
+        params["hold_time"] = 0
             
         # Measurement data type
         if measurement_def.measured_parameters:
@@ -269,6 +312,29 @@ class AMMScheduler:
                 params["meas_data_type"] = "FM"
             elif "Bearing" in measurement_def.measured_parameters:
                 params["meas_data_type"] = "BE"
+        else:
+            params["meas_data_type"] = "LV"  # Default to Level
+            
+        # Antenna configuration
+        antenna = measurement_def.antenna_config
+        if antenna.antenna_name:
+            params["ant_port"] = antenna.antenna_name
+        else:
+            params["ant_port"] = "P1"
+        params["ant_mode"] = "FIX"
+        
+        # Time parameters
+        params["time_mode"] = "P"  # Periodic
+        params["start_time"] = datetime.now()
+        params["stop_time"] = datetime.now()
+        
+        # Location parameters (defaults for Colombia)
+        params["longitude"] = -77.264667
+        params["latitude"] = 1.201194
+        params["height"] = 600
+        
+        # Operator name
+        params["operator_name"] = "ArgusUI"
                 
         return params
         
