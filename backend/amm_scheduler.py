@@ -242,10 +242,11 @@ class AMMScheduler:
             station_pc = measurement_def.station_names[0]
             params["station_pc"] = station_pc
             
-        # Signal path (system path) - ORM 4.2: Use MSP_SIG_PATH not device name
-        # The device_name should actually be the signal path (e.g., "ADD197+075-EB500 DF")
-        # For now, we'll construct a default signal path from device
-        if measurement_def.device_name:
+        # Signal path (system path) - ORM 4.2: Use MSP_SIG_PATH
+        if measurement_def.signal_path:
+            # Use the signal_path directly from measurement definition
+            params["signal_path"] = measurement_def.signal_path
+        elif measurement_def.device_name:
             # If device_name looks like a signal path (contains +, -, etc), use it directly
             if any(char in measurement_def.device_name for char in ['+', '-', ' ']):
                 params["signal_path"] = measurement_def.device_name
