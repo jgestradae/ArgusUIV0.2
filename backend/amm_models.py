@@ -129,7 +129,8 @@ class MeasurementDefinition(BaseModel):
     measurement_type: MeasurementType
     
     # Device and Station
-    device_name: str
+    signal_path: Optional[str] = None  # MSP_SIG_PATH - System/Signal path (ORM 4.2)
+    device_name: str  # Kept for backwards compatibility
     station_names: List[str]
     
     # Frequency Configuration
