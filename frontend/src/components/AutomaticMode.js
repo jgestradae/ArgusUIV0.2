@@ -298,7 +298,8 @@ export default function AutomaticMode() {
       id: crypto.randomUUID ? crypto.randomUUID() : `measurement-${Date.now()}`,
       name: data.name || 'AMM Measurement',
       measurement_type: data.measurement.measurement_type,
-      device_name: data.measurement.device_name,
+      signal_path: data.measurement.signal_path || data.measurement.device_name, // Prioritize signal_path
+      device_name: data.measurement.device_name, // Keep for backwards compatibility
       station_names: data.selected_station ? [data.selected_station.pc] : data.measurement.station_names,
       frequency_mode: data.measurement.frequency_mode,
       frequency_single: data.measurement.frequency_single || null,
