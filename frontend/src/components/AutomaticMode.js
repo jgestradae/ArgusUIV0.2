@@ -185,9 +185,9 @@ export default function AutomaticMode() {
   const loadData = async () => {
     try {
       const [configsResponse, statsResponse, executionsResponse] = await Promise.all([
-        axios.get(`${API}/api/amm/configurations`),
-        axios.get(`${API}/api/amm/dashboard-stats`),
-        axios.get(`${API}/api/amm/executions?limit=20`)
+        axios.get(`${API}/amm/configurations`),
+        axios.get(`${API}/amm/dashboard-stats`),
+        axios.get(`${API}/amm/executions?limit=20`)
       ]);
       
       setAmmConfigs(configsResponse.data);
