@@ -170,7 +170,7 @@ export default function AutomaticMode() {
   const loadAvailableStations = async () => {
     setLoadingStations(true);
     try {
-      const response = await axios.get(`${API}/system/available-stations`);
+      const response = await axios.get(`${API}/api/system/available-stations`);
       if (response.data.success) {
         setAvailableStations(response.data.data.stations);
       }
