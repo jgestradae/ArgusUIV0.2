@@ -435,6 +435,56 @@ async def request_system_state(current_user: User = Depends(get_current_user)):
         )
         
     except Exception as e:
+        logger.error(f"Error sending GSS request: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to send GSS request: {str(e)}"
+        )
+
+@api_router.post("/system/request-gsp")
+async def request_system_parameters(current_user: User = Depends(get_current_user)):
+    """Manually request system parameters (GSP) from Argus to get signal paths and device details"""
+    try:
+        # Get control station configuration from environment
+        control_station = os.getenv("ARGUS_CONTROL_STATION", "HQ4")
+        sender_pc = os.getenv("ARGUS_SENDER_PC", "SRVARGUS")
+        
+        # Generate GSP request
+        order_id = xml_processor.generate_order_id("GSP")
+        xml_content = xml_processor.create_system_params_request(order_id, sender=control_station, sender_pc=sender_pc)
+        
+        # Save request
+        xml_file = xml_processor.save_request(xml_content, order_id)
+        
+        # Create order record
+        order = ArgusOrder(
+            order_id=order_id,
+            order_type=OrderType.GSP,
+            order_name="Manual System Parameters Query",
+            created_by=current_user.id,
+            xml_request_file=xml_file
+        )
+        await db.argus_orders.insert_one(order.dict())
+        
+        logger.info(f"Manual GSP request sent: {order_id}")
+        
+        return ApiResponse(
+            success=True,
+            message="GSP request sent to Argus. Response will be processed automatically and signal paths will be available.",
+            data={
+                "order_id": order_id,
+                "xml_file": xml_file
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error sending GSP request: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to send GSP request: {str(e)}"
+        )
+        
+    except Exception as e:
         logger.error(f"Error requesting system state: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
