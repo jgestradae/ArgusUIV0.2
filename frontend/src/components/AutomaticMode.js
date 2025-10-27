@@ -233,7 +233,7 @@ export default function AutomaticMode() {
 
   const handleStopAMM = async (configId) => {
     try {
-      await axios.post(`${API}/amm/configurations/${configId}/stop`);
+      await axios.post(`${API}/api/amm/configurations/${configId}/stop`);
       toast.success('AMM stopped successfully');
       loadData();
     } catch (error) {
