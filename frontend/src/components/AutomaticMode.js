@@ -338,7 +338,7 @@ export default function AutomaticMode() {
       
       console.log('Sending AMM data:', backendData);
       
-      const response = await axios.post(`${API}/api/amm/configurations`, backendData);
+      const response = await axios.post(`${API}/amm/configurations`, backendData);
       
       toast.success('AMM configuration created successfully');
       setActiveTab('dashboard');
