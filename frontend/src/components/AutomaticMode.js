@@ -246,7 +246,8 @@ export default function AutomaticMode() {
     // Create timing definition
     const timingDefinition = {
       id: crypto.randomUUID ? crypto.randomUUID() : `timing-${Date.now()}`,
-      schedule_type: data.timing.schedule_type.toUpperCase(), // Convert to uppercase
+      name: `${data.name || 'AMM'} Timing`, // ✅ Added name field
+      schedule_type: data.timing.schedule_type, // ✅ Keep lowercase, don't uppercase
       start_date: data.timing.start_date,
       start_time: data.timing.start_time,
       end_date: data.timing.end_date,
@@ -278,7 +279,7 @@ export default function AutomaticMode() {
       frequency_range_start: data.measurement.frequency_range_start || null,
       frequency_range_end: data.measurement.frequency_range_end || null,
       frequency_step: data.measurement.frequency_step || null,
-      frequency_list: data.measurement.frequency_list || null,
+      frequency_list: data.measurement.frequency_list || [], // ✅ Changed from null to empty array
       receiver_config: {
         if_bandwidth: data.measurement.receiver_config?.if_bandwidth || 9000,
         rf_attenuation: data.measurement.receiver_config?.rf_attenuation || 'Auto',
@@ -287,7 +288,7 @@ export default function AutomaticMode() {
         measurement_time: data.measurement.receiver_config?.measurement_time || 5
       },
       antenna_config: {
-        antenna_name: data.measurement.antenna_config?.antenna_path || 'ANT1',
+        antenna_path: data.measurement.antenna_config?.antenna_path || 'ANT1', // ✅ Changed from antenna_name to antenna_path
         azimuth: data.measurement.antenna_config?.azimuth || 0,
         elevation: data.measurement.antenna_config?.elevation || 0,
         polarization: data.measurement.antenna_config?.polarization || 'V'
@@ -301,6 +302,7 @@ export default function AutomaticMode() {
     // Create range definition
     const rangeDefinition = {
       id: crypto.randomUUID ? crypto.randomUUID() : `range-${Date.now()}`,
+      name: `${data.name || 'AMM'} Range`, // ✅ Added name field
       system_path: data.range?.system_path || 'DEFAULT',
       frequency_start: data.range?.frequency_start || 30000000,
       frequency_end: data.range?.frequency_end || 3000000000,
@@ -311,6 +313,7 @@ export default function AutomaticMode() {
     // Create general definition
     const generalDefinition = {
       id: crypto.randomUUID ? crypto.randomUUID() : `general-${Date.now()}`,
+      name: `${data.name || 'AMM'} General`, // ✅ Added name field
       result_config: {
         graphic_type: data.general?.result_config?.graphic_type || 'yt_plot',
         save_measurement_results: data.general?.result_config?.save_measurement_results !== false,
