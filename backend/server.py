@@ -136,6 +136,13 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Shutting down ArgusUI Backend...")
+    
+    # Stop AMM scheduler
+    if amm_scheduler:
+        await amm_scheduler.stop_scheduler()
+        logger.info("AMM Scheduler stopped")
+    
+    # Stop file watcher
     file_watcher.stop()
     client.close()
 
