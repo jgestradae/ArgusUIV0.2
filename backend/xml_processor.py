@@ -250,15 +250,18 @@ class ArgusXMLProcessor:
         """
         Save XML request to both data storage and Argus inbox
         
-        Filename format: PREFIX-DDMMYY-HHMMSSXXX-O.xml
-        Example: GSS-251025-182839822-O.xml
-        Where ORDER_ID inside XML is: GSS251025182839822 (no dashes, no suffix)
+        Filename format: PREFIX-YYMMDD-HHMMSSXXX-O.xml
+        Example: OR-210914-162855677-O.xml
+        Where ORDER_ID inside XML is: OR210914162855677 (no dashes, no suffix)
         """
         # Parse order_id to create proper filename
-        # order_id format: GSS251025182839822 (PREFIX + DDMMYY + HHMMSSXXX)
-        prefix = order_id[:3]  # GSS
-        date_part = order_id[3:9]  # 251025 (DDMMYY)
-        time_part = order_id[9:]  # 182839822 (HHMMSSXXX)
+        # order_id format: OR210914162855677 (PREFIX + YYMMDD + HHMMSSXXX)
+        prefix = order_id[:2] if order_id.startswith("OR") else order_id[:3]  # OR or GSS
+        remaining = order_id[len(prefix):]
+        
+        # Split remaining into date (6 digits) and time (9 digits)
+        date_part = remaining[:6]  # YYMMDD
+        time_part = remaining[6:]  # HHMMSSXXX
         
         # Create filename with dashes and -O suffix for outgoing
         filename = f"{prefix}-{date_part}-{time_part}-O.xml"
