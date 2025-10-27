@@ -110,12 +110,30 @@ class AMMScheduler:
     def _check_timing_conditions(self, timing_def: TimingDefinition, current_time: datetime, amm_config: AMMConfiguration) -> bool:
         """Check if timing conditions are met for execution"""
         
+        logger.debug(f"Checking timing for AMM {amm_config.id}: schedule_type={timing_def.schedule_type}")
+        
         if timing_def.schedule_type == ScheduleType.ALWAYS:
+            logger.debug("Schedule type ALWAYS - executing")
             return True
             
         elif timing_def.schedule_type == ScheduleType.SPAN:
             if timing_def.start_date and timing_def.end_date:
-                return timing_def.start_date <= current_time <= timing_def.end_date
+                # Convert to date-only comparison to check if within date range
+                current_date = current_time.date()
+                start_date = timing_def.start_date.date() if hasattr(timing_def.start_date, 'date') else timing_def.start_date
+                end_date = timing_def.end_date.date() if hasattr(timing_def.end_date, 'date') else timing_def.end_date
+                
+                in_date_range = start_date <= current_date <= end_date
+                logger.debug(f"SPAN check: {start_date} <= {current_date} <= {end_date} = {in_date_range}")
+                
+                # Also check time range if provided
+                if in_date_range and timing_def.start_time and timing_def.end_time:
+                    current_time_str = current_time.strftime("%H:%M:%S")
+                    in_time_range = timing_def.start_time <= current_time_str <= timing_def.end_time
+                    logger.debug(f"Time check: {timing_def.start_time} <= {current_time_str} <= {timing_def.end_time} = {in_time_range}")
+                    return in_time_range
+                    
+                return in_date_range
                 
         elif timing_def.schedule_type == ScheduleType.DAILY:
             if timing_def.start_time and timing_def.end_time:
