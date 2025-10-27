@@ -1099,30 +1099,74 @@ export default function AutomaticMode() {
                 )}
               </div>
               
-              {/* Device Selection - From Station's Devices */}
+              {/* Signal Path Selection (System Path) - ORM 4.2 MSP_SIG_PATH */}
               <div className="space-y-2">
-                <Label>Device</Label>
+                <Label className="flex items-center gap-2">
+                  <Target className="w-4 h-4" />
+                  Signal Path / System Path
+                  <span className="text-xs text-slate-400">(MSP_SIG_PATH)</span>
+                </Label>
                 <Select 
-                  value={wizardData.measurement.device_name}
+                  value={wizardData.measurement.signal_path || wizardData.measurement.device_name}
                   onValueChange={(value) => setWizardData(prev => ({
                     ...prev,
-                    measurement: { ...prev.measurement, device_name: value }
+                    measurement: { 
+                      ...prev.measurement, 
+                      signal_path: value,
+                      device_name: value // Keep for backwards compatibility
+                    }
                   }))}
                 >
                   <SelectTrigger className="input-spectrum">
-                    <SelectValue placeholder="Select device..." />
+                    <SelectValue placeholder="Select signal path..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {wizardData.selected_station?.devices?.map((device, index) => (
-                      <SelectItem key={index} value={device.name}>
-                        <div>
-                          <div className="font-medium">{device.name}</div>
-                          <div className="text-xs text-slate-400">{device.driver} • {device.state}</div>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    {wizardData.selected_station?.devices?.map((device, index) => {
+                      // Extract signal path from device
+                      // Format: "DeviceName+Port-Receiver" or similar
+                      const signalPath = device.system_path || device.signal_path || device.name;
+                      const displayName = signalPath;
+                      
+                      return (
+                        <SelectItem key={index} value={signalPath}>
+                          <div>
+                            <div className="font-medium">{displayName}</div>
+                            <div className="text-xs text-slate-400">
+                              {device.driver} • {device.state}
+                              {device.antenna_name && ` • Antenna: ${device.antenna_name}`}
+                            </div>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                    {/* Fallback options if no devices from station */}
+                    {(!wizardData.selected_station?.devices || wizardData.selected_station.devices.length === 0) && (
+                      <>
+                        <SelectItem value="ADD197+075-EB500 DF">
+                          <div>
+                            <div className="font-medium">ADD197+075-EB500 DF</div>
+                            <div className="text-xs text-slate-400">Default DF System</div>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="HE600-EB500 mon">
+                          <div>
+                            <div className="font-medium">HE600-EB500 mon</div>
+                            <div className="text-xs text-slate-400">Monitoring System</div>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Default_dBuV-EB500 m">
+                          <div>
+                            <div className="font-medium">Default_dBuV-EB500 m</div>
+                            <div className="text-xs text-slate-400">Default Measurement</div>
+                          </div>
+                        </SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-slate-400">
+                  Select the signal/system path from the monitoring station
+                </p>
               </div>
               
               {/* Frequency Configuration - Adaptive */}
