@@ -360,6 +360,10 @@ class ArgusXMLProcessor:
             if result.get("order_type") == "GSS":
                 result.update(self._parse_system_state(root))
             
+            # Parse system parameters responses (GSP)
+            if result.get("order_type") == "GSP":
+                result.update(self._parse_system_parameters(root))
+            
             # Parse measurement results
             measurement_data = root.findall(".//meas_data")
             if measurement_data:
