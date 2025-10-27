@@ -78,68 +78,165 @@ class ArgusXMLProcessor:
         return self._format_xml(root)
 
     def create_measurement_order(self, order_id: str, config: Dict[str, Any], 
-                               sender: str = "ArgusUI") -> str:
-        """Create measurement order XML (OR type with suborder)"""
-        root = ET.Element("order_def")
+                               sender: str = "HQ4", sender_pc: str = "SRVARGUS") -> str:
+        """
+        Create measurement order XML (OR type with suborder) matching ORM format
+        Based on ORM manual chapter 4.2 and actual XML examples
+        """
+        # Create root with proper namespace
+        root = ET.Element("XMLSchema1")
+        root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
         
-        # Order definition
-        ET.SubElement(root, "order_id").text = order_id
-        ET.SubElement(root, "order_type").text = "OR"
-        ET.SubElement(root, "order_name").text = config.get("name", "Measurement Order")
-        ET.SubElement(root, "order_sender").text = sender
-        ET.SubElement(root, "order_state").text = "Open"
-        ET.SubElement(root, "order_creator").text = "External"
-        ET.SubElement(root, "execution_type").text = "A"
-        ET.SubElement(root, "order_ver").text = "200"
+        # Order definition - UPPERCASE tags as per Argus standard
+        order_def = ET.SubElement(root, "ORDER_DEF")
+        ET.SubElement(order_def, "ORDER_ID").text = order_id
+        ET.SubElement(order_def, "ORDER_TYPE").text = "OR"
+        ET.SubElement(order_def, "ORDER_NAME").text = "ORM"
+        ET.SubElement(order_def, "ORDER_SENDER").text = sender
+        ET.SubElement(order_def, "ORDER_SENDER_PC").text = sender_pc
+        ET.SubElement(order_def, "ORDER_STATE").text = "Open"
+        ET.SubElement(order_def, "ORDER_CREATOR").text = config.get("creator", "Extern")
+        ET.SubElement(order_def, "ORDER_ADDRESSEE").text = ""
+        ET.SubElement(order_def, "ORDER_VER").text = "300"
+        ET.SubElement(order_def, "EXECUTION_TYPE").text = "A"
+        ET.SubElement(order_def, "RES_FILE_COMP").text = ""
+        ET.SubElement(order_def, "ORDER_CANCEL_TYPE").text = "NO"
         
         # Sub-order definition
-        sub_order = ET.SubElement(root, "sub_order_def")
-        ET.SubElement(sub_order, "suborder_name").text = config.get("suborder_name", "Measurement")
-        ET.SubElement(sub_order, "suborder_state").text = "Open"
-        ET.SubElement(sub_order, "suborder_task").text = config.get("task", "FFM")
-        ET.SubElement(sub_order, "result_type").text = config.get("result_type", "MR")
-        ET.SubElement(sub_order, "result_format").text = "XML"
+        sub_order = ET.SubElement(order_def, "SUB_ORDER_DEF")
+        ET.SubElement(sub_order, "SUBORDER_NAME").text = "ORM"
+        ET.SubElement(sub_order, "SUBORDER_STATE").text = "Open"
+        ET.SubElement(sub_order, "SUBORDER_TASK").text = config.get("task", "FLSCAN")
+        ET.SubElement(sub_order, "SUBORDER_PRIO").text = config.get("priority", "LOW")
+        ET.SubElement(sub_order, "RESULT_TYPE").text = config.get("result_type", "CMR")
+        ET.SubElement(sub_order, "RESULT_FORMAT").text = "BIN"
+        ET.SubElement(sub_order, "MEAS_RESULT_SAVE_LOCATION").text = "0"
+        ET.SubElement(sub_order, "RESULT_INFO").text = ""
         
         # ACT definition
-        act_def = ET.SubElement(sub_order, "act_def")
-        ET.SubElement(act_def, "acd_userstring").text = f"{order_id}_SUB"
+        act_def = ET.SubElement(sub_order, "ACT_DEF")
+        ET.SubElement(act_def, "ACD_USERSTRING").text = order_id
+        ET.SubElement(act_def, "ACD_ERR").text = ""
         
         # Frequency parameters
-        freq_param = ET.SubElement(sub_order, "freq_param")
-        freq_mode = config.get("freq_mode", "S")
-        ET.SubElement(freq_param, "freq_par_mode").text = freq_mode
+        freq_param = ET.SubElement(sub_order, "FREQ_PARAM")
+        freq_mode = config.get("freq_mode", "L")
+        ET.SubElement(freq_param, "FREQ_PAR_MODE").text = freq_mode
         
         if freq_mode == "S" and "freq_single" in config:
-            ET.SubElement(freq_param, "freq_par_s").text = str(config["freq_single"])
+            ET.SubElement(freq_param, "FREQ_PAR_S").text = str(config["freq_single"])
         elif freq_mode == "R":
             if "freq_range_low" in config:
-                ET.SubElement(freq_param, "freq_par_rg_l").text = str(config["freq_range_low"])
+                ET.SubElement(freq_param, "FREQ_PAR_RG_L").text = str(config["freq_range_low"])
             if "freq_range_high" in config:
-                ET.SubElement(freq_param, "freq_par_rg_u").text = str(config["freq_range_high"])
+                ET.SubElement(freq_param, "FREQ_PAR_RG_U").text = str(config["freq_range_high"])
             if "freq_step" in config:
-                ET.SubElement(freq_param, "freq_par_step").text = str(config["freq_step"])
+                ET.SubElement(freq_param, "FREQ_PAR_STEP").text = str(config["freq_step"])
         
         # Frequency list for L mode
         if freq_mode == "L" and "freq_list" in config:
+            freq_lst = ET.SubElement(sub_order, "FREQ_LST")
             for freq in config["freq_list"]:
-                freq_lst = ET.SubElement(sub_order, "freq_lst")
-                ET.SubElement(freq_lst, "freq").text = str(freq)
+                ET.SubElement(freq_lst, "FREQ").text = str(freq)
         
-        # Optional parameters
-        if "if_bandwidth" in config:
-            ET.SubElement(sub_order, "if_bandwidth").text = str(config["if_bandwidth"])
-        if "rf_attenuation" in config:
-            ET.SubElement(sub_order, "rf_attenuation").text = str(config["rf_attenuation"])
-        if "demodulation" in config:
-            ET.SubElement(sub_order, "demod").text = config["demodulation"]
+        # MDT (Measurement Data Type) parameters
+        mdt_param = ET.SubElement(sub_order, "MDT_PARAM")
+        ET.SubElement(mdt_param, "MEAS_DATA_TYPE").text = config.get("meas_data_type", "LV")
+        ET.SubElement(mdt_param, "LIMIT_CHECK_COUNT").text = str(config.get("limit_check_count", 1))
+        ET.SubElement(mdt_param, "FREQ_PAR_BWIDTH").text = str(config.get("if_bandwidth", 100000))
+        ET.SubElement(mdt_param, "RF_ATTENUATION").text = config.get("rf_attenuation", "Auto")
+        ET.SubElement(mdt_param, "IF_ATTENUATION").text = config.get("if_attenuation", "Normal")
+        ET.SubElement(mdt_param, "MEAS_TIME").text = str(config.get("meas_time", -1))
+        ET.SubElement(mdt_param, "DETECT_TYPE").text = config.get("detect_type", "Peak")
+        ET.SubElement(mdt_param, "DEMOD").text = config.get("demod", "Off")
+        ET.SubElement(mdt_param, "PREAMPLIFICATION").text = config.get("preamplification", "Off")
+        ET.SubElement(mdt_param, "MODE").text = config.get("mode", "Normal")
+        ET.SubElement(mdt_param, "DF_POL").text = ""
+        ET.SubElement(mdt_param, "IF_SPAN").text = str(config.get("if_span", 250000))
+        ET.SubElement(mdt_param, "SQUELCH").text = config.get("squelch", "Off")
+        ET.SubElement(mdt_param, "HOLD_TIME").text = str(config.get("hold_time", 0))
+        ET.SubElement(mdt_param, "DF_SPAN").text = "0"
+        ET.SubElement(mdt_param, "DF_STEP").text = "0"
+        ET.SubElement(mdt_param, "DF_ACT").text = ""
+        ET.SubElement(mdt_param, "IF_STEP").text = "0"
+        ET.SubElement(mdt_param, "FFT_MODE").text = ""
         
-        # Measurement parameters
-        if config.get("task") in ["FFM", "SCAN"]:
-            mdt_param = ET.SubElement(sub_order, "mdt_param")
-            ET.SubElement(mdt_param, "meas_data_type").text = config.get("meas_data_type", "LV")
-            if "measurement_time" in config:
-                ET.SubElement(mdt_param, "meas_time").text = str(config["measurement_time"])
-            ET.SubElement(mdt_param, "detect_type").text = config.get("detect_type", "Average")
+        # TDOA parameters (empty for now)
+        for i in range(1, 3):
+            ET.SubElement(mdt_param, f"TDOA_AOI_LONG_{i}").text = "0"
+            ET.SubElement(mdt_param, f"TDOA_AOI_LAT_{i}").text = "0"
+        ET.SubElement(mdt_param, "TDOA_HYPERBOL_CNT").text = "0"
+        ET.SubElement(mdt_param, "TDOA_SENSOR_PAIRS").text = "0"
+        ET.SubElement(mdt_param, "LIMIT_CHECK").text = "N"
+        
+        # Antenna settings
+        ant_set = ET.SubElement(sub_order, "ANT_SET")
+        ET.SubElement(ant_set, "ANT_MODE").text = config.get("ant_mode", "FIX")
+        ET.SubElement(ant_set, "ANT_PORT").text = config.get("ant_port", "P1")
+        
+        # Time parameters
+        time_param = ET.SubElement(sub_order, "TIME_PARAM")
+        ET.SubElement(time_param, "TIME_PAR_MODE").text = config.get("time_mode", "P")
+        
+        # Format datetime with timezone offset
+        start_time = config.get("start_time", datetime.now())
+        stop_time = config.get("stop_time", datetime.now())
+        
+        # Format: 2021-09-14T00:00:00-05:00
+        tz_offset = start_time.strftime("%z")
+        if not tz_offset:
+            tz_offset = "-05:00"  # Default Colombia timezone
+        else:
+            # Format +/-HHMM to +/-HH:MM
+            tz_offset = f"{tz_offset[:3]}:{tz_offset[3:]}"
+        
+        start_str = start_time.strftime(f"%Y-%m-%dT%H:%M:%S{tz_offset}")
+        stop_str = stop_time.strftime(f"%Y-%m-%dT%H:%M:%S{tz_offset}")
+        
+        ET.SubElement(time_param, "TIME_START").text = start_str
+        ET.SubElement(time_param, "TIME_STOP").text = stop_str
+        
+        # Time parameter list (periodic execution)
+        time_param_list = ET.SubElement(sub_order, "TIME_PARAM_LIST")
+        ET.SubElement(time_param_list, "TIME_PER_START").text = "1899-12-30T00:00:00-05:00"
+        ET.SubElement(time_param_list, "TIME_PER_STOP").text = "1899-12-30T23:59:59-05:00"
+        ET.SubElement(time_param_list, "TIME_DAYS").text = ""
+        ET.SubElement(time_param_list, "TIME_ABS_START_STOP").text = "false"
+        
+        # Measurement station parameters - CRITICAL: Use MSP_SIG_PATH (signal path) not device
+        meas_stat_param = ET.SubElement(sub_order, "MEAS_STAT_PARAM")
+        ET.SubElement(meas_stat_param, "MSP_RMC").text = sender
+        ET.SubElement(meas_stat_param, "MSP_RMC_PC").text = sender_pc
+        ET.SubElement(meas_stat_param, "MSP_ST_PC").text = config.get("station_pc", "pasto")
+        ET.SubElement(meas_stat_param, "MSP_ST_NAME").text = config.get("station_name", "UMS300-100801")
+        ET.SubElement(meas_stat_param, "MSP_ST_TYPE").text = config.get("station_type", "F")
+        # MSP_SIG_PATH is the SYSTEM PATH (e.g., "ADD197+075-EB500 DF") - ORM 4.2
+        ET.SubElement(meas_stat_param, "MSP_SIG_PATH").text = config.get("signal_path", "ADD197+075-EB500 DF")
+        
+        # Measurement location parameters
+        meas_loc_param = ET.SubElement(sub_order, "MEAS_LOC_PARAM")
+        ET.SubElement(meas_loc_param, "MLP_LONG").text = str(config.get("longitude", -77.264667))
+        ET.SubElement(meas_loc_param, "MLP_LAT").text = str(config.get("latitude", 1.201194))
+        ET.SubElement(meas_loc_param, "MLP_HEIGHT").text = str(config.get("height", 600))
+        ET.SubElement(meas_loc_param, "MLP_ALTI").text = "0"
+        
+        # Measurement preparation parameters
+        meas_prep_param = ET.SubElement(sub_order, "MEAS_PREP_PARAM")
+        ET.SubElement(meas_prep_param, "MPP_AVE_TIME").text = "0"
+        ET.SubElement(meas_prep_param, "MPP_ALARM").text = "0"
+        ET.SubElement(meas_prep_param, "MPP_OCC_THRES").text = "0"
+        
+        # Request measurement parameters
+        req_meas_param = ET.SubElement(sub_order, "REQ_MEAS_PARAM")
+        ET.SubElement(req_meas_param, "RMP_O_NAME").text = config.get("operator_name", "demo")
+        
+        # Order state
+        or_state = ET.SubElement(sub_order, "OR_STATE")
+        ET.SubElement(or_state, "SO_STATE").text = "Q"
+        ET.SubElement(or_state, "SO_START_TIME").text = "1600-12-31T19:00:00-05:00"
+        ET.SubElement(or_state, "SO_STOP_TIME").text = "1600-12-31T19:00:00-05:00"
+        current_time_str = datetime.now().strftime(f"%Y-%m-%dT%H:%M:%S.%f{tz_offset}")
+        ET.SubElement(or_state, "SO_CURRENT_TIME").text = current_time_str
         
         return self._format_xml(root)
 
