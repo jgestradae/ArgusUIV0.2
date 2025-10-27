@@ -223,7 +223,7 @@ export default function AutomaticMode() {
 
   const handleStartAMM = async (configId) => {
     try {
-      await axios.post(`${API}/amm/configurations/${configId}/start`);
+      await axios.post(`${API}/api/amm/configurations/${configId}/start`);
       toast.success('AMM started successfully');
       loadData();
     } catch (error) {
