@@ -107,10 +107,10 @@ class ArgusXMLProcessor:
         # Use the actual order name from config
         ET.SubElement(sub_order, "SUBORDER_NAME").text = config.get("name", config.get("order_name", "ORM"))
         ET.SubElement(sub_order, "SUBORDER_STATE").text = "In Process"
-        ET.SubElement(sub_order, "SUBORDER_TASK").text = config.get("task", "FLSCAN")
+        ET.SubElement(sub_order, "SUBORDER_TASK").text = config.get("measurement_type", config.get("task", "FFM"))
         ET.SubElement(sub_order, "SUBORDER_PRIO").text = config.get("priority", "LOW")
-        ET.SubElement(sub_order, "RESULT_TYPE").text = config.get("result_type", "CMR")
-        ET.SubElement(sub_order, "RESULT_FORMAT").text = "BIN"
+        ET.SubElement(sub_order, "RESULT_TYPE").text = config.get("result_type", "MR")
+        ET.SubElement(sub_order, "RESULT_FORMAT").text = "XML"  # Always XML for compatibility
         ET.SubElement(sub_order, "MEAS_RESULT_SAVE_LOCATION").text = "0"
         ET.SubElement(sub_order, "RESULT_INFO").text = ""
         
