@@ -203,8 +203,19 @@ def create_amm_router(db: AsyncIOMotorDatabase, scheduler: AMMScheduler) -> APIR
         config_data: AMMConfigurationCreate,
         current_user: User = Depends(get_current_user)
     ):
-        """Create new AMM configuration"""
-        return await service.create_amm_configuration(config_data, current_user.id)
+        """Create new AMM configuration and immediately generate XML order"""
+        # Create the configuration
+        config = await service.create_amm_configuration(config_data, current_user.id)
+        
+        # Immediately generate and send XML order to inbox
+        try:
+            await scheduler._execute_amm(config)
+            logger.info(f"AMM XML generated immediately for config: {config.id}")
+        except Exception as e:
+            logger.error(f"Error generating immediate AMM XML: {e}")
+            # Don't fail the creation, just log the error
+        
+        return config
     
     @router.get("/api/amm/configurations/{config_id}", response_model=AMMConfiguration)
     async def get_amm_configuration(
