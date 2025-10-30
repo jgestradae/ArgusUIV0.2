@@ -205,12 +205,18 @@ def main():
     
     tester = ArgusAPITester()
     
-    # Test sequence
+    # Test sequence - focusing on GSP and AMM functionality as requested
     tests = [
         ("Health Check", tester.test_health_check),
         ("Login", tester.test_login),
         ("Get Current User", tester.test_get_current_user),
         ("System Status", tester.test_system_status),
+        ("Request GSP", tester.test_request_gsp),
+        ("Get Signal Paths", tester.test_get_signal_paths),
+        ("AMM Dashboard Stats", tester.test_amm_dashboard_stats),
+        ("Get AMM Configurations", tester.test_get_amm_configurations),
+        ("Execute AMM Now", tester.test_execute_amm_now),
+        ("Check XML Files in Inbox", tester.check_xml_files_in_inbox),
         ("System Parameters", tester.test_system_parameters),
         ("Measurement Orders", tester.test_measurement_orders),
         ("Direct Measurement", tester.test_direct_measurement),
