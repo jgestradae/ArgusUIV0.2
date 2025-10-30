@@ -72,6 +72,8 @@ export default function AutomaticMode() {
   const [wizardStep, setWizardStep] = useState(1);
   const [availableStations, setAvailableStations] = useState([]);
   const [loadingStations, setLoadingStations] = useState(false);
+  const [signalPaths, setSignalPaths] = useState([]);
+  const [loadingSignalPaths, setLoadingSignalPaths] = useState(false);
   const [wizardData, setWizardData] = useState({
     // Station Selection (New Step 1)
     selected_station: null,
