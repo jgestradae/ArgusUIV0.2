@@ -116,6 +116,12 @@ async def lifespan(app: FastAPI):
     amm_scheduler = AMMScheduler(db, xml_processor)
     logger.info("AMM Scheduler initialized")
     
+    # Create and include AMM router now that scheduler is available
+    global amm_router
+    amm_router = create_amm_router(db, amm_scheduler)
+    app.include_router(amm_router)
+    logger.info("AMM Router initialized and included")
+    
     # Start AMM scheduler
     await amm_scheduler.start_scheduler()
     logger.info("AMM Scheduler started")
