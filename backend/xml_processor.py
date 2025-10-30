@@ -94,8 +94,8 @@ class ArgusXMLProcessor:
         ET.SubElement(order_def, "ORDER_NAME").text = "ORM"
         ET.SubElement(order_def, "ORDER_SENDER").text = sender
         ET.SubElement(order_def, "ORDER_SENDER_PC").text = sender_pc
-        ET.SubElement(order_def, "ORDER_STATE").text = "Open"
-        ET.SubElement(order_def, "ORDER_CREATOR").text = config.get("creator", "Extern")
+        ET.SubElement(order_def, "ORDER_STATE").text = "In Process"
+        ET.SubElement(order_def, "ORDER_CREATOR").text = "Intern"  # Always "Intern" for AMM
         ET.SubElement(order_def, "ORDER_ADDRESSEE").text = ""
         ET.SubElement(order_def, "ORDER_VER").text = "300"
         ET.SubElement(order_def, "EXECUTION_TYPE").text = "A"
@@ -104,8 +104,9 @@ class ArgusXMLProcessor:
         
         # Sub-order definition
         sub_order = ET.SubElement(order_def, "SUB_ORDER_DEF")
-        ET.SubElement(sub_order, "SUBORDER_NAME").text = "ORM"
-        ET.SubElement(sub_order, "SUBORDER_STATE").text = "Open"
+        # Use the actual order name from config
+        ET.SubElement(sub_order, "SUBORDER_NAME").text = config.get("name", config.get("order_name", "ORM"))
+        ET.SubElement(sub_order, "SUBORDER_STATE").text = "In Process"
         ET.SubElement(sub_order, "SUBORDER_TASK").text = config.get("task", "FLSCAN")
         ET.SubElement(sub_order, "SUBORDER_PRIO").text = config.get("priority", "LOW")
         ET.SubElement(sub_order, "RESULT_TYPE").text = config.get("result_type", "CMR")
