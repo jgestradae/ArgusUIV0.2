@@ -170,10 +170,9 @@ class ArgusXMLProcessor:
         ET.SubElement(mdt_param, "TDOA_SENSOR_PAIRS").text = "0"
         ET.SubElement(mdt_param, "LIMIT_CHECK").text = "N"
         
-        # Antenna settings
+        # Antenna settings (no ANT_PORT in actual Argus format)
         ant_set = ET.SubElement(sub_order, "ANT_SET")
         ET.SubElement(ant_set, "ANT_MODE").text = config.get("ant_mode", "FIX")
-        ET.SubElement(ant_set, "ANT_PORT").text = config.get("ant_port", "P1")
         
         # Time parameters
         time_param = ET.SubElement(sub_order, "TIME_PARAM")
