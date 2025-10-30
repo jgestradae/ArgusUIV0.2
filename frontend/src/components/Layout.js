@@ -41,6 +41,12 @@ export default function Layout({ children }) {
       description: 'Live Argus monitoring'
     },
     {
+      name: 'System Parameters',
+      path: '/system-parameters',
+      icon: Server,
+      description: 'Signal paths & device config'
+    },
+    {
       name: 'Geolocation',
       path: '/geolocation',
       icon: Map,
