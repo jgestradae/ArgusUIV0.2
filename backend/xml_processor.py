@@ -461,89 +461,158 @@ class ArgusXMLProcessor:
         """Parse GSP (Get System Parameters) response to extract signal paths and device details"""
         params = {
             "signal_paths": [],
-            "devices": [],
             "stations": [],
             "parameter_type": "GSP"
         }
         
         try:
-            # Find all MONSYS_STRUCTURE elements (monitoring system structure)
+            # Find all MONSYS_STRUCTURE elements (one per station)
             for monsys in root.findall(".//MONSYS_STRUCTURE"):
                 station_data = {}
                 
-                # Station information
-                station_pc_elem = monsys.find("MONSYS_PC")
-                if station_pc_elem is not None:
-                    station_data["pc"] = station_pc_elem.text
+                # Extract station information
+                station_name_elem = monsys.find("MSS_ST_NAME")
+                if station_name_elem is None:
+                    continue  # Skip if no station name
+                    
+                station_data["name"] = station_name_elem.text
+                station_data["rmc"] = monsys.find("MSS_RMC").text if monsys.find("MSS_RMC") is not None else ""
+                station_data["rmc_pc"] = monsys.find("MSS_RMC_PC").text if monsys.find("MSS_RMC_PC") is not None else ""
+                station_data["type"] = monsys.find("MSS_ST_TYPE").text if monsys.find("MSS_ST_TYPE") is not None else "F"
                 
-                station_name_elem = monsys.find("MONSYS_NAME")
-                if station_name_elem is not None:
-                    station_data["name"] = station_name_elem.text
+                # Extract coordinates
+                long_elem = monsys.find("MSS_LONG")
+                lat_elem = monsys.find("MSS_LAT")
+                station_data["longitude"] = float(long_elem.text) if long_elem is not None and long_elem.text else 0.0
+                station_data["latitude"] = float(lat_elem.text) if lat_elem is not None and lat_elem.text else 0.0
                 
-                # Parse devices
-                devices = []
-                for device in monsys.findall(".//MONSYS_DEVICES"):
-                    device_data = {}
+                # Parse signal paths (MSS_PATHS elements)
+                signal_paths = []
+                for path in monsys.findall("MSS_PATHS"):
+                    path_data = {}
                     
-                    # Device name
-                    dev_name_elem = device.find("NAME")
-                    if dev_name_elem is not None:
-                        device_data["name"] = dev_name_elem.text
+                    # Signal path name - THIS IS THE KEY FIELD for MSP_SIG_PATH
+                    path_name_elem = path.find("MP_NAME")
+                    if path_name_elem is None:
+                        continue
                     
-                    # Signal paths (system paths)
-                    signal_paths = []
-                    for sig_path in device.findall(".//SIGNAL_PATH"):
-                        path_data = {}
-                        
-                        # Signal path name (this is what we need for MSP_SIG_PATH!)
-                        path_name_elem = sig_path.find("PATH_NAME")
-                        if path_name_elem is not None:
-                            path_data["name"] = path_name_elem.text
-                        
-                        # Path type
-                        path_type_elem = sig_path.find("PATH_TYPE")
-                        if path_type_elem is not None:
-                            path_data["type"] = path_type_elem.text
-                        
-                        # Receiver type
-                        receiver_elem = sig_path.find("RECEIVER")
-                        if receiver_elem is not None:
-                            path_data["receiver"] = receiver_elem.text
-                        
-                        # Antenna
-                        antenna_elem = sig_path.find("ANTENNA")
-                        if antenna_elem is not None:
-                            path_data["antenna"] = antenna_elem.text
-                        
-                        # Frequency range
-                        freq_min_elem = sig_path.find("FREQ_MIN")
-                        freq_max_elem = sig_path.find("FREQ_MAX")
-                        if freq_min_elem is not None:
-                            path_data["freq_min"] = freq_min_elem.text
-                        if freq_max_elem is not None:
-                            path_data["freq_max"] = freq_max_elem.text
-                        
-                        signal_paths.append(path_data)
-                        params["signal_paths"].append({
-                            "station_pc": station_data.get("pc"),
-                            "device_name": device_data.get("name"),
-                            **path_data
-                        })
+                    path_data["name"] = path_name_elem.text
+                    path_data["station"] = station_data["name"]
                     
-                    device_data["signal_paths"] = signal_paths
-                    devices.append(device_data)
-                    params["devices"].append({
-                        "station_pc": station_data.get("pc"),
-                        **device_data
+                    # Frequency range
+                    freq_l_elem = path.find("MP_FR_L")
+                    freq_u_elem = path.find("MP_FR_U")
+                    path_data["freq_min"] = int(freq_l_elem.text) if freq_l_elem is not None and freq_l_elem.text else 0
+                    path_data["freq_max"] = int(freq_u_elem.text) if freq_u_elem is not None and freq_u_elem.text else 0
+                    
+                    # Parse all devices in this path
+                    devices = []
+                    for mp_dev in path.findall("MP_DEV"):
+                        device_data = {}
+                        
+                        # Device name and driver
+                        dev_name_elem = mp_dev.find("D_NAME")
+                        dev_driver_elem = mp_dev.find("D_DRIVER")
+                        
+                        if dev_name_elem is not None:
+                            device_data["name"] = dev_name_elem.text
+                            device_data["driver"] = dev_driver_elem.text if dev_driver_elem is not None else ""
+                            
+                            # Extract device capabilities
+                            # Detectors
+                            detectors = [det.text for det in mp_dev.findall("D_DET") if det.text]
+                            if detectors:
+                                device_data["detectors"] = detectors
+                            
+                            # IF Bandwidth options
+                            if_bw = [bw.text for bw in mp_dev.findall("D_IFBW") if bw.text]
+                            if if_bw:
+                                device_data["if_bandwidth"] = if_bw
+                            
+                            # RF Attenuator options
+                            rf_attn = [attn.text for attn in mp_dev.findall("D_RFATTN") if attn.text]
+                            if rf_attn:
+                                device_data["rf_attenuator"] = rf_attn
+                            
+                            # IF Attenuator options
+                            if_attn = [attn.text for attn in mp_dev.findall("D_IFATTN") if attn.text]
+                            if if_attn:
+                                device_data["if_attenuator"] = if_attn
+                            
+                            # Demodulation modes
+                            demod = [dm.text for dm in mp_dev.findall("D_DEMOD") if dm.text]
+                            if demod:
+                                device_data["demodulation"] = demod
+                            
+                            # Measurement parameters
+                            mparams = [mp.text for mp in mp_dev.findall("D_MPARAM") if mp.text]
+                            if mparams:
+                                device_data["measurement_params"] = mparams
+                            
+                            # Measurement time range
+                            mtimes = [mt.text for mt in mp_dev.findall("D_MTIME") if mt.text]
+                            if mtimes:
+                                device_data["measurement_time_range"] = mtimes
+                            
+                            # Measurement modes
+                            modes = [m.text for m in mp_dev.findall("D_MODE") if m.text]
+                            if modes:
+                                device_data["measurement_modes"] = modes
+                            
+                            # IF Span options
+                            if_span = [sp.text for sp in mp_dev.findall("D_IFSPAN") if sp.text]
+                            if if_span:
+                                device_data["if_span"] = if_span
+                            
+                            # DF Bandwidth (for direction finding capable devices)
+                            df_bw = [bw.text for bw in mp_dev.findall("D_DFBW") if bw.text]
+                            if df_bw:
+                                device_data["df_bandwidth"] = df_bw
+                            
+                            # DF Time
+                            df_time = [t.text for t in mp_dev.findall("D_DFTIME") if t.text]
+                            if df_time:
+                                device_data["df_time"] = df_time
+                            
+                            # Antenna parameters (for antenna devices)
+                            azi_elems = mp_dev.findall("D_AZI")
+                            if azi_elems:
+                                device_data["azimuth"] = [az.text for az in azi_elems if az.text]
+                            
+                            ele_elems = mp_dev.findall("D_ELE")
+                            if ele_elems:
+                                device_data["elevation"] = [el.text for el in ele_elems if el.text]
+                            
+                            hgt_elems = mp_dev.findall("D_HGT")
+                            if hgt_elems:
+                                device_data["height"] = [h.text for h in hgt_elems if h.text]
+                            
+                            pol_elem = mp_dev.find("D_POL")
+                            if pol_elem is not None:
+                                device_data["polarization"] = pol_elem.text if pol_elem.text else ""
+                            
+                            devices.append(device_data)
+                    
+                    path_data["devices"] = devices
+                    signal_paths.append(path_data)
+                    
+                    # Add to global list with station context
+                    params["signal_paths"].append({
+                        "station": station_data["name"],
+                        "station_rmc": station_data["rmc"],
+                        "station_pc": station_data["rmc_pc"],
+                        **path_data
                     })
                 
-                station_data["devices"] = devices
+                station_data["signal_paths"] = signal_paths
+                station_data["signal_path_count"] = len(signal_paths)
                 params["stations"].append(station_data)
             
+            logger.info(f"Parsed {len(params['stations'])} stations with {len(params['signal_paths'])} total signal paths")
             return params
             
         except Exception as e:
-            logger.error(f"Error parsing GSP response: {e}")
+            logger.error(f"Error parsing GSP response: {e}", exc_info=True)
             return params
 
     def _parse_measurement_data(self, measurement_data: List[ET.Element]) -> List[Dict[str, Any]]:
