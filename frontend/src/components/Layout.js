@@ -16,7 +16,8 @@ import {
   Shield,
   Database,
   Clock,
-  Map
+  Map,
+  Server
 } from 'lucide-react';
 import { toast } from 'sonner';
 
