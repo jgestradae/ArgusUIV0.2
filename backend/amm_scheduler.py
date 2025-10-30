@@ -268,6 +268,12 @@ class AMMScheduler:
             if timing_def.end_time:
                 params["daily_end_time"] = timing_def.end_time
         
+        # Result type configuration (ORM 4.1)
+        if measurement_def.result_type:
+            params["result_type"] = measurement_def.result_type
+        else:
+            params["result_type"] = "MR"  # Default to Measurement Result
+        
         # Station parameters - CRITICAL for ORM 4.2
         if measurement_def.station_names and len(measurement_def.station_names) > 0:
             # Use first station from the list
