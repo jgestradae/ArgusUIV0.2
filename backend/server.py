@@ -852,6 +852,153 @@ async def process_xml_responses(admin_user: User = Depends(require_admin)):
             detail=f"Failed to process responses: {str(e)}"
         )
 
+
+# ============================================================================
+# MEASUREMENT RESULTS ENDPOINTS (New - with CSV extraction)
+# ============================================================================
+
+@api_router.get("/measurement-results")
+async def get_measurement_results(
+    skip: int = 0,
+    limit: int = 50,
+    station_name: Optional[str] = None,
+    measurement_type: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get measurement results with filtering"""
+    try:
+        # Build query
+        query = {}
+        
+        if station_name:
+            query["station_name"] = {"$regex": station_name, "$options": "i"}
+        
+        if measurement_type:
+            query["measurement_type"] = measurement_type
+        
+        if start_date:
+            query["measurement_start"] = {"$gte": datetime.fromisoformat(start_date)}
+        
+        if end_date:
+            if "measurement_start" in query:
+                query["measurement_start"]["$lte"] = datetime.fromisoformat(end_date)
+            else:
+                query["measurement_start"] = {"$lte": datetime.fromisoformat(end_date)}
+        
+        # Get total count
+        total = await db.measurement_results.count_documents(query)
+        
+        # Get results
+        cursor = db.measurement_results.find(query).sort("measurement_start", -1).skip(skip).limit(limit)
+        results = await cursor.to_list(length=limit)
+        
+        return ApiResponse(
+            success=True,
+            message=f"Found {len(results)} measurement results (total: {total})",
+            data={
+                "results": results,
+                "total": total,
+                "skip": skip,
+                "limit": limit
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting measurement results: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get measurement results: {str(e)}"
+        )
+
+@api_router.get("/measurement-results/{result_id}")
+async def get_measurement_result_detail(
+    result_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Get detailed measurement result with CSV data"""
+    try:
+        result = await db.measurement_results.find_one({"id": result_id})
+        
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Measurement result not found"
+            )
+        
+        # Read CSV data if available
+        csv_data = []
+        if result.get("csv_file_path") and os.path.exists(result["csv_file_path"]):
+            import csv
+            with open(result["csv_file_path"], 'r', encoding='utf-8') as csvfile:
+                reader = csv.DictReader(csvfile)
+                csv_data = list(reader)
+        
+        # Read XML if needed
+        xml_content = None
+        if result.get("xml_file_path") and os.path.exists(result["xml_file_path"]):
+            with open(result["xml_file_path"], 'r', encoding='utf-8') as xmlfile:
+                xml_content = xmlfile.read()
+        
+        return ApiResponse(
+            success=True,
+            message="Measurement result retrieved",
+            data={
+                "metadata": result,
+                "csv_data": csv_data,
+                "xml_content": xml_content
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting measurement result detail: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get measurement result: {str(e)}"
+        )
+
+@api_router.get("/measurement-results/{result_id}/csv")
+async def download_measurement_csv(
+    result_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Download CSV data for a measurement result"""
+    from fastapi.responses import FileResponse
+    
+    try:
+        result = await db.measurement_results.find_one({"id": result_id})
+        
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Measurement result not found"
+            )
+        
+        csv_path = result.get("csv_file_path")
+        if not csv_path or not os.path.exists(csv_path):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="CSV file not found"
+            )
+        
+        return FileResponse(
+            csv_path,
+            media_type="text/csv",
+            filename=f"{result['order_id']}_data.csv"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error downloading CSV: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to download CSV: {str(e)}"
+        )
+
 # ============================================================================
 # MEASUREMENT VISUALIZATION ENDPOINTS
 # ============================================================================
