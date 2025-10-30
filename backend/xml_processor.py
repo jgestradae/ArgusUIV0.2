@@ -198,10 +198,13 @@ class ArgusXMLProcessor:
         
         # Time parameter list (periodic execution)
         time_param_list = ET.SubElement(sub_order, "TIME_PARAM_LIST")
-        ET.SubElement(time_param_list, "TIME_PER_START").text = "1899-12-30T00:00:00-05:00"
-        ET.SubElement(time_param_list, "TIME_PER_STOP").text = "1899-12-30T23:59:59-05:00"
+        # Use actual periodic times from config if available
+        per_start = config.get("daily_start_time", "00:00:00")
+        per_stop = config.get("daily_end_time", "23:59:59")
+        ET.SubElement(time_param_list, "TIME_PER_START").text = f"1899-12-30T{per_start}-05:00"
+        ET.SubElement(time_param_list, "TIME_PER_STOP").text = f"1899-12-30T{per_stop}-05:00"
         ET.SubElement(time_param_list, "TIME_DAYS").text = ""
-        ET.SubElement(time_param_list, "TIME_ABS_START_STOP").text = "false"
+        ET.SubElement(time_param_list, "TIME_ABS_START_STOP").text = "true"
         
         # Measurement station parameters - CRITICAL: Use MSP_SIG_PATH (signal path) not device
         meas_stat_param = ET.SubElement(sub_order, "MEAS_STAT_PARAM")
