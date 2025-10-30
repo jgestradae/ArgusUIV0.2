@@ -198,6 +198,33 @@ backend:
           agent: "testing"
           comment: "System status endpoint working correctly. Health check endpoint responding properly."
 
+  - task: "GSP File Watcher Processing"
+    implemented: true
+    working: false
+    file: "backend/file_watcher.py"
+    stuck_count: 1
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "File watcher detects GSP response files but has asyncio event loop issue: 'RuntimeError: no running event loop' when trying to create async tasks from watchdog thread. Manual processing works correctly, confirming XML parsing and MongoDB storage functionality. Issue: asyncio.create_task() called from non-async thread context."
+
+  - task: "System Parameters Endpoint"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "Duplicate endpoint definitions caused conflict - two @api_router.get('/system/parameters') endpoints."
+        - working: true
+          agent: "testing"
+          comment: "FIXED: Renamed first endpoint to POST /system/request-parameters. GET /api/system/parameters now correctly returns GSP data from MongoDB with 2 stations and 3 signal paths. Endpoint working perfectly for AMM wizard integration."
+
 frontend:
   # No frontend testing performed as per instructions
 
