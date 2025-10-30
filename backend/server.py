@@ -126,9 +126,10 @@ async def lifespan(app: FastAPI):
     await amm_scheduler.start_scheduler()
     logger.info("AMM Scheduler started")
     
-    # Initialize File Watcher for outbox monitoring
+    # Initialize File Watcher for outbox monitoring with event loop
     from file_watcher import ArgusFileWatcher
-    file_watcher = ArgusFileWatcher(outbox_path, xml_processor, db)
+    loop = asyncio.get_event_loop()
+    file_watcher = ArgusFileWatcher(outbox_path, xml_processor, db, loop)
     file_watcher.start()
     logger.info("File watcher started for outbox monitoring")
     
