@@ -283,4 +283,30 @@ def create_amm_router(db: AsyncIOMotorDatabase, scheduler: AMMScheduler) -> APIR
         await scheduler.stop_scheduler()
         return {"success": True, "message": "AMM scheduler stopped"}
     
+    @router.post("/api/amm/configurations/{config_id}/execute-now")
+    async def execute_amm_now(
+        config_id: str,
+        current_user: User = Depends(get_current_user)
+    ):
+        """Manually trigger immediate execution of an AMM configuration (for testing)"""
+        config_data = await db.amm_configurations.find_one({"id": config_id})
+        if not config_data:
+            raise HTTPException(status_code=404, detail="AMM configuration not found")
+        
+        config = AMMConfiguration(**config_data)
+        
+        try:
+            # Execute immediately regardless of schedule
+            await scheduler._execute_amm(config)
+            return {
+                "success": True, 
+                "message": f"AMM '{config.name}' execution triggered. Check inbox folder for generated XML."
+            }
+        except Exception as e:
+            logger.error(f"Error manually executing AMM: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to execute AMM: {str(e)}"
+            )
+    
     return router
