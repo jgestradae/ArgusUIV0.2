@@ -691,3 +691,173 @@ class ArgusXMLProcessor:
             })
         
         return base_response
+
+    def parse_measurement_result(self, xml_file_path: str) -> Dict[str, Any]:
+        """
+        Parse measurement result XML and extract data to CSV format
+        Returns metadata and path to CSV file
+        """
+        import csv
+        
+        try:
+            tree = ET.parse(xml_file_path)
+            root = tree.getroot()
+            
+            result = {
+                "xml_file_path": xml_file_path,
+                "timestamp": datetime.now()
+            }
+            
+            # Extract order information
+            order_def = root.find(".//ORDER_DEF")
+            if order_def is not None:
+                order_id_elem = order_def.find("ORDER_ID")
+                if order_id_elem is not None:
+                    result["order_id"] = order_id_elem.text
+                
+                order_type_elem = order_def.find("ORDER_TYPE")
+                if order_type_elem is not None:
+                    result["order_type"] = order_type_elem.text
+                
+                order_state_elem = order_def.find("ORDER_STATE")
+                if order_state_elem is not None:
+                    result["status"] = order_state_elem.text
+            
+            # Extract sub-order information
+            sub_order = root.find(".//SUB_ORDER_DEF")
+            if sub_order is not None:
+                task_elem = sub_order.find("SUBORDER_TASK")
+                if task_elem is not None:
+                    result["measurement_type"] = task_elem.text
+                
+                result_type_elem = sub_order.find("RESULT_TYPE")
+                if result_type_elem is not None:
+                    result["result_type"] = result_type_elem.text
+                
+                # Extract frequency parameters
+                freq_param = sub_order.find("FREQ_PARAM")
+                if freq_param is not None:
+                    freq_mode = freq_param.find("FREQ_PAR_MODE")
+                    if freq_mode is not None and freq_mode.text == "S":
+                        freq_single = freq_param.find("FREQ_PAR_S")
+                        if freq_single is not None:
+                            result["frequency_single"] = int(freq_single.text)
+                    elif freq_mode is not None and freq_mode.text == "R":
+                        freq_low = freq_param.find("FREQ_PAR_RG_L")
+                        freq_high = freq_param.find("FREQ_PAR_RG_U")
+                        if freq_low is not None:
+                            result["frequency_range_low"] = int(freq_low.text)
+                        if freq_high is not None:
+                            result["frequency_range_high"] = int(freq_high.text)
+                
+                # Extract station parameters
+                meas_stat = sub_order.find("MEAS_STAT_PARAM")
+                if meas_stat is not None:
+                    station_name = meas_stat.find("MSP_ST_NAME")
+                    station_pc = meas_stat.find("MSP_ST_PC")
+                    signal_path = meas_stat.find("MSP_SIG_PATH")
+                    
+                    if station_name is not None:
+                        result["station_name"] = station_name.text
+                    if station_pc is not None:
+                        result["station_pc"] = station_pc.text
+                    if signal_path is not None:
+                        result["signal_path"] = signal_path.text
+                
+                # Extract timing
+                or_state = sub_order.find("OR_STATE")
+                if or_state is not None:
+                    start_time = or_state.find("SO_START_TIME")
+                    stop_time = or_state.find("SO_STOP_TIME")
+                    if start_time is not None and start_time.text:
+                        try:
+                            result["measurement_start"] = datetime.fromisoformat(start_time.text.replace('-05:00', ''))
+                        except:
+                            result["measurement_start"] = datetime.now()
+                    if stop_time is not None and stop_time.text and "1600-12-31" not in stop_time.text:
+                        try:
+                            result["measurement_end"] = datetime.fromisoformat(stop_time.text.replace('-05:00', ''))
+                        except:
+                            pass
+                
+                # Extract operator
+                req_meas = sub_order.find("REQ_MEAS_PARAM")
+                if req_meas is not None:
+                    operator = req_meas.find("RMP_O_NAME")
+                    if operator is not None:
+                        result["operator_name"] = operator.text
+            
+            # Extract measurement data and create CSV
+            measurement_data = []
+            
+            # Look for various possible measurement data structures
+            # Method 1: meas_data elements
+            for meas_elem in root.findall(".//meas_data"):
+                data_point = {}
+                
+                # Frequency
+                freq_elem = meas_elem.find("md_freq")
+                if freq_elem is not None:
+                    data_point["frequency_hz"] = freq_elem.text
+                
+                # Level
+                level_elem = meas_elem.find("md_lev")
+                if level_elem is not None:
+                    data_point["level_dbm"] = level_elem.text
+                
+                # Timestamp
+                time_elem = meas_elem.find("md_time")
+                if time_elem is not None:
+                    data_point["timestamp"] = time_elem.text
+                
+                # Direction/Bearing (for DF measurements)
+                bearing_elem = meas_elem.find("md_dir")
+                if bearing_elem is not None:
+                    data_point["bearing_deg"] = bearing_elem.text
+                
+                # Bandwidth
+                bw_elem = meas_elem.find("md_bw")
+                if bw_elem is not None:
+                    data_point["bandwidth_hz"] = bw_elem.text
+                
+                if data_point:
+                    measurement_data.append(data_point)
+            
+            # Method 2: Look for MEAS_RESULT_DATA or similar structures
+            if not measurement_data:
+                for result_elem in root.findall(".//MEAS_RESULT_DATA"):
+                    # Parse alternative measurement data format
+                    pass
+            
+            # Create CSV file if we have measurement data
+            result["data_points"] = len(measurement_data)
+            
+            if measurement_data:
+                order_id = result.get("order_id", "unknown")
+                csv_filename = f"{order_id}_data.csv"
+                csv_path = self.data_path / "measurements" / csv_filename
+                csv_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                # Write CSV
+                if measurement_data:
+                    keys = measurement_data[0].keys()
+                    with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+                        writer = csv.DictWriter(csvfile, fieldnames=keys)
+                        writer.writeheader()
+                        writer.writerows(measurement_data)
+                    
+                    result["csv_file_path"] = str(csv_path)
+                    result["file_size"] = csv_path.stat().st_size
+                    
+                    logger.info(f"Created CSV with {len(measurement_data)} data points: {csv_path}")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error parsing measurement result: {e}", exc_info=True)
+            return {
+                "xml_file_path": xml_file_path,
+                "error": str(e),
+                "timestamp": datetime.now()
+            }
+
