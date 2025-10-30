@@ -30,6 +30,7 @@ const API = `${BACKEND_URL}/api`;
 export default function Configuration() {
   const { isAdmin } = useAuth();
   const [gssRequesting, setGssRequesting] = useState(false);
+  const [gspRequesting, setGspRequesting] = useState(false);
   const [systemConfig, setSystemConfig] = useState({
     argus_inbox_path: '/argus/inbox',
     argus_outbox_path: '/argus/outbox',
