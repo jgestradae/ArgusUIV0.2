@@ -1203,20 +1203,7 @@ export default function AutomaticMode() {
                     ⚠️ No signal paths found. Go to Configuration → Argus File Paths → Request GSP
                   </p>
                 )}
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
-                    {/* Fallback options if no devices from station */}
-                    {(!wizardData.selected_station?.devices || wizardData.selected_station.devices.length === 0) && (
-                      <>
-                        <SelectItem value="ADD197+075-EB500 DF">
-                          <div>
-                            <div className="font-medium">ADD197+075-EB500 DF</div>
-                            <div className="text-xs text-slate-400">Default DF System</div>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="HE600-EB500 mon">
+              </div>
                           <div>
                             <div className="font-medium">HE600-EB500 mon</div>
                             <div className="text-xs text-slate-400">Monitoring System</div>
