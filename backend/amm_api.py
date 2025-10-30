@@ -289,9 +289,6 @@ def create_amm_router(db: AsyncIOMotorDatabase, scheduler: AMMScheduler) -> APIR
         current_user: User = Depends(get_current_user)
     ):
         """Manually trigger immediate execution of an AMM configuration (for testing)"""
-        if scheduler is None:
-            raise HTTPException(status_code=503, detail="AMM scheduler is not available")
-            
         config_data = await db.amm_configurations.find_one({"id": config_id})
         if not config_data:
             raise HTTPException(status_code=404, detail="AMM configuration not found")
