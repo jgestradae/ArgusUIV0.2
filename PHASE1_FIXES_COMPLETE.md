@@ -11,7 +11,7 @@
 Remote PCs could not connect to the backend API, showing "ERR_CONNECTION_REFUSED" error.
 
 ### Root Cause:
-Frontend was configured for Emergent cloud environment (https://argusui-monitor.preview.emergentagent.com) instead of local server IP.
+Frontend was configured for Emergent cloud environment (https://specmon-dash.preview.emergentagent.com) instead of local server IP.
 
 ### Solution Applied:
 Updated `/app/frontend/.env`:

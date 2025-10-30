@@ -1,102 +1,70 @@
 <analysis>
-The previous AI engineer effectively navigated the initial setup and deployment challenges of the ArgusUI application, transitioning from conceptual requirements to a functional MVP on a React/FastAPI/MongoDB stack. A significant portion of the work focused on resolving local Windows server deployment issues, specifically Python () and Node.js (, , ) dependency conflicts, demonstrating strong troubleshooting capabilities. Critical progress was made in integrating with the R&S Argus system by refining XML request/response formats for System Status, establishing a file watcher for Argus outbox, and making GSS requests configurable. The AMM workflow was enhanced with a station selection step and a redesigned timing definition UI. Currently, the engineer is addressing a persistent login issue (though deferred by the user) and is actively implementing a new Geolocation Map module for visualizing stations and measurement results, with the latest interaction addressing a Leaflet hot-reload bug.
+The AI engineer effectively addressed critical issues and advanced feature development for the ArgusUI application. Initially, a persistent Leaflet hot-reload bug in  was diagnosed as a React StrictMode conflict and resolved by disabling StrictMode in . Subsequently, remote login failures were fixed by correctly configuring  in the frontend's  file to the server's IP. A major effort was directed at fixing AMM XML generation, which involved extensive refactoring of  and  to match ORM specifications, correcting backend Pydantic models (changing  to  for MongoDB compatibility), and aligning frontend data structures. The file watcher's Python 3.13 compatibility issue with  was also resolved by suggesting an upgrade. The scheduler's startup was fixed to ensure AMM XMLs are processed. Most recently, the AMM wizard was updated to display Signal Path instead of Device, and a GSP request endpoint was integrated.
 </analysis>
 
 <product_requirements>
-The user requires a web application, ArgusUI, to interface with the R&S Argus spectrum monitoring system. The application needs to control Argus via an XML interface, replacing existing desktop access. Initial architecture was revised to React (frontend), FastAPI (backend), and MongoDB (database).
-
-Key features to implement:
--   **Automatic Mode (AMM):** Schedule and manage measurement requests.
--   **System Status:** Query Argus operational status via ORM GSS/GSP.
--   **Data Navigator:** Comprehensive data management for measurement results (metadata in MongoDB, files on disk).
--   **Direct Measurement:** Trigger real-time measurements.
--   **Configuration:** Manage system parameters, Argus communication paths (, ).
--   **Report Generation:** Produce Word reports (pending).
--   **System Logs:** Access and view logs (pending).
--   **Authentication:** Admin/operator roles, Active Directory (LDAP) integration, local user creation.
--   **Deployment:** Local Windows server without Nginx.
--   **Geolocation Map:** Display station positions, radio location (ALA, TDOA), and other overlays using OpenStreetMap/Google Maps.
--   **Language Switching:** (English/Spanish - future).
--   **ACD Module:** Backend UDP listener for real-time measurement results for Direct Mode (future).
-
-The application should generate XML requests to Argus's inbox and read responses from the outbox, parsing XML to JSON. Security (OWASP Top 10) is a key concern.
+The ArgusUI web application interfaces with the R&S Argus spectrum monitoring system via an XML interface, replacing desktop access. It uses React (frontend), FastAPI (backend), and MongoDB (database). Key features include Automatic Mode (AMM) for scheduling measurements, System Status via ORM GSS/GSP, Data Navigator for results, Direct Measurement, Configuration, Authentication (admin/operator, AD/LDAP), and a Geolocation Map for station visualization. The application must generate XML requests to Argus's inbox and parse responses from the outbox. Recent additions focus on enhancing AMM with detailed timing, measurement, and station selection, and developing the Geolocation Map. The user also requests ping-based station health checks, SNMP integration roadmap, and user login logs.
 </product_requirements>
 
 <key_technical_concepts>
--   **React/FastAPI/MongoDB:** Core technologies for full-stack development.
--   **XML File Exchange:** Primary communication for Argus integration.
+-   **React/FastAPI/MongoDB:** Core full-stack technologies.
+-   **XML File Exchange:** Primary Argus communication for GSS, GSP, AMM.
 -   **JWT Authentication:** Token-based security.
--   **Active Directory (LDAP):** Planned external authentication.
--   **Shadcn UI & Tailwind CSS:** Frontend UI components and styling.
--   **Windows Batch Scripting:** Local deployment automation.
--   **:** Python library for file system monitoring (outbox).
--   **Leaflet.js/react-leaflet:** Geospatial mapping for frontend visualization.
--   **Pydantic:** Data validation for FastAPI.
+-   **Leaflet.js/react-leaflet:** Geospatial mapping for visualization.
+-   **:** Python library for file system monitoring.
+-   **Pydantic:** Data validation for FastAPI models.
+-   **CORS:** Cross-Origin Resource Sharing for API access.
+-   **Python  serialization:** MongoDB compatibility.
 </key_technical_concepts>
 
 <code_architecture>
 
 
 -   ****: Main FastAPI app.
-    -   **Changes:**  function updated for one-time GSS request at startup and  integration. New  endpoint added.  removed.
+    -   **Changes:**  function was updated to start . A new POST endpoint  was added to trigger GSP XML requests.
 -   ****: XML generation/parsing.
-    -   **Changes:** Updated  and  methods for correct XML format (dashes in filename, , , uppercase tags).  method rewritten to parse real GSS response structure including .  method updated for correct XML filename format (e.g., ).  updated to look for  suffix.
--   ****: New file.
-    -   Contains logic for monitoring the Argus outbox folder using , processing response XMLs, and saving to the database.
--   ****: New file.
-    -   Placeholder for Automatic Control Data (ACD) UDP protocol handling.
--   ****: Python dependencies.
-    -   **Changes:**  library added.
--   ****: Backend environment variables.
-    -   **Changes:** Added  and  for XML requests.
--   ****: HTML entry point.
-    -   **Changes:** Browser tab title changed to ArgusUI - Spectrum Monitoring Control.
+    -   **Changes:**  was significantly refactored to match provided AMM XML examples.  method was added to parse GSP response XMLs.  was also updated for better XML structure and  for correct filename format.
+-   ****: Handles AMM related API endpoints.
+    -   **Changes:** No direct changes to endpoints, but relies on updated  and .
+-   ****: Pydantic models for AMM data.
+    -   **Changes:** 's  and  were changed from  to  for MongoDB compatibility.  was updated to use  instead of .
+-   ****: AMM scheduling logic.
+    -   **Changes:** Scheduler startup was added to 's .  was updated to correctly map frontend data, including  and , to XML parameters.  updated to use OR prefix.
+-   ****: Core data models.
+    -   **Changes:** Verified  enum already included GSP.
+-   ****: Monitors Argus outbox.
+    -   **Changes:** Implied fix through  library upgrade suggestion.
+-   ****: Frontend environment variables.
+    -   **Changes:**  was updated to  for remote access, then reverted to  for local testing to resolve CORS issues, and then finally confirmed to be  for the user's local server environment.
+-   ****: Frontend entry point.
+    -   **Changes:**  was temporarily disabled to fix Leaflet hot-reload issues.
 -   ****: Frontend styling.
-    -   **Changes:** Added CSS for Leaflet map integration ().
--   ****: Main React router.
-    -   **Changes:** Added a new route  for the Geolocation Map component.
--   ****: Navigation layout.
-    -   **Changes:** Added a navigation link for the new Geolocation Map feature.
--   ****: System Status UI.
-    -   **Changes:** Polling interval changed from 15s to 60s. Updated to display real station data and make station cards clickable to filter device displays. Fixed a syntax error (duplicate closing tags).
--   ****: AMM UI.
-    -   **Changes:** Added  icon import. Redesigned the AMM wizard to include a new Step 1: Select Monitoring Station. Shifted subsequent steps and updated navigation logic. Redesigned the Timing Definition (Step 3) UI to match the Argus AMM interface with new  and  structure. Redesigned the Measurement Definition (Step 4) to be intelligent and adaptive. The Review step (Case 5) updated to display the new timing format. Cleaned up multiple instances of duplicate/leftover code.
--   ****: System Configuration UI.
-    -   **Changes:** Added a Request GSS button to trigger a manual GSS request.
--   ****: New file.
-    -   Contains components for visualizing various measurement result types (FFM, SCAN, DSCAN, Waterfall) using charting libraries.
--   ****: New file.
-    -   Contains the main React-Leaflet map component, intended for displaying stations and measurement results.
--   ****: Frontend dependencies.
-    -   **Changes:** Added , , , .
--   ****: New batch script.
-    -   A diagnostic script to help troubleshoot local login issues.
+    -   **Changes:**  import location was problematic, leading to module not found error.
+-   ****: AMM UI component.
+    -   **Changes:**  was modified to correctly transform  into the  format expected by the backend. API calls were re-checked and corrected to ensure proper  prefix usage. The UI for Step 4 was updated to replace Device selection with Signal Path selection.
+-   ****: Map component.
+    -   **Changes:** Multiple attempts to fix the Map container already initialized error were made, including adding  props, creating a  component (later removed), and conditional rendering. The ultimate fix involved disabling  in .
 </code_architecture>
 
 <pending_tasks>
 -   Full implementation and integration of Active Directory (LDAP) authentication.
 -   Detailed file viewers with previews, advanced filtering, and upload capabilities for the Data Navigator.
 -   Data relationship linking, export/download features for Data Navigator.
--   Improvements to the Direct Measurement module.
--   Implementation of Report Generation and System Logs modules.
+-   Improvements to the Direct Measurement module (station selection, connection test).
+-   Implementation of Report Generation and System Logs modules (user login logs planned).
 -   Complete backend ACD module integration with frontend Direct Mode.
 -   Implementation of a Remote Connection Module tab for managing stations and sending GSS/GSP requests.
 -   Frontend language switching (English/Spanish).
--   Resolution of the persistent login issue on the user's local Windows server.
--   Further development of the Geolocation Map (station markers, ALA, TDOA layers, control panel).
+-   Further development of the Geolocation Map (station markers, ALA, TDOA layers, control panel, custom icons).
+-   Station Management with Ping & Hosts file parsing and combined GSS+Ping diagnostic.
+-   Update AMM wizard with Result Type tab.
+-   Troubleshoot why AMM XML is not appearing in the Inbox folder despite AMM creation working.
 </pending_tasks>
 
 <current_work>
-The AI engineer is currently working on developing the **Geolocation Map module**.
-Specifically, the last actions involved:
-1.  Installing necessary frontend dependencies: , , .
-2.  Creating the core  component, which uses React-Leaflet to display an OpenStreetMap base layer.
-3.  Adding the required Leaflet CSS to .
-4.  Integrating the  route into .
-5.  Adding a navigation link for the Geolocation module in the  component.
-Immediately before this summary request, the AI engineer attempted to take a screenshot of the newly integrated map component and encountered a runtime error: Map container is already initialized. This indicates a common issue with Leaflet and React's hot-reloading mechanism, where the map instance is not properly cleaned up between component renders. The engineer has identified this problem and is about to apply a fix.
+The immediate focus is on addressing the AMM (Automatic Mode) module, which recently achieved successful configuration creation but failed to generate the XML file in the Argus inbox. The user also noted that the AMM wizard is displaying device info instead of signal path info despite previous attempts to fix this, and that a GSP (Get System Parameters) request should be made at the beginning to populate signal path information for the AMM wizard. The AI engineer has just finished adding a GSP endpoint and parsing logic, and is currently analyzing the newly provided GSP order and response XML examples to understand why the AMM XML is not being generated in the inbox and to refine the GSP-derived information usage for AMM.
 </current_work>
 
 <optional_next_step>
-Fix the Map container is already initialized error in  by adding a unique key to the  component to ensure proper re-initialization during hot-reload.
+Analyze the provided GSP XML examples and troubleshoot why AMM XML files are not being generated in the Argus inbox.
 </optional_next_step>
