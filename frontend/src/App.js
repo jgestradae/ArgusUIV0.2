@@ -5,6 +5,7 @@ import { Toaster } from './components/ui/sonner';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import SystemStatus from './components/SystemStatus';
+import SystemParameters from './components/SystemParameters';
 import DirectMeasurement from './components/DirectMeasurement';
 import AutomaticMode from './components/AutomaticMode';
 import Configuration from './components/Configuration';
