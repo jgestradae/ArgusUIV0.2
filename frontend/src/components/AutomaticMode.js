@@ -1086,13 +1086,6 @@ export default function AutomaticMode() {
         const isFixedFrequency = wizardData.measurement.measurement_type === 'FFM';
         const isScanType = ['SCAN', 'DSCAN', 'PSCAN', 'FLSCAN'].includes(wizardData.measurement.measurement_type);
         
-        // Load signal paths when reaching this step
-        useEffect(() => {
-          if (wizardStep === 4 && wizardData.selected_station) {
-            loadSignalPaths(wizardData.selected_station.name);
-          }
-        }, [wizardStep, wizardData.selected_station]);
-        
         return (
           <Card className="glass-card border-0">
             <CardHeader>
