@@ -95,7 +95,7 @@ class ArgusXMLProcessor:
         ET.SubElement(order_def, "ORDER_SENDER").text = sender
         ET.SubElement(order_def, "ORDER_SENDER_PC").text = sender_pc
         ET.SubElement(order_def, "ORDER_STATE").text = "In Process"
-        ET.SubElement(order_def, "ORDER_CREATOR").text = "Intern"  # Always "Intern" for AMM
+        ET.SubElement(order_def, "ORDER_CREATOR").text = "Extern"  # External orders from ArgusUI
         ET.SubElement(order_def, "ORDER_ADDRESSEE").text = ""
         ET.SubElement(order_def, "ORDER_VER").text = "300"
         ET.SubElement(order_def, "EXECUTION_TYPE").text = "A"
