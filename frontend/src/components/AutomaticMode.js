@@ -1079,6 +1079,13 @@ export default function AutomaticMode() {
         const isFixedFrequency = wizardData.measurement.measurement_type === 'FFM';
         const isScanType = ['SCAN', 'DSCAN', 'PSCAN', 'FLSCAN'].includes(wizardData.measurement.measurement_type);
         
+        // Load signal paths when reaching this step
+        useEffect(() => {
+          if (wizardStep === 4 && wizardData.selected_station) {
+            loadSignalPaths(wizardData.selected_station.name);
+          }
+        }, [wizardStep, wizardData.selected_station]);
+        
         return (
           <Card className="glass-card border-0">
             <CardHeader>
@@ -1134,11 +1141,24 @@ export default function AutomaticMode() {
               
               {/* Signal Path Selection (System Path) - ORM 4.2 MSP_SIG_PATH */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Target className="w-4 h-4" />
-                  Signal Path / System Path
-                  <span className="text-xs text-slate-400">(MSP_SIG_PATH)</span>
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    Signal Path
+                    <span className="text-xs text-slate-400">(MSP_SIG_PATH)</span>
+                  </Label>
+                  <Button
+                    type="button"
+                    onClick={() => loadSignalPaths(wizardData.selected_station?.name)}
+                    disabled={loadingSignalPaths}
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs"
+                  >
+                    <RefreshCw className={`w-3 h-3 mr-1 ${loadingSignalPaths ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
                 <Select 
                   value={wizardData.measurement.signal_path || wizardData.measurement.device_name}
                   onValueChange={(value) => setWizardData(prev => ({
@@ -1149,25 +1169,40 @@ export default function AutomaticMode() {
                       device_name: value // Keep for backwards compatibility
                     }
                   }))}
+                  disabled={loadingSignalPaths}
                 >
                   <SelectTrigger className="input-spectrum">
-                    <SelectValue placeholder="Select signal path..." />
+                    <SelectValue placeholder={loadingSignalPaths ? "Loading signal paths..." : "Select signal path..."} />
                   </SelectTrigger>
                   <SelectContent>
-                    {wizardData.selected_station?.devices?.map((device, index) => {
-                      // Extract signal path from device
-                      // Format: "DeviceName+Port-Receiver" or similar
-                      const signalPath = device.system_path || device.signal_path || device.name;
-                      const displayName = signalPath;
-                      
-                      return (
-                        <SelectItem key={index} value={signalPath}>
+                    {signalPaths.length > 0 ? (
+                      signalPaths.map((path, index) => (
+                        <SelectItem key={index} value={path.name}>
                           <div>
-                            <div className="font-medium">{displayName}</div>
+                            <div className="font-medium">{path.name}</div>
                             <div className="text-xs text-slate-400">
-                              {device.driver} • {device.state}
-                              {device.antenna_name && ` • Antenna: ${device.antenna_name}`}
+                              {path.freq_min && path.freq_max && 
+                                `${(path.freq_min / 1000000).toFixed(1)} - ${(path.freq_max / 1000000).toFixed(1)} MHz`
+                              }
+                              {path.devices && path.devices.length > 0 && 
+                                ` • ${path.devices.length} device${path.devices.length > 1 ? 's' : ''}`
+                              }
                             </div>
+                          </div>
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-paths" disabled>
+                        No signal paths available. Request GSP from Configuration page.
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+                {signalPaths.length === 0 && !loadingSignalPaths && (
+                  <p className="text-xs text-yellow-400">
+                    ⚠️ No signal paths found. Go to Configuration → Argus File Paths → Request GSP
+                  </p>
+                )}
                           </div>
                         </SelectItem>
                       );
