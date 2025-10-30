@@ -94,7 +94,7 @@ class ArgusXMLProcessor:
         ET.SubElement(order_def, "ORDER_NAME").text = "ORM"
         ET.SubElement(order_def, "ORDER_SENDER").text = sender
         ET.SubElement(order_def, "ORDER_SENDER_PC").text = sender_pc
-        ET.SubElement(order_def, "ORDER_STATE").text = "In Process"
+        ET.SubElement(order_def, "ORDER_STATE").text = "Open"
         ET.SubElement(order_def, "ORDER_CREATOR").text = "Extern"  # External orders from ArgusUI
         ET.SubElement(order_def, "ORDER_ADDRESSEE").text = ""
         ET.SubElement(order_def, "ORDER_VER").text = "300"
@@ -106,7 +106,7 @@ class ArgusXMLProcessor:
         sub_order = ET.SubElement(order_def, "SUB_ORDER_DEF")
         # Use the actual order name from config
         ET.SubElement(sub_order, "SUBORDER_NAME").text = config.get("name", config.get("order_name", "ORM"))
-        ET.SubElement(sub_order, "SUBORDER_STATE").text = "In Process"
+        ET.SubElement(sub_order, "SUBORDER_STATE").text = "Open"
         ET.SubElement(sub_order, "SUBORDER_TASK").text = config.get("measurement_type", config.get("task", "FFM"))
         ET.SubElement(sub_order, "SUBORDER_PRIO").text = config.get("priority", "LOW")
         ET.SubElement(sub_order, "RESULT_TYPE").text = config.get("result_type", "MR")
