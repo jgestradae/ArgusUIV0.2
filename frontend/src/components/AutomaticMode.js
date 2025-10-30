@@ -184,6 +184,35 @@ export default function AutomaticMode() {
     }
   };
 
+  const loadSignalPaths = async (stationName = null) => {
+    setLoadingSignalPaths(true);
+    try {
+      const url = stationName 
+        ? `${API}/system/signal-paths?station_name=${encodeURIComponent(stationName)}`
+        : `${API}/system/signal-paths`;
+      
+      const response = await axios.get(url);
+      if (response.data.success) {
+        const paths = response.data.data.signal_paths || [];
+        setSignalPaths(paths);
+        
+        if (paths.length === 0) {
+          toast.info('No signal paths found. Please request GSP from Configuration page first.', {
+            duration: 5000
+          });
+        } else {
+          toast.success(`Loaded ${paths.length} signal paths`);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading signal paths:', error);
+      toast.error('Failed to load signal paths');
+      setSignalPaths([]);
+    } finally {
+      setLoadingSignalPaths(false);
+    }
+  };
+
   const loadData = async () => {
     try {
       const [configsResponse, statsResponse, executionsResponse] = await Promise.all([
