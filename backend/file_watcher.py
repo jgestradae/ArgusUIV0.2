@@ -174,19 +174,51 @@ class ArgusResponseHandler(FileSystemEventHandler):
             logger.error(f"Error processing GSP response: {e}", exc_info=True)
     
     async def _process_measurement_response(self, response_data: dict):
-        """Process OR (Measurement Order) response"""
+        """Process OR (Measurement Order) response and extract CSV data"""
         try:
-            # Save measurement result
-            await self.db.measurements.insert_one({
-                "order_id": response_data.get("order_id"),
-                "timestamp": datetime.now(),
-                "measurement_type": response_data.get("measurement_type"),
-                "result_data": response_data
-            })
-            logger.info(f"Measurement result saved for order: {response_data.get('order_id')}")
+            from models import MeasurementResult
+            
+            # Parse the XML file to extract measurement data and create CSV
+            xml_file = response_data.get("raw_xml_file")
+            if xml_file:
+                parsed_data = self.xml_processor.parse_measurement_result(xml_file)
+                
+                # Create MeasurementResult model
+                measurement_result = MeasurementResult(
+                    order_id=response_data.get("order_id", parsed_data.get("order_id", "unknown")),
+                    measurement_type=parsed_data.get("measurement_type", "FFM"),
+                    station_name=parsed_data.get("station_name", "unknown"),
+                    station_pc=parsed_data.get("station_pc", "unknown"),
+                    signal_path=parsed_data.get("signal_path", "unknown"),
+                    frequency_single=parsed_data.get("frequency_single"),
+                    frequency_range_low=parsed_data.get("frequency_range_low"),
+                    frequency_range_high=parsed_data.get("frequency_range_high"),
+                    measurement_start=parsed_data.get("measurement_start", datetime.now()),
+                    measurement_end=parsed_data.get("measurement_end"),
+                    xml_file_path=xml_file,
+                    csv_file_path=parsed_data.get("csv_file_path"),
+                    status=parsed_data.get("status", "completed"),
+                    result_type=parsed_data.get("result_type", "MR"),
+                    data_points=parsed_data.get("data_points", 0),
+                    file_size=parsed_data.get("file_size", 0),
+                    operator_name=parsed_data.get("operator_name")
+                )
+                
+                # Save to measurement_results collection
+                await self.db.measurement_results.insert_one(measurement_result.dict())
+                logger.info(f"Measurement result saved: {measurement_result.order_id}, {measurement_result.data_points} data points")
+            else:
+                # Fallback for older format
+                await self.db.measurements.insert_one({
+                    "order_id": response_data.get("order_id"),
+                    "timestamp": datetime.now(),
+                    "measurement_type": response_data.get("measurement_type"),
+                    "result_data": response_data
+                })
+                logger.info(f"Measurement result saved (legacy format): {response_data.get('order_id')}")
             
         except Exception as e:
-            logger.error(f"Error processing measurement response: {e}")
+            logger.error(f"Error processing measurement response: {e}", exc_info=True)
 
 
 class ArgusFileWatcher:
