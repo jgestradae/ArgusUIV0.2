@@ -623,6 +623,54 @@ export default function Configuration() {
                     </Button>
                   </div>
                 </div>
+                
+                <div className="p-4 bg-slate-800/30 rounded-lg border border-slate-700/30 mt-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-white mb-2">
+                        Request System Parameters (GSP)
+                      </h4>
+                      <p className="text-sm text-slate-400 mb-3">
+                        Query Argus for detailed system parameters including signal paths, device capabilities, 
+                        frequency ranges, and measurement configurations. Required for AMM configuration.
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        ✓ Signal paths will be available for AMM wizard after processing
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={async () => {
+                        setGspRequesting(true);
+                        try {
+                          const response = await axios.post(`${API}/system/request-gsp`);
+                          if (response.data.success) {
+                            toast.success('GSP request sent to Argus');
+                            toast.info('Signal paths will be available shortly');
+                          }
+                        } catch (error) {
+                          console.error('Error requesting GSP:', error);
+                          toast.error('Failed to send GSP request');
+                        } finally {
+                          setGspRequesting(false);
+                        }
+                      }}
+                      disabled={gspRequesting}
+                      className="btn-spectrum ml-4 whitespace-nowrap"
+                    >
+                      {gspRequesting ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Radio className="w-4 h-4 mr-2" />
+                          Request GSP
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
               
               <div className="flex justify-end pt-4 border-t border-slate-700/50">
