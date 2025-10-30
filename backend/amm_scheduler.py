@@ -189,11 +189,18 @@ class AMMScheduler:
                 
             measurement_def = MeasurementDefinition(**measurement_def_data)
             
+            # Get timing definition
+            timing_def_data = await self.db.timing_definitions.find_one({
+                "id": amm_config.timing_definition_id
+            })
+            
+            timing_def = TimingDefinition(**timing_def_data) if timing_def_data else None
+            
             # Generate XML order for Argus
             order_id = self.xml_processor.generate_order_id("OR")  # Use OR prefix for measurement orders
             
             # Convert AMM measurement to XML order parameters
-            xml_params = self._convert_amm_to_xml_params(measurement_def, order_id)
+            xml_params = self._convert_amm_to_xml_params(measurement_def, timing_def, order_id)
             
             # Create XML order
             xml_content = self.xml_processor.create_measurement_order(order_id, xml_params)
