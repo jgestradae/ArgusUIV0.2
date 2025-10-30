@@ -538,6 +538,86 @@ async def get_signal_paths(
             detail=f"Failed to get signal paths: {str(e)}"
         )
 
+@api_router.get("/system/parameters")
+async def get_system_parameters(current_user: User = Depends(get_current_user)):
+    """Get the most recent system parameters (GSP) data for display"""
+    try:
+        # Get the most recent GSP response
+        latest_gsp = await db.system_parameters.find_one(
+            {"parameter_type": "GSP"},
+            sort=[("timestamp", -1)]
+        )
+        
+        if not latest_gsp:
+            return ApiResponse(
+                success=False,
+                message="No GSP data available. Please request system parameters first.",
+                data=None
+            )
+        
+        # Format the response
+        stations = latest_gsp.get("stations", [])
+        signal_paths = latest_gsp.get("signal_paths", [])
+        
+        return ApiResponse(
+            success=True,
+            message=f"System parameters retrieved: {len(stations)} stations, {len(signal_paths)} signal paths",
+            data={
+                "timestamp": latest_gsp.get("timestamp"),
+                "order_id": latest_gsp.get("order_id"),
+                "stations": stations,
+                "signal_paths": signal_paths,
+                "total_stations": len(stations),
+                "total_signal_paths": len(signal_paths)
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting system parameters: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get system parameters: {str(e)}"
+        )
+        latest_gsp = await db.system_parameters.find_one(
+            {"parameter_type": "GSP"},
+            sort=[("timestamp", -1)]
+        )
+        
+        if not latest_gsp:
+            return ApiResponse(
+                success=True,
+                message="No GSP data available. Please request system parameters first.",
+                data={
+                    "signal_paths": [],
+                    "stations": []
+                }
+            )
+        
+        signal_paths = latest_gsp.get("signal_paths", [])
+        stations = latest_gsp.get("stations", [])
+        
+        # Filter by station if specified
+        if station_name:
+            signal_paths = [sp for sp in signal_paths if sp.get("station") == station_name]
+            stations = [st for st in stations if st.get("name") == station_name]
+        
+        return ApiResponse(
+            success=True,
+            message=f"Found {len(signal_paths)} signal paths",
+            data={
+                "signal_paths": signal_paths,
+                "stations": stations,
+                "timestamp": latest_gsp.get("timestamp")
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting signal paths: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get signal paths: {str(e)}"
+        )
+
 def _get_measurement_types_for_station(devices: list) -> list:
     """Determine available measurement types based on station's devices"""
     measurement_types = set()
