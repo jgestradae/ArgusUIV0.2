@@ -173,10 +173,69 @@ function MeasurementViewer({ measurementId, onClose }) {
       {/* Content Tabs */}
       <Tabs value={activeView} onValueChange={setActiveView}>
         <TabsList className="glass-card border-0">
-          <TabsTrigger value="data">CSV Data</TabsTrigger>
-          <TabsTrigger value="xml">Raw XML</TabsTrigger>
-          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="graph">📊 Graph</TabsTrigger>
+          <TabsTrigger value="data">📋 Data Table</TabsTrigger>
+          <TabsTrigger value="xml">📄 Raw XML</TabsTrigger>
+          <TabsTrigger value="details">ℹ️ Details</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="graph">
+          <Card className="glass-card border-0">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-400" />
+                Level vs Time Graph
+              </CardTitle>
+              <CardDescription>
+                Visualization of measurement data over time
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {csvData.length > 0 && csvData[0].level_dbm ? (
+                <div className="w-full h-96">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={csvData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                      <XAxis 
+                        dataKey="timestamp" 
+                        stroke="#94a3b8"
+                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                      />
+                      <YAxis 
+                        label={{ value: 'Level (dBm)', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
+                        stroke="#94a3b8"
+                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1e293b', 
+                          border: '1px solid #334155',
+                          borderRadius: '8px',
+                          color: '#fff'
+                        }}
+                      />
+                      <Legend wrapperStyle={{ color: '#94a3b8' }} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="level_dbm" 
+                        stroke="#3b82f6" 
+                        strokeWidth={2}
+                        dot={false}
+                        name="Level (dBm)"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="text-center py-12 text-slate-400">
+                  <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No graphable data available</p>
+                  <p className="text-sm mt-2">Measurement data must contain level_dbm and timestamp fields</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="data">
           <Card className="glass-card border-0">
