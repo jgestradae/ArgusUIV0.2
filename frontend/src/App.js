@@ -45,6 +45,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/system-parameters" element={
+              <ProtectedRoute>
+                <Layout>
+                  <SystemParameters />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/direct-measurement" element={
               <ProtectedRoute>
                 <Layout>
