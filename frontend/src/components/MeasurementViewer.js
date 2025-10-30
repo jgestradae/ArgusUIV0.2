@@ -27,7 +27,7 @@ function MeasurementViewer({ measurementId, onClose }) {
   const [csvData, setCsvData] = useState([]);
   const [xmlContent, setXmlContent] = useState('');
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState('data');
+  const [activeView, setActiveView] = useState('graph');
 
   useEffect(() => {
     if (measurementId) {
