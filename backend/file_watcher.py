@@ -147,16 +147,23 @@ class ArgusResponseHandler(FileSystemEventHandler):
     async def _process_gsp_response(self, response_data: dict):
         """Process GSP (Get System Parameters) response"""
         try:
-            # Save system parameters
+            # Extract the parsed signal paths and stations data
+            signal_paths = response_data.get("signal_paths", [])
+            stations = response_data.get("stations", [])
+            
+            # Save system parameters with detailed structure
             await self.db.system_parameters.insert_one({
                 "order_id": response_data.get("order_id"),
                 "timestamp": datetime.now(),
-                "parameters": response_data
+                "parameter_type": "GSP",
+                "signal_paths": signal_paths,
+                "stations": stations,
+                "raw_response": response_data
             })
-            logger.info(f"System parameters saved for order: {response_data.get('order_id')}")
+            logger.info(f"System parameters saved: {len(stations)} stations, {len(signal_paths)} signal paths")
             
         except Exception as e:
-            logger.error(f"Error processing GSP response: {e}")
+            logger.error(f"Error processing GSP response: {e}", exc_info=True)
     
     async def _process_measurement_response(self, response_data: dict):
         """Process OR (Measurement Order) response"""
