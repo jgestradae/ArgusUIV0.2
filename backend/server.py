@@ -324,9 +324,9 @@ async def get_system_status(current_user: User = Depends(get_current_user)):
             detail=f"Failed to get system status: {str(e)}"
         )
 
-@api_router.get("/system/parameters")
-async def get_system_parameters(current_user: User = Depends(get_current_user)):
-    """Get Argus system parameters (GSP)"""
+@api_router.post("/system/request-parameters")
+async def request_system_parameters_alt(current_user: User = Depends(get_current_user)):
+    """Request Argus system parameters (GSP) - alternative endpoint"""
     try:
         # Get control station configuration from environment
         control_station = os.getenv("ARGUS_CONTROL_STATION", "HQ4")
