@@ -143,6 +143,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "GET /api/system/signal-paths endpoint working. Returns empty signal paths as expected when no GSP response is processed yet."
+        - working: true
+          agent: "testing"
+          comment: "UPDATED: Signal paths endpoint fully tested with GSP data. Successfully retrieves 3 signal paths from 2 stations (Station_HQ4 and Mobile_Unit_01). Frequency ranges: VHF 30-300MHz, UHF 300-3000MHz. Data properly formatted for AMM wizard consumption. MongoDB integration working correctly."
 
   - task: "AMM Configuration Management"
     implemented: true
