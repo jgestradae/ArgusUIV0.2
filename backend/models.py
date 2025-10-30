@@ -153,3 +153,42 @@ class SystemStatusResponse(BaseModel):
     system_health: str
     stations: List[Dict[str, Any]]
     devices: List[Dict[str, Any]]
+
+
+# Measurement Result Models
+class MeasurementResult(BaseModel):
+    """Model for storing measurement result metadata"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    order_id: str
+    amm_config_id: Optional[str] = None  # Reference to AMM config if from automatic mode
+    
+    # Measurement details
+    measurement_type: str  # FFM, SCAN, DSCAN, etc.
+    station_name: str
+    station_pc: str
+    signal_path: str
+    
+    # Frequency information
+    frequency_single: Optional[int] = None  # For FFM
+    frequency_range_low: Optional[int] = None  # For SCAN
+    frequency_range_high: Optional[int] = None
+    
+    # Timing
+    measurement_start: datetime
+    measurement_end: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # File references
+    xml_file_path: str  # Path to original XML response
+    csv_file_path: Optional[str] = None  # Path to extracted CSV data
+    
+    # Status and metadata
+    status: str = "completed"  # completed, failed, processing
+    result_type: str = "MR"  # MR, CMR, etc.
+    data_points: int = 0  # Number of measurement data points
+    file_size: int = 0  # Size in bytes
+    
+    # Additional metadata
+    operator_name: Optional[str] = None
+    notes: Optional[str] = None
+    tags: List[str] = []
