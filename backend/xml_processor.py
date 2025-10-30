@@ -223,7 +223,6 @@ class ArgusXMLProcessor:
         
         # Measurement preparation parameters
         meas_prep_param = ET.SubElement(sub_order, "MEAS_PREP_PARAM")
-        ET.SubElement(meas_prep_param, "MPP_AVE_TIME").text = "0"
         ET.SubElement(meas_prep_param, "MPP_ALARM").text = "0"
         ET.SubElement(meas_prep_param, "MPP_OCC_THRES").text = "0"
         
