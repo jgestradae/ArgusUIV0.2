@@ -17,17 +17,19 @@ logger = logging.getLogger(__name__)
 class ArgusResponseHandler(FileSystemEventHandler):
     """Handler for Argus XML response files"""
     
-    def __init__(self, xml_processor, db, callback=None):
+    def __init__(self, xml_processor, db, loop=None, callback=None):
         """
         Initialize handler
         
         Args:
             xml_processor: ArgusXMLProcessor instance
             db: Database connection
+            loop: asyncio event loop
             callback: Optional callback function for new responses
         """
         self.xml_processor = xml_processor
         self.db = db
+        self.loop = loop
         self.callback = callback
         self.processing = set()  # Track files being processed
         
@@ -48,8 +50,14 @@ class ArgusResponseHandler(FileSystemEventHandler):
                 
             self.processing.add(str(file_path))
             
-            # Process the file
-            asyncio.create_task(self._process_response(file_path))
+            # Process the file in the main event loop
+            if self.loop and self.loop.is_running():
+                asyncio.run_coroutine_threadsafe(
+                    self._process_response(file_path),
+                    self.loop
+                )
+            else:
+                logger.error("No running event loop available for processing response")
     
     async def _process_response(self, file_path: Path):
         """
