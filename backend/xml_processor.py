@@ -244,7 +244,9 @@ class ArgusXMLProcessor:
         # Order state
         or_state = ET.SubElement(sub_order, "OR_STATE")
         ET.SubElement(or_state, "SO_STATE").text = "P"  # P for Pending/Processing
-        ET.SubElement(or_state, "SO_START_TIME").text = start_str
+        # SO_START_TIME should have actual time, not 00:00:00
+        actual_start_str = start_time.strftime(f"%Y-%m-%dT%H:%M:%S{tz_offset}")
+        ET.SubElement(or_state, "SO_START_TIME").text = actual_start_str
         ET.SubElement(or_state, "SO_STOP_TIME").text = "1600-12-31T19:00:00-05:00"
         current_time_str = datetime.now().strftime(f"%Y-%m-%dT%H:%M:%S.%f{tz_offset}")
         ET.SubElement(or_state, "SO_CURRENT_TIME").text = current_time_str
