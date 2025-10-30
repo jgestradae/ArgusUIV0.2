@@ -159,8 +159,18 @@ class ArgusXMLProcessor:
         ET.SubElement(mdt_param, "DF_SPAN").text = "0"
         ET.SubElement(mdt_param, "DF_STEP").text = "0"
         ET.SubElement(mdt_param, "DF_ACT").text = ""
+        ET.SubElement(mdt_param, "ADD_SET").text = ""
         ET.SubElement(mdt_param, "IF_STEP").text = "0"
         ET.SubElement(mdt_param, "FFT_MODE").text = ""
+        
+        # AU600 parameters (empty by default)
+        ET.SubElement(mdt_param, "AU600_VERT_AMP").text = ""
+        ET.SubElement(mdt_param, "AU600_VERT_FILTER").text = ""
+        ET.SubElement(mdt_param, "AU600_VERT_LNA").text = ""
+        ET.SubElement(mdt_param, "AU600_HOR_AMP").text = ""
+        ET.SubElement(mdt_param, "AU600_HOR_FILTER").text = ""
+        ET.SubElement(mdt_param, "AU600_HOR_LNA").text = ""
+        ET.SubElement(mdt_param, "AU600_X7_OUT").text = ""
         
         # TDOA parameters (empty for now)
         for i in range(1, 3):
