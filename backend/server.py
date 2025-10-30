@@ -483,12 +483,53 @@ async def request_system_parameters(current_user: User = Depends(get_current_use
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to send GSP request: {str(e)}"
         )
+
+@api_router.get("/system/signal-paths")
+async def get_signal_paths(
+    station_name: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get available signal paths from the most recent GSP response"""
+    try:
+        # Get the most recent GSP response from system_parameters collection
+        latest_gsp = await db.system_parameters.find_one(
+            {"parameter_type": "GSP"},
+            sort=[("timestamp", -1)]
+        )
+        
+        if not latest_gsp:
+            return ApiResponse(
+                success=True,
+                message="No GSP data available. Please request system parameters first.",
+                data={
+                    "signal_paths": [],
+                    "stations": []
+                }
+            )
+        
+        signal_paths = latest_gsp.get("signal_paths", [])
+        stations = latest_gsp.get("stations", [])
+        
+        # Filter by station if specified
+        if station_name:
+            signal_paths = [sp for sp in signal_paths if sp.get("station") == station_name]
+            stations = [st for st in stations if st.get("name") == station_name]
+        
+        return ApiResponse(
+            success=True,
+            message=f"Found {len(signal_paths)} signal paths",
+            data={
+                "signal_paths": signal_paths,
+                "stations": stations,
+                "timestamp": latest_gsp.get("timestamp")
+            }
+        )
         
     except Exception as e:
-        logger.error(f"Error requesting system state: {e}")
+        logger.error(f"Error getting signal paths: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to request system state: {str(e)}"
+            detail=f"Failed to get signal paths: {str(e)}"
         )
 
 def _get_measurement_types_for_station(devices: list) -> list:
