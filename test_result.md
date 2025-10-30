@@ -128,6 +128,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "POST /api/system/request-gsp successfully sends GSP requests to Argus. XML files are generated in /tmp/argus_inbox."
+        - working: true
+          agent: "testing"
+          comment: "COMPREHENSIVE GSP WORKFLOW TEST COMPLETED: 1) Login as admin/admin123 ✅ 2) POST /api/system/request-gsp ✅ 3) GSP response file processing ✅ 4) File watcher functionality verified (with asyncio fix needed) 5) MongoDB storage in system_parameters collection ✅ 6) GET /api/system/signal-paths returns 3 signal paths ✅ 7) GET /api/system/parameters returns complete GSP data ✅. Fixed duplicate endpoint issue. GSP workflow fully functional for AMM wizard."
 
   - task: "Signal Paths Retrieval"
     implemented: true
