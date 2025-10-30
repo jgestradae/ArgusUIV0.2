@@ -131,6 +131,74 @@ class ArgusAPITester:
         # For unauthorized test, success means we got the expected 403
         return success
 
+    def test_request_gsp(self):
+        """Test requesting system parameters (GSP)"""
+        return self.run_test("Request GSP", "POST", "system/request-gsp", 200, auth_required=True)
+
+    def test_get_signal_paths(self):
+        """Test getting signal paths from GSP response"""
+        return self.run_test("Get Signal Paths", "GET", "system/signal-paths", 200, auth_required=True)
+
+    def test_get_amm_configurations(self):
+        """Test getting AMM configurations"""
+        return self.run_test("Get AMM Configurations", "GET", "amm/configurations", 200, auth_required=True)
+
+    def test_amm_dashboard_stats(self):
+        """Test getting AMM dashboard statistics"""
+        return self.run_test("AMM Dashboard Stats", "GET", "amm/dashboard-stats", 200, auth_required=True)
+
+    def test_execute_amm_now(self, config_id=None):
+        """Test manually executing an AMM configuration"""
+        if not config_id:
+            # First try to get existing configurations
+            success, response = self.run_test("Get AMM Configs for Execute", "GET", "amm/configurations", 200, auth_required=True)
+            if success and isinstance(response, list) and len(response) > 0:
+                config_id = response[0].get('id')
+            else:
+                print("   No AMM configurations found to execute")
+                return False
+        
+        if config_id:
+            return self.run_test(
+                f"Execute AMM Now (ID: {config_id[:8]}...)", 
+                "POST", 
+                f"amm/configurations/{config_id}/execute-now", 
+                200, 
+                auth_required=True
+            )
+        return False
+
+    def check_xml_files_in_inbox(self):
+        """Check if XML files are generated in /tmp/argus_inbox"""
+        import os
+        import glob
+        
+        print(f"\n🔍 Checking for XML files in /tmp/argus_inbox...")
+        
+        try:
+            inbox_path = "/tmp/argus_inbox"
+            if not os.path.exists(inbox_path):
+                print(f"   ❌ Inbox directory does not exist: {inbox_path}")
+                return False
+            
+            xml_files = glob.glob(os.path.join(inbox_path, "*.xml"))
+            print(f"   Found {len(xml_files)} XML files in inbox")
+            
+            if xml_files:
+                print("   ✅ XML files found:")
+                for xml_file in xml_files[-5:]:  # Show last 5 files
+                    file_stat = os.stat(xml_file)
+                    file_time = datetime.fromtimestamp(file_stat.st_mtime)
+                    print(f"      - {os.path.basename(xml_file)} (modified: {file_time})")
+                return True
+            else:
+                print("   ❌ No XML files found in inbox")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Error checking inbox: {str(e)}")
+            return False
+
 def main():
     print("🚀 Starting ArgusUI Backend API Tests")
     print("=" * 50)
