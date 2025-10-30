@@ -218,10 +218,8 @@ class ArgusXMLProcessor:
         
         # Measurement location parameters
         meas_loc_param = ET.SubElement(sub_order, "MEAS_LOC_PARAM")
-        ET.SubElement(meas_loc_param, "MLP_LONG").text = str(config.get("longitude", -77.264667))
-        ET.SubElement(meas_loc_param, "MLP_LAT").text = str(config.get("latitude", 1.201194))
-        ET.SubElement(meas_loc_param, "MLP_HEIGHT").text = str(config.get("height", 600))
-        ET.SubElement(meas_loc_param, "MLP_ALTI").text = "0"
+        ET.SubElement(meas_loc_param, "MLP_LONG").text = str(config.get("longitude", 0))
+        ET.SubElement(meas_loc_param, "MLP_LAT").text = str(config.get("latitude", 0))
         
         # Measurement preparation parameters
         meas_prep_param = ET.SubElement(sub_order, "MEAS_PREP_PARAM")
