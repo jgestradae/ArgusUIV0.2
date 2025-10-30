@@ -169,6 +169,13 @@ export default function AutomaticMode() {
     }
   }, [activeTab, wizardStep]);
 
+  // Load signal paths when reaching step 4
+  useEffect(() => {
+    if (wizardStep === 4 && wizardData.selected_station) {
+      loadSignalPaths(wizardData.selected_station.name);
+    }
+  }, [wizardStep, wizardData.selected_station]);
+
   const loadAvailableStations = async () => {
     setLoadingStations(true);
     try {
