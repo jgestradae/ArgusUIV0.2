@@ -193,7 +193,7 @@ class GSPWorkflowTester:
         """Step 5: Query MongoDB to verify GSP data was stored"""
         print("\n🗄️ Step 5: Verify GSP data stored in MongoDB")
         
-        if not self.db:
+        if self.db is None:
             return self.log_test("MongoDB Storage", False, "MongoDB connection not available")
         
         try:
