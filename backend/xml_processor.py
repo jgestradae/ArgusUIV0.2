@@ -200,19 +200,20 @@ class ArgusXMLProcessor:
             # Format +/-HHMM to +/-HH:MM
             tz_offset = f"{tz_offset[:3]}:{tz_offset[3:]}"
         
-        start_str = start_time.strftime(f"%Y-%m-%dT%H:%M:%S{tz_offset}")
-        stop_str = stop_time.strftime(f"%Y-%m-%dT%H:%M:%S{tz_offset}")
+        # TIME_PARAM: Current DATE with 00:00:00 time
+        start_date_only = start_time.strftime(f"%Y-%m-%dT00:00:00{tz_offset}")
+        stop_date_only = stop_time.strftime(f"%Y-%m-%dT00:00:00{tz_offset}")
         
-        ET.SubElement(time_param, "TIME_START").text = start_str
-        ET.SubElement(time_param, "TIME_STOP").text = stop_str
+        ET.SubElement(time_param, "TIME_START").text = start_date_only
+        ET.SubElement(time_param, "TIME_STOP").text = stop_date_only
         
-        # Time parameter list (periodic execution)
+        # Time parameter list (periodic execution with actual times)
         time_param_list = ET.SubElement(sub_order, "TIME_PARAM_LIST")
-        # Use actual periodic times from config if available
+        # Use actual periodic times from config - fixed date (1899-12-30) with ACTUAL TIME
         per_start = config.get("daily_start_time", "00:00:00")
         per_stop = config.get("daily_end_time", "23:59:59")
-        ET.SubElement(time_param_list, "TIME_PER_START").text = f"1899-12-30T{per_start}-05:00"
-        ET.SubElement(time_param_list, "TIME_PER_STOP").text = f"1899-12-30T{per_stop}-05:00"
+        ET.SubElement(time_param_list, "TIME_PER_START").text = f"1899-12-30T{per_start}{tz_offset}"
+        ET.SubElement(time_param_list, "TIME_PER_STOP").text = f"1899-12-30T{per_stop}{tz_offset}"
         ET.SubElement(time_param_list, "TIME_DAYS").text = ""
         ET.SubElement(time_param_list, "TIME_ABS_START_STOP").text = "true"
         
