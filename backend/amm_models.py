@@ -133,6 +133,9 @@ class MeasurementDefinition(BaseModel):
     device_name: str  # Kept for backwards compatibility
     station_names: List[str]
     
+    # Result Configuration (ORM 4.1)
+    result_type: str = "MR"  # MR=Measurement Result, CMR=Compressed, SMR=Summary, LIMIT=Limits only
+    
     # Frequency Configuration
     frequency_mode: str = "S"  # S=Single, R=Range, L=List
     frequency_single: Optional[float] = None  # Hz
