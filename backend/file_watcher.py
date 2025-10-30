@@ -192,7 +192,7 @@ class ArgusResponseHandler(FileSystemEventHandler):
 class ArgusFileWatcher:
     """File watcher service for Argus outbox folder"""
     
-    def __init__(self, outbox_path: str, xml_processor, db, callback=None):
+    def __init__(self, outbox_path: str, xml_processor, db, loop=None, callback=None):
         """
         Initialize file watcher
         
@@ -200,11 +200,13 @@ class ArgusFileWatcher:
             outbox_path: Path to Argus outbox folder
             xml_processor: ArgusXMLProcessor instance
             db: Database connection
+            loop: asyncio event loop
             callback: Optional callback for new responses
         """
         self.outbox_path = Path(outbox_path)
         self.xml_processor = xml_processor
         self.db = db
+        self.loop = loop
         self.callback = callback
         self.observer = None
         self.handler = None
@@ -215,10 +217,11 @@ class ArgusFileWatcher:
             # Ensure outbox path exists
             self.outbox_path.mkdir(parents=True, exist_ok=True)
             
-            # Create event handler
+            # Create event handler with event loop
             self.handler = ArgusResponseHandler(
                 self.xml_processor, 
-                self.db, 
+                self.db,
+                self.loop,
                 self.callback
             )
             
