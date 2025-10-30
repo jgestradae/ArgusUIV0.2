@@ -1204,25 +1204,6 @@ export default function AutomaticMode() {
                   </p>
                 )}
               </div>
-                          <div>
-                            <div className="font-medium">HE600-EB500 mon</div>
-                            <div className="text-xs text-slate-400">Monitoring System</div>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Default_dBuV-EB500 m">
-                          <div>
-                            <div className="font-medium">Default_dBuV-EB500 m</div>
-                            <div className="text-xs text-slate-400">Default Measurement</div>
-                          </div>
-                        </SelectItem>
-                      </>
-                    )}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-slate-400">
-                  Select the signal/system path from the monitoring station
-                </p>
-              </div>
               
               {/* Frequency Configuration - Adaptive */}
               {isFixedFrequency && (
