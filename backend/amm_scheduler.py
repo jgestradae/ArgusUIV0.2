@@ -251,7 +251,7 @@ class AMMScheduler:
                 }
             )
             
-    def _convert_amm_to_xml_params(self, measurement_def: MeasurementDefinition, order_id: str) -> dict:
+    def _convert_amm_to_xml_params(self, measurement_def: MeasurementDefinition, timing_def: Optional[TimingDefinition], order_id: str) -> dict:
         """Convert AMM measurement definition to XML order parameters"""
         params = {
             "name": f"AMM_{measurement_def.name}",
@@ -260,6 +260,13 @@ class AMMScheduler:
             "priority": "LOW",
             "creator": "Extern"
         }
+        
+        # Add timing parameters if available
+        if timing_def:
+            if timing_def.start_time:
+                params["daily_start_time"] = timing_def.start_time
+            if timing_def.end_time:
+                params["daily_end_time"] = timing_def.end_time
         
         # Station parameters - CRITICAL for ORM 4.2
         if measurement_def.station_names and len(measurement_def.station_names) > 0:
