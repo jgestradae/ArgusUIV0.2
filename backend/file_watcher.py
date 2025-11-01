@@ -114,6 +114,10 @@ class ArgusResponseHandler(FileSystemEventHandler):
                 await self._process_gsp_response(response_data)
             elif order_type == "OR":
                 await self._process_measurement_response(response_data)
+            elif order_type in ["IFL", "IOFL"]:
+                await self._process_ifl_response(file_path)
+            elif order_type == "ITL":
+                await self._process_itl_response(file_path)
             
             # Move file to processed folder
             processed_path = self.xml_processor.data_path / "xml_responses" / file_path.name
