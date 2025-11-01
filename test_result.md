@@ -227,6 +227,32 @@ backend:
 
   - task: "SMDI Frequency List Query"
     implemented: true
+
+frontend:
+  - task: "Database Import Interface"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/DatabaseImport.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created comprehensive Database Import UI matching user's Spanish interface design. Includes result type selection (Transmitter/Frequency lists), frequency parameters (Single/List/Range), location parameters (Country/Coordinates with radius), and optional search criteria (Service, Signature, Call Sign, Licensee, etc.). Form submits SMDI queries to backend."
+
+  - task: "Data Navigator SMDI Integration"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/DataNavigator.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Extended Data Navigator with new tabs for Frequency Lists and Transmitter Lists. Added custom table columns showing Order ID, Status, and count of frequencies/transmitters. Integrated with SMDI backend APIs for data retrieval and deletion."
+
     working: "NA"
     file: "backend/smdi_api.py"
     stuck_count: 0
