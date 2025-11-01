@@ -227,6 +227,78 @@ backend:
 
   - task: "SMDI Frequency List Query"
     implemented: true
+    working: true
+    file: "backend/smdi_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created SMDI API endpoints for querying frequency lists. Endpoint POST /api/smdi/query-frequencies generates IFL XML requests and sends to Argus inbox. Need to test with actual SMDI database."
+        - working: true
+          agent: "testing"
+          comment: "COMPREHENSIVE SMDI FREQUENCY TESTING COMPLETED: 1) POST /api/smdi/query-frequencies working with all frequency modes (No restriction, Single frequency 94.7MHz, Range 88-108MHz, Coordinates) ✅ 2) XML generation correct - IFL/IOFL orders created in /tmp/argus_inbox ✅ 3) XML structure validated - proper ORDER_DEF, FREQ_PARAM, REG_PARAM, ADD_PARAM elements ✅ 4) Frequencies correctly stored in Hz (not MHz) ✅ 5) Coordinate format validated (degrees, minutes, seconds, hemisphere) ✅ 6) MongoDB storage working - 6 queries stored in smdi_queries collection ✅ 7) Fixed User object attribute error in API ✅"
+
+  - task: "SMDI Transmitter List Query"
+    implemented: true
+    working: true
+    file: "backend/smdi_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created SMDI API endpoints for querying transmitter lists. Endpoint POST /api/smdi/query-transmitters generates ITL XML requests and sends to Argus inbox. Need to test with actual SMDI database."
+        - working: true
+          agent: "testing"
+          comment: "COMPREHENSIVE SMDI TRANSMITTER TESTING COMPLETED: 1) POST /api/smdi/query-transmitters working with all parameter combinations (No restriction, Range + Coordinates) ✅ 2) XML generation correct - ITL orders created in /tmp/argus_inbox ✅ 3) XML structure validated - proper ORDER_DEF, FREQ_PARAM, REG_PARAM, ADD_PARAM elements ✅ 4) Location parameters working - coordinates (74°48'46.9\"W, 10°59'8.8\"N) with 30km radius ✅ 5) Service filtering working (BC - Broadcast) ✅ 6) MongoDB storage working - transmitter queries stored in smdi_queries collection ✅"
+
+  - task: "SMDI XML Generation"
+    implemented: true
+    working: true
+    file: "backend/xml_processor.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented XML generation methods for IFL and ITL requests with support for frequency modes (S/L/R), location parameters (coordinates, radius), and service filters. Based on SMDI manual specification and example XMLs."
+        - working: true
+          agent: "testing"
+          comment: "XML GENERATION FULLY VALIDATED: 1) create_smdi_frequency_list_order() working - generates proper IFL/IOFL XML ✅ 2) create_smdi_transmitter_list_order() working - generates proper ITL XML ✅ 3) All frequency modes supported (S=Single, R=Range, N=No restriction) ✅ 4) Location modes supported (N=No restriction, COORD=Coordinates) ✅ 5) XML structure matches SMDI specification ✅ 6) Frequencies stored in Hz as required ✅ 7) Coordinate format correct (degrees/minutes/seconds/hemisphere) ✅ 8) Files saved to /tmp/argus_inbox with correct naming convention ✅"
+
+  - task: "SMDI Response Parsing"
+    implemented: true
+    working: "NA"
+    file: "backend/xml_processor.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented parsing methods for IFL/IOFL and ITL responses. Extracts FREQ_RES and TX_RES data structures from XML responses. File watcher updated to process SMDI responses and store in MongoDB."
+        - working: "NA"
+          agent: "testing"
+          comment: "Response parsing not tested - no actual SMDI database responses available. Implementation exists for _parse_smdi_frequency_list_response() and _parse_smdi_transmitter_list_response() methods. Would require actual SMDI database connection to test response processing."
+
+  - task: "SMDI Data Retrieval APIs"
+    implemented: true
+    working: true
+    file: "backend/smdi_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created GET endpoints for retrieving stored frequency lists and transmitter lists: /api/smdi/frequency-lists, /api/smdi/transmitter-lists. Includes delete endpoints for data management."
+        - working: true
+          agent: "testing"
+          comment: "SMDI DATA RETRIEVAL APIS WORKING: 1) GET /api/smdi/frequency-lists returns empty list (no responses processed yet) ✅ 2) GET /api/smdi/transmitter-lists returns empty list (no responses processed yet) ✅ 3) GET /api/smdi/queries returns 6 stored queries with proper metadata ✅ 4) All endpoints return proper JSON structure with success/total/count fields ✅ 5) Authentication working correctly ✅"
 
 frontend:
   - task: "Database Import Interface"
@@ -252,64 +324,6 @@ frontend:
         - working: "NA"
           agent: "main"
           comment: "Extended Data Navigator with new tabs for Frequency Lists and Transmitter Lists. Added custom table columns showing Order ID, Status, and count of frequencies/transmitters. Integrated with SMDI backend APIs for data retrieval and deletion."
-
-    working: "NA"
-    file: "backend/smdi_api.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Created SMDI API endpoints for querying frequency lists. Endpoint POST /api/smdi/query-frequencies generates IFL XML requests and sends to Argus inbox. Need to test with actual SMDI database."
-
-  - task: "SMDI Transmitter List Query"
-    implemented: true
-    working: "NA"
-    file: "backend/smdi_api.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Created SMDI API endpoints for querying transmitter lists. Endpoint POST /api/smdi/query-transmitters generates ITL XML requests and sends to Argus inbox. Need to test with actual SMDI database."
-
-  - task: "SMDI XML Generation"
-    implemented: true
-    working: "NA"
-    file: "backend/xml_processor.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Implemented XML generation methods for IFL and ITL requests with support for frequency modes (S/L/R), location parameters (coordinates, radius), and service filters. Based on SMDI manual specification and example XMLs."
-
-  - task: "SMDI Response Parsing"
-    implemented: true
-    working: "NA"
-    file: "backend/xml_processor.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Implemented parsing methods for IFL/IOFL and ITL responses. Extracts FREQ_RES and TX_RES data structures from XML responses. File watcher updated to process SMDI responses and store in MongoDB."
-
-  - task: "SMDI Data Retrieval APIs"
-    implemented: true
-    working: "NA"
-    file: "backend/smdi_api.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Created GET endpoints for retrieving stored frequency lists and transmitter lists: /api/smdi/frequency-lists, /api/smdi/transmitter-lists. Includes delete endpoints for data management."
 
 
 frontend:
