@@ -186,7 +186,7 @@ from soap_gateway import create_soap_application
 soap_app = None
 
 @app.api_route("/soap", methods=["GET", "POST"])
-async def soap_endpoint(request):
+async def soap_endpoint(request: Request):
     """
     SOAP 1.2 endpoint for external system interoperability
     Handles all SOAP requests and returns SOAP responses
@@ -199,8 +199,6 @@ async def soap_endpoint(request):
             media_type="text/xml",
             status_code=503
         )
-    
-    from starlette.requests import Request as StarletteRequest
     
     # Convert FastAPI request to WSGI environ
     scope = request.scope
