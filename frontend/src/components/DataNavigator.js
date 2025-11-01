@@ -295,8 +295,48 @@ export default function DataNavigator() {
                       </div>
                     </td>
                     <td className="p-4 text-slate-300 max-w-xs truncate">
-                      {item.description || 'No description'}
+                      {item.description || item.query_name || 'No description'}
                     </td>
+                    
+                    {/* Frequency List specific columns */}
+                    {dataType === 'frequency_list' && (
+                      <>
+                        <td className="p-4 text-slate-300">
+                          <code className="text-xs bg-slate-800 px-2 py-1 rounded">{item.order_id}</code>
+                        </td>
+                        <td className="p-4">
+                          <Badge className={`${
+                            item.status === 'Finished' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                            'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                          }`}>
+                            {item.status}
+                          </Badge>
+                        </td>
+                        <td className="p-4 text-slate-300">
+                          {item.frequencies ? item.frequencies.length : 0} frequencies
+                        </td>
+                      </>
+                    )}
+                    
+                    {/* Transmitter List specific columns */}
+                    {dataType === 'transmitter_list' && (
+                      <>
+                        <td className="p-4 text-slate-300">
+                          <code className="text-xs bg-slate-800 px-2 py-1 rounded">{item.order_id}</code>
+                        </td>
+                        <td className="p-4">
+                          <Badge className={`${
+                            item.status === 'Finished' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                            'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                          }`}>
+                            {item.status}
+                          </Badge>
+                        </td>
+                        <td className="p-4 text-slate-300">
+                          {item.transmitters ? item.transmitters.length : 0} transmitters
+                        </td>
+                      </>
+                    )}
                     
                     {/* Measurement Result specific columns */}
                     {dataType === 'measurement_result' && (
