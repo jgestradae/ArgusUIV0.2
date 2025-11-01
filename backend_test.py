@@ -431,6 +431,7 @@ class ArgusAPITester:
 
     def _validate_smdi_xml_structure(self, xml_file_path, filename):
         """Validate SMDI XML structure"""
+        import xml.etree.ElementTree as ET
         try:
             tree = ET.parse(xml_file_path)
             root = tree.getroot()
