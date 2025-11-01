@@ -78,6 +78,12 @@ export default function Layout({ children }) {
       description: 'Import frequency & transmitter lists'
     },
     {
+      name: 'Reports',
+      path: '/reports/list',
+      icon: FileText,
+      description: 'View & download reports'
+    },
+    {
       name: 'Configuration',
       path: '/configuration',
       icon: Settings,
