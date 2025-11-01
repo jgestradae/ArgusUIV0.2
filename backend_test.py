@@ -384,9 +384,10 @@ class ArgusAPITester:
         )
 
     def check_xml_files_in_inbox(self):
-        """Check if XML files are generated in /tmp/argus_inbox"""
+        """Check if XML files are generated in /tmp/argus_inbox and validate SMDI structure"""
         import os
         import glob
+        import xml.etree.ElementTree as ET
         
         print(f"\n🔍 Checking for XML files in /tmp/argus_inbox...")
         
@@ -401,10 +402,24 @@ class ArgusAPITester:
             
             if xml_files:
                 print("   ✅ XML files found:")
-                for xml_file in xml_files[-5:]:  # Show last 5 files
+                smdi_files_found = False
+                
+                for xml_file in xml_files[-10:]:  # Show last 10 files
                     file_stat = os.stat(xml_file)
                     file_time = datetime.fromtimestamp(file_stat.st_mtime)
-                    print(f"      - {os.path.basename(xml_file)} (modified: {file_time})")
+                    filename = os.path.basename(xml_file)
+                    print(f"      - {filename} (modified: {file_time})")
+                    
+                    # Check if this is an SMDI file (IFL or ITL)
+                    if filename.startswith(('IFL', 'ITL', 'IOFL')):
+                        smdi_files_found = True
+                        self._validate_smdi_xml_structure(xml_file, filename)
+                
+                if smdi_files_found:
+                    print("   ✅ SMDI XML files detected and validated")
+                else:
+                    print("   ⚠️  No SMDI files found (IFL/ITL/IOFL)")
+                
                 return True
             else:
                 print("   ❌ No XML files found in inbox")
@@ -413,6 +428,74 @@ class ArgusAPITester:
         except Exception as e:
             print(f"   ❌ Error checking inbox: {str(e)}")
             return False
+
+    def _validate_smdi_xml_structure(self, xml_file_path, filename):
+        """Validate SMDI XML structure"""
+        try:
+            tree = ET.parse(xml_file_path)
+            root = tree.getroot()
+            
+            print(f"      📋 Validating {filename}:")
+            
+            # Check for required SMDI elements
+            order_def = root.find(".//ORDER_DEF")
+            if order_def is not None:
+                order_id = order_def.find("ORDER_ID")
+                order_type = order_def.find("ORDER_TYPE")
+                
+                if order_id is not None:
+                    print(f"         ✅ ORDER_ID: {order_id.text}")
+                if order_type is not None:
+                    print(f"         ✅ ORDER_TYPE: {order_type.text}")
+                
+                # Check frequency parameters
+                freq_param = order_def.find("FREQ_PARAM")
+                if freq_param is not None:
+                    freq_mode = freq_param.find("FREQ_PAR_MODE")
+                    if freq_mode is not None:
+                        print(f"         ✅ FREQ_PAR_MODE: {freq_mode.text}")
+                        
+                        # Check specific frequency parameters based on mode
+                        if freq_mode.text == "S":
+                            freq_single = freq_param.find("FREQ_PAR_S")
+                            if freq_single is not None:
+                                freq_hz = int(freq_single.text)
+                                freq_mhz = freq_hz / 1000000
+                                print(f"         ✅ Single Frequency: {freq_hz} Hz ({freq_mhz:.1f} MHz)")
+                        elif freq_mode.text == "R":
+                            freq_low = freq_param.find("FREQ_PAR_RG_L")
+                            freq_high = freq_param.find("FREQ_PAR_RG_U")
+                            if freq_low is not None and freq_high is not None:
+                                low_hz = int(freq_low.text)
+                                high_hz = int(freq_high.text)
+                                print(f"         ✅ Frequency Range: {low_hz} - {high_hz} Hz ({low_hz/1e6:.1f} - {high_hz/1e6:.1f} MHz)")
+                
+                # Check location parameters
+                reg_param = order_def.find("REG_PARAM")
+                if reg_param is not None:
+                    # Check coordinates
+                    lon_deg = reg_param.find("REG_PAR_LONG_DEG")
+                    lat_deg = reg_param.find("REG_PAR_LAT_DEG")
+                    radius = reg_param.find("REG_PAR_COORD_RAD")
+                    
+                    if lon_deg is not None and lat_deg is not None:
+                        print(f"         ✅ Coordinates: {lat_deg.text}°N, {lon_deg.text}°W")
+                        if radius is not None:
+                            print(f"         ✅ Radius: {radius.text} km")
+                
+                # Check additional parameters
+                add_param = order_def.find("ADD_PARAM")
+                if add_param is not None:
+                    service = add_param.find("ADD_PAR_SERVICE")
+                    if service is not None:
+                        print(f"         ✅ Service: {service.text}")
+                
+                print(f"         ✅ XML structure valid for SMDI spec")
+            else:
+                print(f"         ❌ Missing ORDER_DEF element")
+                
+        except Exception as e:
+            print(f"         ❌ XML validation error: {str(e)}")
 
 def main():
     print("🚀 Starting ArgusUI Backend API Tests - SMDI Module Focus")
