@@ -688,7 +688,7 @@ def create_soap_application(db=None, xml_processor=None):
         WSGI application for SOAP services
     """
     # Set dependencies
-    if db:
+    if db is not None:
         ArgusSOAPService.set_dependencies(db, xml_processor)
     
     # Create Spyne application
