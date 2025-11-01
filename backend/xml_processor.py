@@ -864,3 +864,465 @@ class ArgusXMLProcessor:
                 "timestamp": datetime.now()
             }
 
+
+    # ============================================================================
+    # SMDI (Spectrum Management Database Interface) Methods
+    # ============================================================================
+    
+    def create_smdi_frequency_list_order(self, order_id: str, query_params: Dict[str, Any],
+                                        sender: str = "CCS", sender_pc: str = "ET1") -> str:
+        """
+        Create IFL/IOFL (Import Frequency List) XML request
+        Based on SMDI manual and example XMLs
+        """
+        # Create root with proper namespace
+        root = ET.Element("XMLSchema1")
+        root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        
+        # Order definition
+        order_def = ET.SubElement(root, "ORDER_DEF")
+        ET.SubElement(order_def, "ORDER_ID").text = order_id
+        
+        # Determine order type based on result_option
+        result_option = query_params.get("result_option", "occupied_freq")
+        if result_option == "occupied_freq":
+            ET.SubElement(order_def, "ORDER_TYPE").text = "IOFL"  # Import Occupied Frequency List
+        else:
+            ET.SubElement(order_def, "ORDER_TYPE").text = "IFL"   # Import Frequency List
+        
+        ET.SubElement(order_def, "ORDER_SENDER").text = sender
+        ET.SubElement(order_def, "ORDER_SENDER_PC").text = sender_pc
+        ET.SubElement(order_def, "ORDER_STATE").text = "Open"
+        ET.SubElement(order_def, "ORDER_CREATOR").text = "Intern"
+        ET.SubElement(order_def, "ORDER_VER").text = "100"
+        ET.SubElement(order_def, "EXECUTION_TYPE").text = "A"
+        
+        # Action definition
+        act_def = ET.SubElement(order_def, "ACT_DEF")
+        ET.SubElement(act_def, "ACD_USERSTRING").text = order_id
+        ET.SubElement(act_def, "ACD_ERR")
+        
+        # Frequency parameters
+        freq_params = query_params.get("frequency_params", {})
+        freq_mode = freq_params.get("mode", "N")
+        
+        if freq_mode != "N":  # Not "No restriction"
+            freq_param = ET.SubElement(order_def, "FREQ_PARAM")
+            ET.SubElement(freq_param, "FREQ_PAR_MODE").text = freq_mode
+            
+            if freq_mode == "S":  # Single frequency
+                freq_single = freq_params.get("single_freq")
+                if freq_single:
+                    ET.SubElement(freq_param, "FREQ_PAR_S").text = str(int(freq_single))
+            
+            elif freq_mode == "L":  # Frequency list
+                freq_list = freq_params.get("freq_list", [])
+                if freq_list:
+                    freq_lst = ET.SubElement(freq_param, "FREQ_LST")
+                    for freq in freq_list:
+                        ET.SubElement(freq_lst, "FREQ_LST_EL").text = str(int(freq))
+            
+            elif freq_mode == "R":  # Frequency range
+                range_lower = freq_params.get("range_lower")
+                range_upper = freq_params.get("range_upper")
+                if range_lower:
+                    ET.SubElement(freq_param, "FREQ_PAR_RG_L").text = str(int(range_lower))
+                if range_upper:
+                    ET.SubElement(freq_param, "FREQ_PAR_RG_U").text = str(int(range_upper))
+        
+        # Location parameters
+        loc_params = query_params.get("location_params", {})
+        loc_mode = loc_params.get("mode", "N")
+        
+        if loc_mode != "N":  # Not "No restriction"
+            reg_param = ET.SubElement(order_def, "REG_PARAM")
+            
+            # Country code
+            if loc_mode == "C":
+                country = loc_params.get("country")
+                if country:
+                    ET.SubElement(reg_param, "REG_PAR_COUNTRY").text = country
+            
+            # Coordinates
+            if loc_mode == "COORD":
+                # Longitude
+                lon_deg = loc_params.get("longitude_deg")
+                lon_min = loc_params.get("longitude_min")
+                lon_sec = loc_params.get("longitude_sec")
+                lon_hem = loc_params.get("longitude_hem")
+                
+                if lon_deg is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LONG_DEG").text = str(lon_deg)
+                if lon_min is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LONG_MIN").text = str(lon_min)
+                if lon_sec is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LONG_SEC").text = str(lon_sec)
+                if lon_hem:
+                    ET.SubElement(reg_param, "REG_PAR_LONG_HEM").text = lon_hem
+                
+                # Latitude
+                lat_deg = loc_params.get("latitude_deg")
+                lat_min = loc_params.get("latitude_min")
+                lat_sec = loc_params.get("latitude_sec")
+                lat_hem = loc_params.get("latitude_hem")
+                
+                if lat_deg is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LAT_DEG").text = str(lat_deg)
+                if lat_min is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LAT_MIN").text = str(lat_min)
+                if lat_sec is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LAT_SEC").text = str(lat_sec)
+                if lat_hem:
+                    ET.SubElement(reg_param, "REG_PAR_LAT_HEM").text = lat_hem
+                
+                # Radius
+                radius = loc_params.get("radius")
+                if radius is not None:
+                    ET.SubElement(reg_param, "REG_PAR_COORD_RAD").text = str(int(radius))
+        
+        # Additional parameters
+        add_params = query_params.get("additional_params", {})
+        service = add_params.get("service")
+        
+        if service:
+            add_param = ET.SubElement(order_def, "ADD_PARAM")
+            ET.SubElement(add_param, "ADD_PAR_SERVICE").text = service
+        
+        return self._format_xml(root)
+    
+    def create_smdi_transmitter_list_order(self, order_id: str, query_params: Dict[str, Any],
+                                          sender: str = "CCS", sender_pc: str = "ET1") -> str:
+        """
+        Create ITL (Import Transmitter List) XML request
+        Based on SMDI manual and example XMLs
+        """
+        # Create root with proper namespace
+        root = ET.Element("XMLSchema1")
+        root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        
+        # Order definition
+        order_def = ET.SubElement(root, "ORDER_DEF")
+        ET.SubElement(order_def, "ORDER_ID").text = order_id
+        ET.SubElement(order_def, "ORDER_TYPE").text = "ITL"
+        ET.SubElement(order_def, "ORDER_SENDER").text = sender
+        ET.SubElement(order_def, "ORDER_SENDER_PC").text = sender_pc
+        ET.SubElement(order_def, "ORDER_STATE").text = "Open"
+        ET.SubElement(order_def, "ORDER_CREATOR").text = "Intern"
+        ET.SubElement(order_def, "ORDER_VER").text = "100"
+        ET.SubElement(order_def, "EXECUTION_TYPE").text = "A"
+        
+        # Action definition
+        act_def = ET.SubElement(order_def, "ACT_DEF")
+        ET.SubElement(act_def, "ACD_USERSTRING").text = order_id
+        ET.SubElement(act_def, "ACD_ERR")
+        
+        # Frequency parameters (same as IFL)
+        freq_params = query_params.get("frequency_params", {})
+        freq_mode = freq_params.get("mode", "N")
+        
+        if freq_mode != "N":
+            freq_param = ET.SubElement(order_def, "FREQ_PARAM")
+            ET.SubElement(freq_param, "FREQ_PAR_MODE").text = freq_mode
+            
+            if freq_mode == "S":
+                freq_single = freq_params.get("single_freq")
+                if freq_single:
+                    ET.SubElement(freq_param, "FREQ_PAR_S").text = str(int(freq_single))
+            
+            elif freq_mode == "L":
+                freq_list = freq_params.get("freq_list", [])
+                if freq_list:
+                    freq_lst = ET.SubElement(freq_param, "FREQ_LST")
+                    for freq in freq_list:
+                        ET.SubElement(freq_lst, "FREQ_LST_EL").text = str(int(freq))
+            
+            elif freq_mode == "R":
+                range_lower = freq_params.get("range_lower")
+                range_upper = freq_params.get("range_upper")
+                if range_lower:
+                    ET.SubElement(freq_param, "FREQ_PAR_RG_L").text = str(int(range_lower))
+                if range_upper:
+                    ET.SubElement(freq_param, "FREQ_PAR_RG_U").text = str(int(range_upper))
+        
+        # Location parameters (same as IFL)
+        loc_params = query_params.get("location_params", {})
+        loc_mode = loc_params.get("mode", "N")
+        
+        if loc_mode != "N":
+            reg_param = ET.SubElement(order_def, "REG_PARAM")
+            
+            if loc_mode == "C":
+                country = loc_params.get("country")
+                if country:
+                    ET.SubElement(reg_param, "REG_PAR_COUNTRY").text = country
+            
+            if loc_mode == "COORD":
+                lon_deg = loc_params.get("longitude_deg")
+                lon_min = loc_params.get("longitude_min")
+                lon_sec = loc_params.get("longitude_sec")
+                lon_hem = loc_params.get("longitude_hem")
+                
+                if lon_deg is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LONG_DEG").text = str(lon_deg)
+                if lon_min is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LONG_MIN").text = str(lon_min)
+                if lon_sec is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LONG_SEC").text = str(lon_sec)
+                if lon_hem:
+                    ET.SubElement(reg_param, "REG_PAR_LONG_HEM").text = lon_hem
+                
+                lat_deg = loc_params.get("latitude_deg")
+                lat_min = loc_params.get("latitude_min")
+                lat_sec = loc_params.get("latitude_sec")
+                lat_hem = loc_params.get("latitude_hem")
+                
+                if lat_deg is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LAT_DEG").text = str(lat_deg)
+                if lat_min is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LAT_MIN").text = str(lat_min)
+                if lat_sec is not None:
+                    ET.SubElement(reg_param, "REG_PAR_LAT_SEC").text = str(lat_sec)
+                if lat_hem:
+                    ET.SubElement(reg_param, "REG_PAR_LAT_HEM").text = lat_hem
+                
+                radius = loc_params.get("radius")
+                if radius is not None:
+                    ET.SubElement(reg_param, "REG_PAR_COORD_RAD").text = str(int(radius))
+        
+        # Additional parameters
+        add_params = query_params.get("additional_params", {})
+        service = add_params.get("service")
+        
+        if service:
+            add_param = ET.SubElement(order_def, "ADD_PARAM")
+            ET.SubElement(add_param, "ADD_PAR_SERVICE").text = service
+        
+        return self._format_xml(root)
+    
+    def _parse_smdi_frequency_list_response(self, xml_file_path: str) -> Dict[str, Any]:
+        """
+        Parse IFL/IOFL response XML and extract FREQ_RES data
+        """
+        try:
+            tree = ET.parse(xml_file_path)
+            root = tree.getroot()
+            
+            result = {
+                "xml_file_path": xml_file_path,
+                "timestamp": datetime.now(),
+                "frequencies": []
+            }
+            
+            # Extract order information
+            order_def = root.find(".//ORDER_DEF")
+            if order_def is not None:
+                order_id = order_def.find("ORDER_ID")
+                if order_id is not None:
+                    result["order_id"] = order_id.text
+                
+                order_type = order_def.find("ORDER_TYPE")
+                if order_type is not None:
+                    result["order_type"] = order_type.text
+                
+                order_state = order_def.find("ORDER_STATE")
+                if order_state is not None:
+                    result["status"] = order_state.text
+                
+                # Extract action definition (error info)
+                act_def = order_def.find("ACT_DEF")
+                if act_def is not None:
+                    err_code = act_def.find("ACD_ERR_CODE")
+                    err_mess = act_def.find("ACD_ERR_MESS")
+                    if err_code is not None:
+                        result["error_code"] = err_code.text
+                    if err_mess is not None:
+                        result["error_message"] = err_mess.text
+                
+                # Extract FREQ_RES entries
+                for freq_res in order_def.findall("FREQ_RES"):
+                    freq_item = {}
+                    
+                    for child in freq_res:
+                        tag = child.tag
+                        value = child.text
+                        
+                        if tag == "FREQ_RES_TX_ID":
+                            freq_item["tx_id"] = int(value) if value else None
+                        elif tag == "FREQ_RES_FREQ":
+                            freq_item["frequency"] = float(value) if value else None
+                        elif tag == "FREQ_RES_LW_FREQ":
+                            freq_item["lower_freq"] = float(value) if value else None
+                        elif tag == "FREQ_RES_UP_FREQ":
+                            freq_item["upper_freq"] = float(value) if value else None
+                        elif tag == "FREQ_RES_CHAN":
+                            freq_item["channel"] = value
+                        elif tag == "FREQ_RES_CHAN_SPAC":
+                            freq_item["channel_spacing"] = float(value) if value else None
+                        elif tag == "FREQ_RES_BANDWIDTH":
+                            freq_item["bandwidth"] = float(value) if value else None
+                        elif tag == "FREQ_RES_TX_NAME":
+                            freq_item["transmitter_name"] = value
+                        elif tag == "FREQ_RES_TYPE":
+                            freq_item["spectrum_type"] = int(value) if value else None
+                        elif tag == "FREQ_RES_TX_COUNT":
+                            freq_item["transmitter_count"] = int(value) if value else None
+                    
+                    if freq_item:
+                        result["frequencies"].append(freq_item)
+            
+            logger.info(f"Parsed {len(result['frequencies'])} frequency entries from {xml_file_path}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error parsing SMDI frequency list response: {e}", exc_info=True)
+            return {
+                "xml_file_path": xml_file_path,
+                "error": str(e),
+                "timestamp": datetime.now(),
+                "frequencies": []
+            }
+    
+    def _parse_smdi_transmitter_list_response(self, xml_file_path: str) -> Dict[str, Any]:
+        """
+        Parse ITL response XML and extract TX_RES data
+        """
+        try:
+            tree = ET.parse(xml_file_path)
+            root = tree.getroot()
+            
+            result = {
+                "xml_file_path": xml_file_path,
+                "timestamp": datetime.now(),
+                "transmitters": []
+            }
+            
+            # Extract order information
+            order_def = root.find(".//ORDER_DEF")
+            if order_def is not None:
+                order_id = order_def.find("ORDER_ID")
+                if order_id is not None:
+                    result["order_id"] = order_id.text
+                
+                order_type = order_def.find("ORDER_TYPE")
+                if order_type is not None:
+                    result["order_type"] = order_type.text
+                
+                order_state = order_def.find("ORDER_STATE")
+                if order_state is not None:
+                    result["status"] = order_state.text
+                
+                # Extract action definition (error info)
+                act_def = order_def.find("ACT_DEF")
+                if act_def is not None:
+                    err_code = act_def.find("ACD_ERR_CODE")
+                    err_mess = act_def.find("ACD_ERR_MESS")
+                    if err_code is not None:
+                        result["error_code"] = err_code.text
+                    if err_mess is not None:
+                        result["error_message"] = err_mess.text
+                
+                # Extract TX_RES entries
+                for tx_res in order_def.findall("TX_RES"):
+                    tx_item = {}
+                    
+                    for child in tx_res:
+                        tag = child.tag
+                        value = child.text
+                        
+                        # Map all TX_RES fields
+                        if tag == "TX_RES_TX_ID":
+                            tx_item["tx_id"] = int(value) if value else None
+                        elif tag == "TX_RES_RX_ID":
+                            tx_item["rx_id"] = int(value) if value else None
+                        elif tag == "TX_RES_MODIFY":
+                            tx_item["modify_flag"] = int(value) if value else None
+                        elif tag == "TX_RES_FREQ":
+                            tx_item["frequency"] = float(value) if value else None
+                        elif tag == "TX_RES_CHAN":
+                            tx_item["channel"] = value
+                        elif tag == "TX_RES_CHAN_SPAC":
+                            tx_item["channel_spacing"] = float(value) if value else None
+                        elif tag == "TX_RES_SERVICE":
+                            tx_item["service"] = value
+                        elif tag == "TX_RES_SIGNATURE":
+                            tx_item["signature"] = value
+                        elif tag == "TX_RES_CALL_SIGN":
+                            tx_item["call_sign"] = value
+                        elif tag == "TX_RES_LIC_NM":
+                            tx_item["licensee_name"] = value
+                        elif tag == "TX_RES_STATE":
+                            tx_item["license_state"] = value
+                        elif tag == "TX_RES_NAME":
+                            tx_item["station_name"] = value
+                        elif tag == "TX_RES_PH":
+                            tx_item["phone"] = value
+                        elif tag == "TX_RES_ZIP":
+                            tx_item["zip_code"] = value
+                        elif tag == "TX_RES_CITY":
+                            tx_item["city"] = value
+                        elif tag == "TX_RES_ST":
+                            tx_item["street"] = value
+                        elif tag == "TX_RES_COUNTRY":
+                            tx_item["country"] = value
+                        elif tag == "TX_RES_LONG":
+                            tx_item["longitude"] = float(value) if value else None
+                        elif tag == "TX_RES_LAT":
+                            tx_item["latitude"] = float(value) if value else None
+                        elif tag == "TX_RES_LONG_DEG":
+                            tx_item["longitude_deg"] = int(value) if value else None
+                        elif tag == "TX_RES_LONG_MIN":
+                            tx_item["longitude_min"] = int(value) if value else None
+                        elif tag == "TX_RES_LONG_SEC":
+                            tx_item["longitude_sec"] = float(value) if value else None
+                        elif tag == "TX_RES_LONG_HEM":
+                            tx_item["longitude_hem"] = value
+                        elif tag == "TX_RES_LAT_DEG":
+                            tx_item["latitude_deg"] = int(value) if value else None
+                        elif tag == "TX_RES_LAT_MIN":
+                            tx_item["latitude_min"] = int(value) if value else None
+                        elif tag == "TX_RES_LAT_SEC":
+                            tx_item["latitude_sec"] = float(value) if value else None
+                        elif tag == "TX_RES_LAT_HEM":
+                            tx_item["latitude_hem"] = value
+                        elif tag == "TX_RES_DIST":
+                            tx_item["distance"] = float(value) if value else None
+                        elif tag == "TX_RES_FR_OFF_LIM":
+                            tx_item["freq_offset_limit"] = float(value) if value else None
+                        elif tag == "TX_RES_FR_OFF_U":
+                            tx_item["freq_offset_unit"] = value
+                        elif tag == "TX_RES_FR_OFF_LIM_COM":
+                            tx_item["freq_offset_comment"] = value
+                        elif tag == "TX_RES_BW_LIM":
+                            tx_item["bandwidth_limit"] = float(value) if value else None
+                        elif tag == "TX_RES_BW_U":
+                            tx_item["bandwidth_unit"] = value
+                        elif tag == "TX_RES_BW_LIM_COM":
+                            tx_item["bandwidth_comment"] = value
+                        elif tag == "TX_RES_MOD_LIM":
+                            tx_item["modulation_limit"] = float(value) if value else None
+                        elif tag == "TX_RES_MOD_U":
+                            tx_item["modulation_unit"] = value
+                        elif tag == "TX_RES_MOD_T":
+                            tx_item["modulation_type"] = value
+                        elif tag == "TX_RES_MOD_LIM_COM":
+                            tx_item["modulation_comment"] = value
+                        elif tag == "TX_RES_POL":
+                            tx_item["polarization"] = value
+                        elif tag == "TX_RES_ANT_HEIGHT":
+                            tx_item["antenna_height"] = float(value) if value else None
+                    
+                    if tx_item:
+                        result["transmitters"].append(tx_item)
+            
+            logger.info(f"Parsed {len(result['transmitters'])} transmitter entries from {xml_file_path}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error parsing SMDI transmitter list response: {e}", exc_info=True)
+            return {
+                "xml_file_path": xml_file_path,
+                "error": str(e),
+                "timestamp": datetime.now(),
+                "transmitters": []
+            }
+
