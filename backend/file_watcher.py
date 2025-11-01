@@ -219,6 +219,81 @@ class ArgusResponseHandler(FileSystemEventHandler):
                     "measurement_type": response_data.get("measurement_type"),
                     "result_data": response_data
                 })
+
+    async def _process_ifl_response(self, file_path: Path):
+        """Process IFL/IOFL (Import Frequency List) response"""
+        try:
+            from smdi_models import FrequencyListResult, FrequencyListItem
+            
+            # Parse the IFL response XML
+            parsed_data = self.xml_processor._parse_smdi_frequency_list_response(str(file_path))
+            
+            if not parsed_data or "error" in parsed_data:
+                logger.error(f"Failed to parse IFL response: {parsed_data.get('error')}")
+                return
+            
+            # Try to find the original query request from database to get query_params
+            order_id = parsed_data.get("order_id")
+            original_request = None
+            if order_id:
+                original_request = await self.db.smdi_queries.find_one({"order_id": order_id})
+            
+            # Create FrequencyListResult
+            freq_list_result = FrequencyListResult(
+                order_id=parsed_data.get("order_id", "unknown"),
+                order_type=parsed_data.get("order_type", "IOFL"),
+                query_name=original_request.get("query_name") if original_request else None,
+                status=parsed_data.get("status", "Unknown"),
+                error_code=parsed_data.get("error_code"),
+                error_message=parsed_data.get("error_message"),
+                query_params=original_request.get("query_params") if original_request else {},
+                frequencies=[FrequencyListItem(**freq) for freq in parsed_data.get("frequencies", [])]
+            )
+            
+            # Save to frequency_lists collection
+            await self.db.frequency_lists.insert_one(freq_list_result.dict())
+            logger.info(f"Frequency list saved: {freq_list_result.order_id}, {len(freq_list_result.frequencies)} frequencies")
+            
+        except Exception as e:
+            logger.error(f"Error processing IFL response: {e}", exc_info=True)
+    
+    async def _process_itl_response(self, file_path: Path):
+        """Process ITL (Import Transmitter List) response"""
+        try:
+            from smdi_models import TransmitterListResult, TransmitterListItem
+            
+            # Parse the ITL response XML
+            parsed_data = self.xml_processor._parse_smdi_transmitter_list_response(str(file_path))
+            
+            if not parsed_data or "error" in parsed_data:
+                logger.error(f"Failed to parse ITL response: {parsed_data.get('error')}")
+                return
+            
+            # Try to find the original query request from database to get query_params
+            order_id = parsed_data.get("order_id")
+            original_request = None
+            if order_id:
+                original_request = await self.db.smdi_queries.find_one({"order_id": order_id})
+            
+            # Create TransmitterListResult
+            tx_list_result = TransmitterListResult(
+                order_id=parsed_data.get("order_id", "unknown"),
+                order_type=parsed_data.get("order_type", "ITL"),
+                query_name=original_request.get("query_name") if original_request else None,
+                status=parsed_data.get("status", "Unknown"),
+                error_code=parsed_data.get("error_code"),
+                error_message=parsed_data.get("error_message"),
+                query_params=original_request.get("query_params") if original_request else {},
+                transmitters=[TransmitterListItem(**tx) for tx in parsed_data.get("transmitters", [])]
+            )
+            
+            # Save to transmitter_lists collection
+            await self.db.transmitter_lists.insert_one(tx_list_result.dict())
+            logger.info(f"Transmitter list saved: {tx_list_result.order_id}, {len(tx_list_result.transmitters)} transmitters")
+            
+        except Exception as e:
+            logger.error(f"Error processing ITL response: {e}", exc_info=True)
+
                 logger.info(f"Measurement result saved (legacy format): {response_data.get('order_id')}")
             
         except Exception as e:
