@@ -198,7 +198,15 @@ export default function DataNavigator() {
     const typeData = data[dataType];
     if (!typeData) return <div>Loading...</div>;
 
-    const { items, total_count } = typeData;
+    // Handle SMDI data types (they return arrays directly, not {items, total_count})
+    let items, total_count;
+    if (dataType === 'frequency_list' || dataType === 'transmitter_list') {
+      items = typeData;
+      total_count = typeData.length;
+    } else {
+      items = typeData.items || [];
+      total_count = typeData.total_count || 0;
+    }
 
     if (items.length === 0) {
       return (
