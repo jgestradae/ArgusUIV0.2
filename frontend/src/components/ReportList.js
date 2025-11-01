@@ -269,6 +269,16 @@ const ReportList = () => {
           </div>
         )}
       </div>
+      
+      {/* Floating Action Button */}
+      <button
+        onClick={() => navigate('/reports/generate')}
+        className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-110 flex items-center gap-2"
+        title="Create New Report"
+      >
+        <Plus className="w-6 h-6" />
+        <span className="font-medium">New Report</span>
+      </button>
     </div>
   );
 };
