@@ -38,6 +38,9 @@ class OrderType(str, Enum):
     GMS = "GMS"  # Get Monitoring Statistic
     ST = "ST"   # Stop Order
     OS = "OS"   # Order State
+    IFL = "IFL"  # Import Frequency List (SMDI)
+    ITL = "ITL"  # Import Transmitter List (SMDI)
+    IOFL = "IOFL"  # Import Occupied Frequency List (SMDI)
 
 class OrderState(str, Enum):
     OPEN = "Open"
