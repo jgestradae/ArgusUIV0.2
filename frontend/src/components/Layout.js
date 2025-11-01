@@ -71,6 +71,12 @@ export default function Layout({ children }) {
       description: 'Browse measurement data'
     },
     {
+      name: 'Database Import',
+      path: '/database-import',
+      icon: Download,
+      description: 'Import frequency & transmitter lists'
+    },
+    {
       name: 'Configuration',
       path: '/configuration',
       icon: Settings,
