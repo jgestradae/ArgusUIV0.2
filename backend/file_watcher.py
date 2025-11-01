@@ -219,6 +219,10 @@ class ArgusResponseHandler(FileSystemEventHandler):
                     "measurement_type": response_data.get("measurement_type"),
                     "result_data": response_data
                 })
+                logger.info(f"Measurement result saved (legacy format): {response_data.get('order_id')}")
+            
+        except Exception as e:
+            logger.error(f"Error processing measurement response: {e}", exc_info=True)
 
     async def _process_ifl_response(self, file_path: Path):
         """Process IFL/IOFL (Import Frequency List) response"""
