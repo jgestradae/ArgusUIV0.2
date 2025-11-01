@@ -168,6 +168,136 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# ============================================================================
+# SOAP WEB SERVICES
+# ============================================================================
+
+from fastapi.responses import Response
+from soap_gateway import create_soap_application
+
+# SOAP application (will be initialized in lifespan)
+soap_app = None
+
+@app.api_route("/soap", methods=["GET", "POST"])
+async def soap_endpoint(request):
+    """
+    SOAP 1.2 endpoint for external system interoperability
+    Handles all SOAP requests and returns SOAP responses
+    """
+    global soap_app
+    
+    if soap_app is None:
+        return Response(
+            content="<error>SOAP service not initialized</error>",
+            media_type="text/xml",
+            status_code=503
+        )
+    
+    from starlette.requests import Request as StarletteRequest
+    
+    # Convert FastAPI request to WSGI environ
+    scope = request.scope
+    environ = {
+        'REQUEST_METHOD': scope['method'],
+        'SCRIPT_NAME': '',
+        'PATH_INFO': scope['path'],
+        'QUERY_STRING': scope.get('query_string', b'').decode('latin1'),
+        'CONTENT_TYPE': request.headers.get('content-type', ''),
+        'CONTENT_LENGTH': request.headers.get('content-length', ''),
+        'SERVER_NAME': scope.get('server', ['localhost', None])[0],
+        'SERVER_PORT': str(scope.get('server', [None, 80])[1]),
+        'SERVER_PROTOCOL': 'HTTP/1.1',
+        'wsgi.version': (1, 0),
+        'wsgi.url_scheme': scope.get('scheme', 'http'),
+        'wsgi.input': await request.body(),
+        'wsgi.errors': None,
+        'wsgi.multithread': True,
+        'wsgi.multiprocess': False,
+        'wsgi.run_once': False,
+    }
+    
+    # Add HTTP headers
+    for header_name, header_value in request.headers.items():
+        key = f'HTTP_{header_name.upper().replace("-", "_")}'
+        environ[key] = header_value
+    
+    # Call SOAP application
+    response_started = False
+    status_code = 200
+    response_headers = []
+    response_body = []
+    
+    def start_response(status, headers):
+        nonlocal response_started, status_code, response_headers
+        response_started = True
+        status_code = int(status.split()[0])
+        response_headers = headers
+    
+    # Get response from SOAP app
+    import io
+    environ['wsgi.input'] = io.BytesIO(environ['wsgi.input'])
+    
+    result = soap_app(environ, start_response)
+    
+    for data in result:
+        response_body.append(data)
+    
+    # Return response
+    content = b''.join(response_body)
+    headers_dict = {name: value for name, value in response_headers}
+    
+    return Response(
+        content=content,
+        status_code=status_code,
+        headers=headers_dict,
+        media_type=headers_dict.get('Content-Type', 'text/xml')
+    )
+
+@app.get("/wsdl")
+@app.get("/wsdl/ArgusUI.wsdl")
+async def get_wsdl():
+    """
+    Retrieve WSDL (Web Services Description Language) for ArgusUI SOAP services
+    """
+    global soap_app
+    
+    if soap_app is None:
+        return Response(
+            content="<error>SOAP service not initialized</error>",
+            media_type="text/xml",
+            status_code=503
+        )
+    
+    # Generate WSDL by making a GET request to SOAP endpoint
+    from starlette.requests import Request
+    
+    wsdl_request_env = {
+        'REQUEST_METHOD': 'GET',
+        'SCRIPT_NAME': '',
+        'PATH_INFO': '/soap',
+        'QUERY_STRING': 'wsdl',
+        'SERVER_NAME': 'localhost',
+        'SERVER_PORT': '8001',
+        'wsgi.url_scheme': 'http',
+    }
+    
+    response_data = []
+    
+    def start_response(status, headers):
+        pass
+    
+    result = soap_app(wsdl_request_env, start_response)
+    for data in result:
+        response_data.append(data)
+    
+    wsdl_content = b''.join(response_data)
+    
+    return Response(
+        content=wsdl_content,
+        media_type="text/xml",
+        headers={"Content-Disposition": "inline; filename=ArgusUI.wsdl"}
+    )
+
 # Create API router with prefix
 api_router = APIRouter(prefix="/api")
 
