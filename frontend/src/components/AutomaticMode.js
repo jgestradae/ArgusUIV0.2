@@ -1647,6 +1647,10 @@ export default function AutomaticMode() {
           </div>
         </TabsContent>
 
+        <TabsContent value="calendar">
+          <AMMCalendarView />
+        </TabsContent>
+
         <TabsContent value="executions">
           <Card className="glass-card border-0">
             <CardHeader>
