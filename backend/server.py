@@ -123,6 +123,12 @@ async def lifespan(app: FastAPI):
     app.include_router(amm_router)
     logger.info("AMM Router initialized and included")
     
+    # Initialize and include SMDI router
+    import smdi_api
+    smdi_api.set_dependencies(xml_processor, db)
+    app.include_router(smdi_api.router, prefix="/api", tags=["SMDI"])
+    logger.info("SMDI Router initialized and included")
+    
     # Start AMM scheduler
     await amm_scheduler.start_scheduler()
     logger.info("AMM Scheduler started")
