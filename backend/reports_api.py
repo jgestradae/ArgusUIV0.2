@@ -48,7 +48,7 @@ async def create_report(
             report_type=request.report_type,
             report_name=request.report_name,
             description=request.description,
-            created_by=current_user.get("username", "unknown"),
+            created_by=current_user.username if hasattr(current_user, 'username') else str(current_user.get("username", "unknown")),
             filters=request.filters.dict(),
             status="generating"
         )
