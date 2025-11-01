@@ -127,7 +127,7 @@ def login(base_url):
         return None
 
 def main():
-    base_url = "https://specmon-dash.preview.emergentagent.com"
+    base_url = "https://argus-spectrum.preview.emergentagent.com"
     
     print("🚀 Testing AMM Configuration Creation and Execution")
     print("=" * 60)
