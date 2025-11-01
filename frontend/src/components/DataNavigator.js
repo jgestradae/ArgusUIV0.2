@@ -36,6 +36,18 @@ const DATA_TYPES = {
     color: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
     description: 'Spectrum measurement data and results'
   },
+  frequency_list: {
+    label: 'Frequency Lists',
+    icon: Radio,
+    color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    description: 'Imported frequency list data from SMDI'
+  },
+  transmitter_list: {
+    label: 'Transmitter Lists',
+    icon: HardDrive,
+    color: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+    description: 'Imported transmitter list data from SMDI'
+  },
   graph: {
     label: 'Graphs & Charts', 
     icon: Image,
