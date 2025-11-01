@@ -111,17 +111,32 @@ export default function DataNavigator() {
   const loadDataForType = async (dataType) => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        page_size: pagination.pageSize.toString()
-      });
       
-      if (searchTerm) {
-        params.append('name_search', searchTerm);
+      // Handle SMDI data types separately
+      if (dataType === 'frequency_list') {
+        const response = await axios.get(`${API}/smdi/frequency-lists`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        setData(prev => ({ ...prev, [dataType]: response.data.frequency_lists }));
+      } else if (dataType === 'transmitter_list') {
+        const response = await axios.get(`${API}/smdi/transmitter-lists`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        setData(prev => ({ ...prev, [dataType]: response.data.transmitter_lists }));
+      } else {
+        // Original data types
+        const params = new URLSearchParams({
+          page: pagination.page.toString(),
+          page_size: pagination.pageSize.toString()
+        });
+        
+        if (searchTerm) {
+          params.append('name_search', searchTerm);
+        }
+        
+        const response = await axios.get(`${API}/data/${dataType}?${params}`);
+        setData(prev => ({ ...prev, [dataType]: response.data }));
       }
-      
-      const response = await axios.get(`${API}/data/${dataType}?${params}`);
-      setData(prev => ({ ...prev, [dataType]: response.data }));
     } catch (error) {
       console.error(`Error loading ${dataType} data:`, error);
       toast.error(`Failed to load ${DATA_TYPES[dataType]?.label || dataType}`);
