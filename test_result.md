@@ -225,6 +225,67 @@ backend:
           agent: "testing"
           comment: "FIXED: Renamed first endpoint to POST /system/request-parameters. GET /api/system/parameters now correctly returns GSP data from MongoDB with 2 stations and 3 signal paths. Endpoint working perfectly for AMM wizard integration."
 
+  - task: "SMDI Frequency List Query"
+    implemented: true
+    working: "NA"
+    file: "backend/smdi_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created SMDI API endpoints for querying frequency lists. Endpoint POST /api/smdi/query-frequencies generates IFL XML requests and sends to Argus inbox. Need to test with actual SMDI database."
+
+  - task: "SMDI Transmitter List Query"
+    implemented: true
+    working: "NA"
+    file: "backend/smdi_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created SMDI API endpoints for querying transmitter lists. Endpoint POST /api/smdi/query-transmitters generates ITL XML requests and sends to Argus inbox. Need to test with actual SMDI database."
+
+  - task: "SMDI XML Generation"
+    implemented: true
+    working: "NA"
+    file: "backend/xml_processor.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented XML generation methods for IFL and ITL requests with support for frequency modes (S/L/R), location parameters (coordinates, radius), and service filters. Based on SMDI manual specification and example XMLs."
+
+  - task: "SMDI Response Parsing"
+    implemented: true
+    working: "NA"
+    file: "backend/xml_processor.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented parsing methods for IFL/IOFL and ITL responses. Extracts FREQ_RES and TX_RES data structures from XML responses. File watcher updated to process SMDI responses and store in MongoDB."
+
+  - task: "SMDI Data Retrieval APIs"
+    implemented: true
+    working: "NA"
+    file: "backend/smdi_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created GET endpoints for retrieving stored frequency lists and transmitter lists: /api/smdi/frequency-lists, /api/smdi/transmitter-lists. Includes delete endpoints for data management."
+
+
 frontend:
   # No frontend testing performed as per instructions
 
