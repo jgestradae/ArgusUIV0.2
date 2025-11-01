@@ -597,7 +597,7 @@ class ArgusSOAPService(ServiceBase):
     # Service 7: GetReportList
     # ========================================================================
     
-    @rpc(Unicode, Unicode, _returns=ReportInfoArray)
+    @rpc(Unicode, Unicode, _returns=ReportInfo)
     def GetReportList(ctx, auth_token, report_type=None):
         """
         Provides metadata and download links for generated reports
@@ -619,30 +619,26 @@ class ArgusSOAPService(ServiceBase):
             # Query MongoDB for reports
             if ArgusSOAPService.db is not None:
                 try:
-                    import asyncio
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    
                     query = {}
                     if report_type:
-                        query['format'] = report_type.upper()
+                        query['report_type'] = report_type
                     
-                    cursor = ArgusSOAPService.db.reports.find(query).sort("created_date", -1).limit(50)
-                    reports_data = loop.run_until_complete(cursor.to_list(length=50))
-                    loop.close()
+                    # Get reports using thread-safe approach
+                    cursor = ArgusSOAPService.db.reports.find(query).sort("created_at", -1).limit(50)
+                    reports_data = run_async_in_thread(cursor.to_list(length=50))
                     
                     if reports_data:
                         reports = []
                         for report in reports_data:
                             report_info = ReportInfo(
                                 report_id=report.get('id', str(report.get('_id', ''))),
-                                report_name=report.get('name', 'Unknown Report'),
-                                report_type=report.get('type', 'measurement'),
-                                format=report.get('format', 'PDF'),
-                                created_date=report.get('created_date', datetime.now()),
+                                report_name=report.get('report_name', 'Unknown Report'),
+                                report_type=report.get('report_type', 'unknown'),
+                                format=report.get('export_formats', ['PDF'])[0] if report.get('export_formats') else 'PDF',
+                                created_date=report.get('created_at', datetime.now()),
                                 created_by=report.get('created_by', 'system'),
                                 file_size=report.get('file_size', 0),
-                                download_url=report.get('download_url', '')
+                                download_url=f"/api/reports/{report.get('id')}/download" if report.get('id') else ''
                             )
                             reports.append(report_info)
                         
@@ -670,6 +666,72 @@ class ArgusSOAPService(ServiceBase):
         except Exception as e:
             logger.error(f"GetReportList error: {e}", exc_info=True)
             raise Fault(faultcode="Server", faultstring=f"Error retrieving report list: {str(e)}")
+    
+    # ========================================================================
+    # Service 8: GetReportData (NEW)
+    # ========================================================================
+    
+    @rpc(Unicode, Unicode, _returns=Unicode)
+    def GetReportData(ctx, auth_token, report_id):
+        """
+        Retrieves report contents in XML format
+        
+        Args:
+            auth_token: WS-Security authentication token
+            report_id: Unique identifier of the report
+            
+        Returns:
+            Report data as XML string
+        """
+        try:
+            # Authenticate
+            if not validate_soap_token(auth_token):
+                raise SoapAuthenticationError()
+            
+            logger.info(f"SOAP: GetReportData called for {report_id}")
+            
+            # Query MongoDB for report
+            if ArgusSOAPService.db is not None:
+                try:
+                    report = run_async_in_thread(
+                        ArgusSOAPService.db.reports.find_one({"id": report_id})
+                    )
+                    
+                    if report:
+                        # Read XML file if available
+                        file_path = report.get('file_path', '')
+                        if file_path:
+                            # Try to find XML version
+                            xml_path = file_path.replace('/pdf/', '/xml/').replace('.pdf', '.xml')
+                            if os.path.exists(xml_path):
+                                with open(xml_path, 'r', encoding='utf-8') as f:
+                                    return f.read()
+                        
+                        # Return report metadata as XML if file not found
+                        import xml.etree.ElementTree as ET
+                        root = ET.Element("Report")
+                        ET.SubElement(root, "ReportID").text = report.get('id', '')
+                        ET.SubElement(root, "ReportName").text = report.get('report_name', '')
+                        ET.SubElement(root, "ReportType").text = report.get('report_type', '')
+                        ET.SubElement(root, "Status").text = report.get('status', '')
+                        ET.SubElement(root, "CreatedBy").text = report.get('created_by', '')
+                        ET.SubElement(root, "CreatedAt").text = str(report.get('created_at', ''))
+                        
+                        return ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    logger.error(f"Error querying database: {e}")
+            
+            # Report not found
+            raise Fault(
+                faultcode="Client.NotFound",
+                faultstring=f"Report {report_id} not found"
+            )
+            
+        except SoapAuthenticationError:
+            raise
+        except Exception as e:
+            logger.error(f"GetReportData error: {e}", exc_info=True)
+            raise Fault(faultcode="Server", faultstring=f"Error retrieving report data: {str(e)}")
 
 
 # ============================================================================
