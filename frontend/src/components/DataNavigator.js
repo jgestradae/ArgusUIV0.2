@@ -239,6 +239,20 @@ export default function DataNavigator() {
                 <tr className="bg-slate-800/50">
                   <th className="text-left p-4 font-medium">Name</th>
                   <th className="text-left p-4 font-medium">Description</th>
+                  {dataType === 'frequency_list' && (
+                    <>
+                      <th className="text-left p-4 font-medium">Order ID</th>
+                      <th className="text-left p-4 font-medium">Status</th>
+                      <th className="text-left p-4 font-medium">Frequencies</th>
+                    </>
+                  )}
+                  {dataType === 'transmitter_list' && (
+                    <>
+                      <th className="text-left p-4 font-medium">Order ID</th>
+                      <th className="text-left p-4 font-medium">Status</th>
+                      <th className="text-left p-4 font-medium">Transmitters</th>
+                    </>
+                  )}
                   {dataType === 'measurement_result' && (
                     <>
                       <th className="text-left p-4 font-medium">Frequency</th>
