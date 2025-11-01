@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, Trash2, Clock, CheckCircle, XCircle, RefreshCw, Eye, Calendar } from 'lucide-react';
+import { FileText, Download, Trash2, Clock, CheckCircle, XCircle, RefreshCw, Eye, Calendar, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const ReportList = () => {
   const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+  const navigate = useNavigate();
   
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
