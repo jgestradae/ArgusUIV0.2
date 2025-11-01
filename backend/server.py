@@ -129,6 +129,14 @@ async def lifespan(app: FastAPI):
     app.include_router(smdi_api.router, prefix="/api", tags=["SMDI"])
     logger.info("SMDI Router initialized and included")
     
+    # Initialize Reports Module
+    import reports_api
+    from report_generator import ReportGenerator
+    report_generator = ReportGenerator()
+    reports_api.set_dependencies(db, report_generator)
+    app.include_router(reports_api.router, prefix="/api", tags=["Reports"])
+    logger.info("Reports Module initialized")
+    
     # Initialize SOAP Web Services
     global soap_app
     from soap_gateway import create_soap_application
