@@ -196,7 +196,7 @@ class ArgusSOAPService(ServiceBase):
             logger.info("SOAP: GetSystemParameters called")
             
             # Query MongoDB for system parameters
-            if ArgusSOAPService.db:
+            if ArgusSOAPService.db is not None:
                 try:
                     # Get latest system parameters from GSP
                     import asyncio
@@ -276,7 +276,7 @@ class ArgusSOAPService(ServiceBase):
             logger.info(f"SOAP: GetStationStatus called for station {station_id}")
             
             # Query MongoDB for station status
-            if ArgusSOAPService.db:
+            if ArgusSOAPService.db is not None:
                 try:
                     import asyncio
                     loop = asyncio.new_event_loop()
@@ -416,7 +416,7 @@ class ArgusSOAPService(ServiceBase):
             logger.info(f"SOAP: RequestMeasurementResult called for {measurement_id}")
             
             # Query MongoDB for measurement result
-            if ArgusSOAPService.db:
+            if ArgusSOAPService.db is not None:
                 try:
                     import asyncio
                     loop = asyncio.new_event_loop()
@@ -481,7 +481,7 @@ class ArgusSOAPService(ServiceBase):
             logger.info(f"SOAP: PushMeasurementResult called for {measurement_result.measurement_id}")
             
             # Store pushed result in database
-            if ArgusSOAPService.db:
+            if ArgusSOAPService.db is not None:
                 try:
                     import asyncio
                     loop = asyncio.new_event_loop()
@@ -545,7 +545,7 @@ class ArgusSOAPService(ServiceBase):
             logger.info("SOAP: GetOperatorList called")
             
             # Query MongoDB for operators
-            if ArgusSOAPService.db:
+            if ArgusSOAPService.db is not None:
                 try:
                     import asyncio
                     loop = asyncio.new_event_loop()
@@ -617,7 +617,7 @@ class ArgusSOAPService(ServiceBase):
             logger.info(f"SOAP: GetReportList called (type: {report_type})")
             
             # Query MongoDB for reports
-            if ArgusSOAPService.db:
+            if ArgusSOAPService.db is not None:
                 try:
                     import asyncio
                     loop = asyncio.new_event_loop()
