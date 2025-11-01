@@ -168,6 +168,221 @@ class ArgusAPITester:
             )
         return False
 
+    # ============================================================================
+    # SMDI Testing Methods
+    # ============================================================================
+
+    def test_smdi_query_frequencies_no_restriction(self):
+        """Test SMDI frequency query with no restrictions"""
+        query_data = {
+            "query_type": "IFL",
+            "result_option": "occupied_freq",
+            "include_bandwidth": False,
+            "list_name": "Test Frequency Query - No Restriction",
+            "frequency_params": {
+                "mode": "N"
+            },
+            "location_params": {
+                "mode": "N"
+            },
+            "additional_params": {},
+            "auto_update": False
+        }
+        return self.run_test(
+            "SMDI Frequency Query (No Restriction)",
+            "POST",
+            "smdi/query-frequencies",
+            200,
+            data=query_data,
+            auth_required=True
+        )
+
+    def test_smdi_query_frequencies_single(self):
+        """Test SMDI frequency query with single frequency"""
+        query_data = {
+            "query_type": "IFL",
+            "result_option": "occupied_freq",
+            "include_bandwidth": False,
+            "list_name": "Test Frequency Query - Single Freq",
+            "frequency_params": {
+                "mode": "S",
+                "single_freq": 94700000  # 94.7 MHz
+            },
+            "location_params": {
+                "mode": "N"
+            },
+            "additional_params": {},
+            "auto_update": False
+        }
+        return self.run_test(
+            "SMDI Frequency Query (Single Frequency)",
+            "POST",
+            "smdi/query-frequencies",
+            200,
+            data=query_data,
+            auth_required=True
+        )
+
+    def test_smdi_query_frequencies_range(self):
+        """Test SMDI frequency query with frequency range"""
+        query_data = {
+            "query_type": "IFL",
+            "result_option": "occupied_freq",
+            "include_bandwidth": False,
+            "list_name": "Test Frequency Query - FM Band",
+            "frequency_params": {
+                "mode": "R",
+                "range_lower": 88000000,  # 88 MHz
+                "range_upper": 108000000  # 108 MHz
+            },
+            "location_params": {
+                "mode": "N"
+            },
+            "additional_params": {
+                "service": "BC"  # Broadcast service
+            },
+            "auto_update": False
+        }
+        return self.run_test(
+            "SMDI Frequency Query (Range)",
+            "POST",
+            "smdi/query-frequencies",
+            200,
+            data=query_data,
+            auth_required=True
+        )
+
+    def test_smdi_query_frequencies_coordinates(self):
+        """Test SMDI frequency query with coordinates"""
+        query_data = {
+            "query_type": "IFL",
+            "result_option": "occupied_freq",
+            "include_bandwidth": False,
+            "list_name": "Test Frequency Query - Coordinates",
+            "frequency_params": {
+                "mode": "R",
+                "range_lower": 88000000,
+                "range_upper": 108000000
+            },
+            "location_params": {
+                "mode": "COORD",
+                "longitude_deg": 74,
+                "longitude_min": 48,
+                "longitude_sec": 46.9,
+                "longitude_hem": "W",
+                "latitude_deg": 10,
+                "latitude_min": 59,
+                "latitude_sec": 8.8,
+                "latitude_hem": "N",
+                "radius": 30
+            },
+            "additional_params": {
+                "service": "BC"
+            },
+            "auto_update": False
+        }
+        return self.run_test(
+            "SMDI Frequency Query (Coordinates)",
+            "POST",
+            "smdi/query-frequencies",
+            200,
+            data=query_data,
+            auth_required=True
+        )
+
+    def test_smdi_query_transmitters_no_restriction(self):
+        """Test SMDI transmitter query with no restrictions"""
+        query_data = {
+            "query_type": "ITL",
+            "result_option": "transmitters",
+            "include_bandwidth": False,
+            "list_name": "Test Transmitter Query - No Restriction",
+            "frequency_params": {
+                "mode": "N"
+            },
+            "location_params": {
+                "mode": "N"
+            },
+            "additional_params": {},
+            "auto_update": False
+        }
+        return self.run_test(
+            "SMDI Transmitter Query (No Restriction)",
+            "POST",
+            "smdi/query-transmitters",
+            200,
+            data=query_data,
+            auth_required=True
+        )
+
+    def test_smdi_query_transmitters_range_coordinates(self):
+        """Test SMDI transmitter query with range and coordinates"""
+        query_data = {
+            "query_type": "ITL",
+            "result_option": "transmitters",
+            "include_bandwidth": False,
+            "list_name": "Test Transmitter Query - Range + Coordinates",
+            "frequency_params": {
+                "mode": "R",
+                "range_lower": 88000000,
+                "range_upper": 108000000
+            },
+            "location_params": {
+                "mode": "COORD",
+                "longitude_deg": 74,
+                "longitude_min": 48,
+                "longitude_sec": 46.9,
+                "longitude_hem": "W",
+                "latitude_deg": 10,
+                "latitude_min": 59,
+                "latitude_sec": 8.8,
+                "latitude_hem": "N",
+                "radius": 30
+            },
+            "additional_params": {
+                "service": "BC"
+            },
+            "auto_update": False
+        }
+        return self.run_test(
+            "SMDI Transmitter Query (Range + Coordinates)",
+            "POST",
+            "smdi/query-transmitters",
+            200,
+            data=query_data,
+            auth_required=True
+        )
+
+    def test_smdi_get_frequency_lists(self):
+        """Test getting SMDI frequency lists"""
+        return self.run_test(
+            "Get SMDI Frequency Lists",
+            "GET",
+            "smdi/frequency-lists",
+            200,
+            auth_required=True
+        )
+
+    def test_smdi_get_transmitter_lists(self):
+        """Test getting SMDI transmitter lists"""
+        return self.run_test(
+            "Get SMDI Transmitter Lists",
+            "GET",
+            "smdi/transmitter-lists",
+            200,
+            auth_required=True
+        )
+
+    def test_smdi_get_queries(self):
+        """Test getting SMDI query history"""
+        return self.run_test(
+            "Get SMDI Queries",
+            "GET",
+            "smdi/queries",
+            200,
+            auth_required=True
+        )
+
     def check_xml_files_in_inbox(self):
         """Check if XML files are generated in /tmp/argus_inbox"""
         import os
