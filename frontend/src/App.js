@@ -12,6 +12,8 @@ import Configuration from './components/Configuration';
 import SystemLogs from './components/SystemLogs';
 import DataNavigator from './components/DataNavigator';
 import DatabaseImport from './components/DatabaseImport';
+import ReportGeneration from './components/ReportGeneration';
+import ReportList from './components/ReportList';
 import GeolocationMap from './components/GeolocationMap';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
