@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implement SMDI module for importing Frequency Lists and Transmitter Lists from external database. Test backend endpoints for SMDI queries and frontend Database Import interface."
+user_problem_statement: "Implement SOAP Web Services layer with 7 services (GetSystemParameters, GetStationStatus, ScheduleMeasurement, RequestMeasurementResult, PushMeasurementResult, GetOperatorList, GetReportList) using Spyne server and Zeep client. WS-Security token authentication. Auto-generated WSDL."
 
 backend:
   - task: "Authentication System"
