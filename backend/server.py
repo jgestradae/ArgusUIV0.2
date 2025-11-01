@@ -853,6 +853,98 @@ async def process_xml_responses(admin_user: User = Depends(require_admin)):
         )
 
 
+
+# ============================================================================
+# CALENDAR VIEW ENDPOINTS
+# ============================================================================
+
+@api_router.get("/amm/calendar-events")
+async def get_amm_calendar_events(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get AMM executions for calendar view with color coding"""
+    try:
+        # Parse dates
+        if start_date:
+            start_dt = datetime.fromisoformat(start_date)
+        else:
+            start_dt = datetime.now() - timedelta(days=30)
+        
+        if end_date:
+            end_dt = datetime.fromisoformat(end_date)
+        else:
+            end_dt = datetime.now() + timedelta(days=30)
+        
+        # Query executions within date range
+        query = {
+            "scheduled_time": {
+                "$gte": start_dt,
+                "$lte": end_dt
+            }
+        }
+        
+        executions_cursor = db.amm_executions.find(query).sort("scheduled_time", 1)
+        executions = await executions_cursor.to_list(length=1000)
+        
+        # Get all AMM configurations for reference
+        configs_cursor = db.amm_configurations.find()
+        configs = await configs_cursor.to_list(length=None)
+        configs_dict = {c["id"]: c for c in configs}
+        
+        # Transform to calendar events
+        calendar_events = []
+        for execution in executions:
+            config_id = execution.get("amm_config_id")
+            config = configs_dict.get(config_id, {})
+            
+            # Determine color based on status
+            status = execution.get("status", "pending")
+            if status == "completed":
+                color = "#10b981"  # Green
+            elif status in ["running", "in_progress"]:
+                color = "#f59e0b"  # Yellow/Orange
+            elif status in ["failed", "error"]:
+                color = "#ef4444"  # Red
+            else:
+                color = "#6366f1"  # Blue (pending)
+            
+            # Create event
+            event = {
+                "id": execution.get("id"),
+                "title": config.get("name", "AMM Execution"),
+                "start": execution.get("scheduled_time").isoformat() if execution.get("scheduled_time") else None,
+                "end": execution.get("actual_end_time").isoformat() if execution.get("actual_end_time") else None,
+                "status": status,
+                "color": color,
+                "amm_config_id": config_id,
+                "amm_name": config.get("name"),
+                "measurements_performed": execution.get("measurements_performed", 0),
+                "generated_orders": execution.get("generated_orders", []),
+                "execution_id": execution.get("id")
+            }
+            
+            calendar_events.append(event)
+        
+        return ApiResponse(
+            success=True,
+            message=f"Found {len(calendar_events)} calendar events",
+            data={
+                "events": calendar_events,
+                "start_date": start_dt.isoformat(),
+                "end_date": end_dt.isoformat()
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting calendar events: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get calendar events: {str(e)}"
+        )
+
+
 # ============================================================================
 # MEASUREMENT RESULTS ENDPOINTS (New - with CSV extraction)
 # ============================================================================
