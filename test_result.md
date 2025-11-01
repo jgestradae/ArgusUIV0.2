@@ -323,15 +323,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "AMM Execution System"
-    - "GSP Request System"
-    - "XML File Generation"
+    - "SMDI Frequency List Query"
+    - "SMDI Transmitter List Query"
+    - "SMDI XML Generation"
+    - "Database Import Interface"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
-    - agent: "testing"
-      message: "Completed comprehensive backend testing. All critical GSP and AMM functionality working correctly. Fixed AMM scheduler initialization issue. XML files are being generated successfully in /tmp/argus_inbox. All 16 backend tests passing with 100% success rate."
-    - agent: "testing"
-      message: "COMPREHENSIVE GSP WORKFLOW TESTING COMPLETED as requested. Tested complete workflow: 1) Authentication ✅ 2) GSP Request ✅ 3) Response file handling ✅ 4) File watcher (minor asyncio issue) 5) MongoDB storage ✅ 6) Signal paths API ✅ 7) System parameters API ✅. Fixed duplicate endpoint issue. GSP data (2 stations, 3 signal paths) successfully stored and retrievable. All critical components working for AMM wizard integration. File watcher needs asyncio fix but manual processing confirms data flow works correctly."
+    - agent: "main"
+      message: "Completed Phase 1-3 of SMDI integration. Backend: Created smdi_models.py with Pydantic models for query params and results. Extended xml_processor.py with IFL/ITL XML generation and parsing methods. Updated file_watcher.py to process SMDI responses. Created smdi_api.py with query and retrieval endpoints. Frontend: Created DatabaseImport.js component with comprehensive query interface matching user's UI design. Extended DataNavigator.js with Frequency Lists and Transmitter Lists tabs. All components integrated with routing and navigation. Ready for backend testing - need to test XML generation, query submission, and response parsing (if SMDI database available for testing)."
