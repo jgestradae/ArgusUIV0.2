@@ -74,6 +74,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/database-import" element={
+              <ProtectedRoute>
+                <Layout>
+                  <DatabaseImport />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/configuration" element={
               <ProtectedRoute>
                 <Layout>
