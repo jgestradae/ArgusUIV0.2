@@ -1596,7 +1596,7 @@ export default function AutomaticMode() {
 
       {/* Navigation Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="dashboard" className="flex items-center space-x-2">
             <BarChart3 className="w-4 h-4" />
             <span>Dashboard</span>
@@ -1604,6 +1604,10 @@ export default function AutomaticMode() {
           <TabsTrigger value="wizard" className="flex items-center space-x-2">
             <Settings className="w-4 h-4" />
             <span>AMM Wizard</span>
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4" />
+            <span>Calendar View</span>
           </TabsTrigger>
           <TabsTrigger value="executions" className="flex items-center space-x-2">
             <Activity className="w-4 h-4" />
