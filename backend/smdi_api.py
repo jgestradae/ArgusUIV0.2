@@ -131,7 +131,7 @@ async def query_transmitters(query: SMDIQueryRequest, current_user: dict = Depen
             "query_type": "transmitter_list",
             "query_name": query.list_name or f"Transmitter Query {datetime.now().strftime('%Y-%m-%d %H:%M')}",
             "query_params": query.dict(),
-            "created_by": current_user.get("username"),
+            "created_by": current_user.username,
             "created_at": datetime.now(),
             "status": "pending",
             "xml_request_file": str(xml_filepath)
