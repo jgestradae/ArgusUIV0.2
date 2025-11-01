@@ -394,7 +394,10 @@ export default function DataNavigator() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => deleteItem(item.id, dataType)}
+                          onClick={() => deleteItem(
+                            (dataType === 'frequency_list' || dataType === 'transmitter_list') ? item.order_id : item.id, 
+                            dataType
+                          )}
                           className="text-red-400 hover:text-red-300"
                         >
                           <Trash2 className="w-4 h-4" />
