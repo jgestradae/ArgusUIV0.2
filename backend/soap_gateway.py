@@ -351,33 +351,41 @@ class ArgusSOAPService(ServiceBase):
             order_id = f"SOAP{datetime.now().strftime('%y%m%d%H%M%S')}"
             
             # Create measurement order in database
-            if ArgusSOAPService.db and ArgusSOAPService.xml_processor:
+            if ArgusSOAPService.db is not None and ArgusSOAPService.xml_processor:
                 try:
-                    import asyncio
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
+                    # Use thread-safe database access (avoid event loop conflicts)
+                    import concurrent.futures
+                    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
                     
-                    # Store measurement order
-                    order_doc = {
-                        "order_id": order_id,
-                        "order_type": "OR",
-                        "measurement_type": measurement_request.measurement_type,
-                        "station_id": measurement_request.station_id,
-                        "frequency_start": measurement_request.frequency_start,
-                        "frequency_stop": measurement_request.frequency_stop,
-                        "start_time": measurement_request.start_time,
-                        "duration": measurement_request.duration,
-                        "priority": measurement_request.priority,
-                        "operator": measurement_request.operator,
-                        "created_via": "SOAP",
-                        "created_at": datetime.now(),
-                        "status": "scheduled"
-                    }
+                    def store_measurement():
+                        import asyncio
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        
+                        order_doc = {
+                            "order_id": order_id,
+                            "order_type": "OR",
+                            "measurement_type": measurement_request.measurement_type,
+                            "station_id": measurement_request.station_id,
+                            "frequency_start": measurement_request.frequency_start,
+                            "frequency_stop": measurement_request.frequency_stop,
+                            "start_time": measurement_request.start_time,
+                            "duration": measurement_request.duration,
+                            "priority": measurement_request.priority,
+                            "operator": measurement_request.operator,
+                            "created_via": "SOAP",
+                            "created_at": datetime.now(),
+                            "status": "scheduled"
+                        }
+                        
+                        result = loop.run_until_complete(
+                            ArgusSOAPService.db.soap_measurements.insert_one(order_doc)
+                        )
+                        loop.close()
+                        return result
                     
-                    loop.run_until_complete(
-                        ArgusSOAPService.db.soap_measurements.insert_one(order_doc)
-                    )
-                    loop.close()
+                    future = executor.submit(store_measurement)
+                    future.result(timeout=5)  # Wait max 5 seconds
                     
                     logger.info(f"Measurement {order_id} scheduled successfully")
                     
