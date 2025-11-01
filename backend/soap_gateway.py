@@ -298,17 +298,12 @@ class ArgusSOAPService(ServiceBase):
             # Query MongoDB for station status
             if ArgusSOAPService.db is not None:
                 try:
-                    import asyncio
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    
-                    # Get latest system state
-                    state = loop.run_until_complete(
+                    # Get latest system state using thread-safe approach
+                    state = run_async_in_thread(
                         ArgusSOAPService.db.system_states.find_one(
                             sort=[("timestamp", -1)]
                         )
                     )
-                    loop.close()
                     
                     if state:
                         for station in state.get('stations', []):
