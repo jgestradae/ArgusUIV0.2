@@ -75,7 +75,7 @@ async def query_frequencies(query: SMDIQueryRequest, current_user: dict = Depend
             "query_type": "frequency_list",
             "query_name": query.list_name or f"Frequency Query {datetime.now().strftime('%Y-%m-%d %H:%M')}",
             "query_params": query.dict(),
-            "created_by": current_user.get("username"),
+            "created_by": current_user.username,
             "created_at": datetime.now(),
             "status": "pending",
             "xml_request_file": str(xml_filepath)
