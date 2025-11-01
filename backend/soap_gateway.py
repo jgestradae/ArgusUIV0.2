@@ -428,16 +428,11 @@ class ArgusSOAPService(ServiceBase):
             # Query MongoDB for measurement result
             if ArgusSOAPService.db is not None:
                 try:
-                    import asyncio
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    
-                    result = loop.run_until_complete(
+                    result = run_async_in_thread(
                         ArgusSOAPService.db.measurement_results.find_one(
                             {"order_id": measurement_id}
                         )
                     )
-                    loop.close()
                     
                     if result:
                         return MeasurementResult(
@@ -557,13 +552,8 @@ class ArgusSOAPService(ServiceBase):
             # Query MongoDB for operators
             if ArgusSOAPService.db is not None:
                 try:
-                    import asyncio
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    
                     cursor = ArgusSOAPService.db.users.find({})
-                    users = loop.run_until_complete(cursor.to_list(length=100))
-                    loop.close()
+                    users = run_async_in_thread(cursor.to_list(length=100))
                     
                     if users:
                         operators = []
