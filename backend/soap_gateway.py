@@ -223,17 +223,12 @@ class ArgusSOAPService(ServiceBase):
             # Query MongoDB for system parameters
             if ArgusSOAPService.db is not None:
                 try:
-                    # Get latest system parameters from GSP
-                    import asyncio
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    
-                    params = loop.run_until_complete(
+                    # Get latest system parameters from GSP using thread-safe approach
+                    params = run_async_in_thread(
                         ArgusSOAPService.db.system_parameters.find_one(
                             sort=[("timestamp", -1)]
                         )
                     )
-                    loop.close()
                     
                     if params:
                         stations = []
