@@ -298,11 +298,6 @@ class ArgusResponseHandler(FileSystemEventHandler):
         except Exception as e:
             logger.error(f"Error processing ITL response: {e}", exc_info=True)
 
-                logger.info(f"Measurement result saved (legacy format): {response_data.get('order_id')}")
-            
-        except Exception as e:
-            logger.error(f"Error processing measurement response: {e}", exc_info=True)
-
 
 class ArgusFileWatcher:
     """File watcher service for Argus outbox folder"""
