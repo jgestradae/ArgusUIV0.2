@@ -129,6 +129,13 @@ async def lifespan(app: FastAPI):
     app.include_router(smdi_api.router, prefix="/api", tags=["SMDI"])
     logger.info("SMDI Router initialized and included")
     
+    # Initialize SOAP Web Services
+    global soap_app
+    from soap_gateway import create_soap_application
+    soap_app = create_soap_application(db, xml_processor)
+    logger.info("SOAP Web Services initialized at /soap endpoint")
+    logger.info("WSDL available at /wsdl and /wsdl/ArgusUI.wsdl")
+    
     # Start AMM scheduler
     await amm_scheduler.start_scheduler()
     logger.info("AMM Scheduler started")
