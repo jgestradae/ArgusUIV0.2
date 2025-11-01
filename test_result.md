@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the backend endpoints and AMM functionality: Authentication, GSP Request, Signal Paths, AMM Configurations, and XML file generation"
+user_problem_statement: "Implement SMDI module for importing Frequency Lists and Transmitter Lists from external database. Test backend endpoints for SMDI queries and frontend Database Import interface."
 
 backend:
   - task: "Authentication System"
