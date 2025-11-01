@@ -158,7 +158,18 @@ export default function DataNavigator() {
 
   const deleteItem = async (itemId, dataType) => {
     try {
-      await axios.delete(`${API}/data/${dataType}/${itemId}`);
+      // Handle SMDI data types separately
+      if (dataType === 'frequency_list') {
+        await axios.delete(`${API}/smdi/frequency-lists/${itemId}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+      } else if (dataType === 'transmitter_list') {
+        await axios.delete(`${API}/smdi/transmitter-lists/${itemId}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+      } else {
+        await axios.delete(`${API}/data/${dataType}/${itemId}`);
+      }
       toast.success('Item deleted successfully');
       loadDataForType(dataType);
       loadStatistics();
