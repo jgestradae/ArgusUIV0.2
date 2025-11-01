@@ -83,6 +83,20 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/reports/generate" element={
+              <ProtectedRoute>
+                <Layout>
+                  <ReportGeneration />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports/list" element={
+              <ProtectedRoute>
+                <Layout>
+                  <ReportList />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/configuration" element={
               <ProtectedRoute>
                 <Layout>
