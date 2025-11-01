@@ -15,6 +15,31 @@ import os
 logger = logging.getLogger(__name__)
 
 # ============================================================================
+# Helper Functions for Async DB Access in Sync Context
+# ============================================================================
+
+def run_async_in_thread(coro):
+    """
+    Helper to run async database operations in SOAP service context.
+    Avoids "event loop already running" errors by using a thread executor.
+    """
+    import concurrent.futures
+    import asyncio
+    
+    def run():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(coro)
+        finally:
+            loop.close()
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(run)
+        return future.result(timeout=10)  # 10 second timeout
+
+
+# ============================================================================
 # Security & Authentication
 # ============================================================================
 
