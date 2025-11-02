@@ -137,12 +137,22 @@ async def lifespan(app: FastAPI):
     app.include_router(reports_api.router, prefix="/api", tags=["Reports"])
     logger.info("Reports Module initialized")
     
-    # Initialize SOAP Web Services
+    # Initialize SOAP Web Services (Optional - requires Python 3.11/3.12)
     global soap_app
-    from soap_gateway import create_soap_application
-    soap_app = create_soap_application(db, xml_processor)
-    logger.info("SOAP Web Services initialized at /soap endpoint")
-    logger.info("WSDL available at /wsdl and /wsdl/ArgusUI.wsdl")
+    try:
+        from soap_gateway import create_soap_application
+        soap_app = create_soap_application(db, xml_processor)
+        logger.info("SOAP Web Services initialized at /soap endpoint")
+        logger.info("WSDL available at /wsdl and /wsdl/ArgusUI.wsdl")
+    except ImportError as e:
+        soap_app = None
+        logger.warning("=" * 70)
+        logger.warning("SOAP Web Services NOT AVAILABLE")
+        logger.warning(f"Reason: {e}")
+        logger.warning("SOAP services require Python 3.11 or 3.12 (spyne compatibility issue)")
+        logger.warning("All other features (Reports, SMDI, AMM, etc.) will work normally")
+        logger.warning("To enable SOAP: Use Python 3.11 or 3.12 and reinstall dependencies")
+        logger.warning("=" * 70)
     
     # Start AMM scheduler
     await amm_scheduler.start_scheduler()
