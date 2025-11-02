@@ -289,12 +289,20 @@ async def soap_endpoint(request: Request):
 async def get_wsdl():
     """
     Retrieve WSDL (Web Services Description Language) for ArgusUI SOAP services
+    
+    Note: Requires Python 3.11 or 3.12 (spyne compatibility)
     """
     global soap_app
     
     if soap_app is None:
         return Response(
-            content="<error>SOAP service not initialized</error>",
+            content="""<?xml version="1.0" encoding="UTF-8"?>
+<error>
+    <message>SOAP WSDL is not available</message>
+    <reason>Requires Python 3.11 or 3.12 (spyne compatibility issue with Python 3.13)</reason>
+    <solution>Use Python 3.11/3.12 and run: pip install spyne zeep lxml</solution>
+    <documentation>See SOAP_WEB_SERVICES_DOCUMENTATION.md for details</documentation>
+</error>""",
             media_type="text/xml",
             status_code=503
         )
