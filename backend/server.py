@@ -208,12 +208,20 @@ async def soap_endpoint(request: Request):
     """
     SOAP 1.2 endpoint for external system interoperability
     Handles all SOAP requests and returns SOAP responses
+    
+    Note: Requires Python 3.11 or 3.12 (spyne compatibility)
     """
     global soap_app
     
     if soap_app is None:
         return Response(
-            content="<error>SOAP service not initialized</error>",
+            content="""<?xml version="1.0" encoding="UTF-8"?>
+<error>
+    <message>SOAP Web Services are not available</message>
+    <reason>Requires Python 3.11 or 3.12 (spyne compatibility issue with Python 3.13)</reason>
+    <solution>Use Python 3.11/3.12 and run: pip install spyne zeep lxml</solution>
+    <note>All other ArgusUI features are fully functional</note>
+</error>""",
             media_type="text/xml",
             status_code=503
         )
