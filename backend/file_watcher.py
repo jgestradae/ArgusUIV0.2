@@ -40,8 +40,8 @@ class ArgusResponseHandler(FileSystemEventHandler):
             
         file_path = Path(event.src_path)
         
-        # Only process XML files with -R suffix (responses)
-        if file_path.suffix.lower() == '.xml' and '-R' in file_path.stem:
+        # Process XML files with -R suffix (responses) or ZIP files
+        if (file_path.suffix.lower() == '.xml' and '-R' in file_path.stem) or file_path.suffix.lower() == '.zip':
             logger.info(f"New response detected: {file_path.name}")
             
             # Avoid duplicate processing
