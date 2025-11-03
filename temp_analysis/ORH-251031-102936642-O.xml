@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XMLSchema1 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ORDER_DEF>
+    <ORDER_ID>OR251031102936642</ORDER_ID>
+    <ORDER_TYPE>OR</ORDER_TYPE>
+    <ORDER_NAME>ORM</ORDER_NAME>
+    <ORDER_SENDER>HQ4</ORDER_SENDER>
+    <ORDER_SENDER_PC>SRVARGUS</ORDER_SENDER_PC>
+    <ORDER_STATE>Finished</ORDER_STATE>
+    <ORDER_CREATOR>Extern</ORDER_CREATOR>
+    <ORDER_ADDRESSEE />
+    <ORDER_VER>300</ORDER_VER>
+    <EXECUTION_TYPE>A</EXECUTION_TYPE>
+    <RES_FILE_COMP />
+    <ORDER_CANCEL_TYPE>NO</ORDER_CANCEL_TYPE>
+    <SUB_ORDER_DEF>
+      <SUBORDER_NAME>AMM_Prueba_4_6</SUBORDER_NAME>
+      <SUBORDER_STATE>Finished</SUBORDER_STATE>
+      <SUBORDER_TASK>FFM</SUBORDER_TASK>
+      <SUBORDER_PRIO>LOW</SUBORDER_PRIO>
+      <RESULT_TYPE>MR</RESULT_TYPE>
+      <RESULT_FORMAT>XML</RESULT_FORMAT>
+      <MEAS_RESULT_SAVE_LOCATION>0</MEAS_RESULT_SAVE_LOCATION>
+      <RESULT_INFO />
+      <ACT_DEF>
+        <ACD_USERSTRING>OR251031102936642</ACD_USERSTRING>
+        <ACD_ERR />
+      </ACT_DEF>
+      <FREQ_PARAM>
+        <FREQ_PAR_MODE>S</FREQ_PAR_MODE>
+        <FREQ_PAR_S>100000000.0</FREQ_PAR_S>
+      </FREQ_PARAM>
+      <MDT_PARAM>
+        <MEAS_DATA_TYPE>LV</MEAS_DATA_TYPE>
+        <LIMIT_CHECK_COUNT>1</LIMIT_CHECK_COUNT>
+        <FREQ_PAR_BWIDTH>9000.0</FREQ_PAR_BWIDTH>
+        <RF_ATTENUATION>Auto</RF_ATTENUATION>
+        <IF_ATTENUATION>Normal</IF_ATTENUATION>
+        <MEAS_TIME>5.0</MEAS_TIME>
+        <DETECT_TYPE>Average</DETECT_TYPE>
+        <DEMOD>FM</DEMOD>
+        <PREAMPLIFICATION>Off</PREAMPLIFICATION>
+        <MODE>Normal</MODE>
+        <DF_POL />
+        <IF_SPAN>250000</IF_SPAN>
+        <SQUELCH>Off</SQUELCH>
+        <HOLD_TIME>0</HOLD_TIME>
+        <DF_SPAN>0</DF_SPAN>
+        <DF_STEP>0</DF_STEP>
+        <ADD_SET />
+        <DF_ACT />
+        <IF_STEP>0</IF_STEP>
+        <FFT_MODE />
+        <AU600_VERT_AMP />
+        <AU600_VERT_FILTER />
+        <AU600_VERT_LNA />
+        <AU600_HOR_AMP />
+        <AU600_HOR_FILTER />
+        <AU600_HOR_LNA />
+        <AU600_X7_OUT />
+        <TDOA_AOI_LONG_1>0</TDOA_AOI_LONG_1>
+        <TDOA_AOI_LAT_1>0</TDOA_AOI_LAT_1>
+        <TDOA_AOI_LONG_2>0</TDOA_AOI_LONG_2>
+        <TDOA_AOI_LAT_2>0</TDOA_AOI_LAT_2>
+        <TDOA_HYPERBOL_CNT>0</TDOA_HYPERBOL_CNT>
+        <TDOA_SENSOR_PAIRS>0</TDOA_SENSOR_PAIRS>
+        <LIMIT_CHECK>N</LIMIT_CHECK>
+      </MDT_PARAM>
+      <ANT_SET>
+        <ANT_MODE>FIX</ANT_MODE>
+      </ANT_SET>
+      <TIME_PARAM>
+        <TIME_PAR_MODE>P</TIME_PAR_MODE>
+        <TIME_START>2025-10-31T00:00:00-05:00</TIME_START>
+        <TIME_STOP>2025-10-31T00:00:00-05:00</TIME_STOP>
+      </TIME_PARAM>
+      <TIME_PARAM_LIST>
+        <TIME_PER_START>1899-12-30T10:31:00-05:00</TIME_PER_START>
+        <TIME_PER_STOP>1899-12-30T10:32:59-05:00</TIME_PER_STOP>
+        <TIME_DAYS />
+        <TIME_ABS_START_STOP>true</TIME_ABS_START_STOP>
+      </TIME_PARAM_LIST>
+      <MEAS_STAT_PARAM>
+        <MSP_RMC>HQ4</MSP_RMC>
+        <MSP_RMC_PC>SRVARGUS</MSP_RMC_PC>
+        <MSP_ST_PC>UMS300-100823</MSP_ST_PC>
+        <MSP_ST_NAME>UMS300-100823</MSP_ST_NAME>
+        <MSP_ST_TYPE>F</MSP_ST_TYPE>
+        <MSP_SIG_PATH>AU600-EB500</MSP_SIG_PATH>
+      </MEAS_STAT_PARAM>
+      <MEAS_LOC_PARAM>
+        <MLP_LONG>-77.264667</MLP_LONG>
+        <MLP_LAT>1.201194</MLP_LAT>
+      </MEAS_LOC_PARAM>
+      <MEAS_PREP_PARAM>
+        <MPP_ALARM>0</MPP_ALARM>
+        <MPP_OCC_THRES>0</MPP_OCC_THRES>
+      </MEAS_PREP_PARAM>
+      <REQ_MEAS_PARAM>
+        <RMP_O_NAME>ArgusUI</RMP_O_NAME>
+        <RMP_COMMENT />
+      </REQ_MEAS_PARAM>
+      <OR_STATE>
+        <SO_STATE>F</SO_STATE>
+        <SO_START_TIME>2025-10-31T10:29:45.4597875-05:00</SO_START_TIME>
+        <SO_STOP_TIME>2025-10-31T10:33:04.3891656-05:00</SO_STOP_TIME>
+        <SO_CURRENT_TIME>2025-10-31T10:33:04.3891656-05:00</SO_CURRENT_TIME>
+      </OR_STATE>
+      <MEAS_DATA_HDR>
+        <MD_ID_NAME>1_210430_251031_0101</MD_ID_NAME>
+        <MD_S_NAME>UMS300-100823</MD_S_NAME>
+        <MD_S_TYPE>F</MD_S_TYPE>
+        <MD_S_LONG>-74.053972</MD_S_LONG>
+        <MD_S_LAT>4.677583</MD_S_LAT>
+        <MD_S_H_NN>2572.8</MD_S_H_NN>
+        <MD_M_START>2025-10-31T10:31:06-05:00</MD_M_START>
+        <MD_M_STOP>2025-10-31T10:33:00-05:00</MD_M_STOP>
+        <MD_M_REF>AMM_Prueba_4_6</MD_M_REF>
+        <MD_LFILE>UMS300-100823        	UMS300-100823        	timing_00002	Activity 	      	2025-10-31T10:29:48-05:00	AMM "timing_00002" running</MD_LFILE>
+        <MD_LFILE>UMS300-100823        	UMS300-100823        	timing_00002	Activity 	01    	2025-10-31T10:31:00-05:00	Start</MD_LFILE>
+        <MD_LFILE>UMS300-100823        	UMS300-100823        	timing_00002	Activity 	01    	2025-10-31T10:33:00-05:00	Stop	21</MD_LFILE>
+        <MD_FINFO>Measurement Result Type: Measurement Result</MD_FINFO>
+        <MD_FINFO>Measurement Unit Configuration: UMS300-100823</MD_FINFO>
+        <MD_FINFO>Longitude:  74°03'14,3"W</MD_FINFO>
+        <MD_FINFO>Latitude:  4°40'39,3"N</MD_FINFO>
+        <MD_FINFO>Number of Measurements: 21</MD_FINFO>
+        <MD_FINFO>Start Date: 31/10/2025</MD_FINFO>
+        <MD_FINFO>Start Time: 10:31:06 a.m.</MD_FINFO>
+        <MD_FINFO>Stop Date: 31/10/2025</MD_FINFO>
+        <MD_FINFO>Stop Time: 10:32:12 a.m.</MD_FINFO>
+        <MD_FINFO>Measurement Definition:</MD_FINFO>
+        <MD_FINFO>Date: 31/10/2025</MD_FINFO>
+        <MD_FINFO>Frequency: 100,000000 MHz</MD_FINFO>
+        <MD_FINFO>Maximum Frequency: 100,000000 MHz</MD_FINFO>
+        <MD_FINFO>Meas. Parameter: Level</MD_FINFO>
+        <MD_FINFO>Measurement Type: FFM</MD_FINFO>
+        <MD_FINFO>Minimum Frequency: 100,000000 MHz</MD_FINFO>
+        <MD_FINFO>Name: meas_00002</MD_FINFO>
+        <MD_FINFO>Squelch: Off</MD_FINFO>
+        <MD_FINFO>Time: 10:29:44 a.m.</MD_FINFO>
+        <MD_FINFO>Range Definition:</MD_FINFO>
+        <MD_FINFO>Date: 31/10/2025</MD_FINFO>
+        <MD_FINFO>Name: range_00002</MD_FINFO>
+        <MD_FINFO>No. of Subranges: 1</MD_FINFO>
+        <MD_FINFO>Time: 10:29:45 a.m.</MD_FINFO>
+        <MD_FINFO>SR1:</MD_FINFO>
+        <MD_FINFO>Start Frequency: 20,000000 MHz</MD_FINFO>
+        <MD_FINFO>Stop Frequency: 6,000000000 GHz</MD_FINFO>
+        <MD_FINFO>SR1 Device 1:</MD_FINFO>
+        <MD_FINFO>Azimuth: 0,000 deg</MD_FINFO>
+        <MD_FINFO>Elevation: 0,000 deg</MD_FINFO>
+        <MD_FINFO>Height: 0,00 m</MD_FINFO>
+        <MD_FINFO>Name: AU600</MD_FINFO>
+        <MD_FINFO>SR1 Device 2:</MD_FINFO>
+        <MD_FINFO>Demodulation: FM</MD_FINFO>
+        <MD_FINFO>Detector: Average</MD_FINFO>
+        <MD_FINFO>FFT Mode: Average</MD_FINFO>
+        <MD_FINFO>IF Attenuation: Normal</MD_FINFO>
+        <MD_FINFO>IF Bandwidth: 9 kHz</MD_FINFO>
+        <MD_FINFO>Meas.Time: 5,000000 s</MD_FINFO>
+        <MD_FINFO>Name: EB500</MD_FINFO>
+        <MD_FINFO>RF Attenuation: Auto</MD_FINFO>
+        <MD_FINFO>SR1 Device 8:</MD_FINFO>
+        <MD_FINFO>Amplifier: Passive</MD_FINFO>
+        <MD_FINFO>Filter: Bypass</MD_FINFO>
+        <MD_FINFO>LNA: LNA Off</MD_FINFO>
+        <MD_FINFO>Name: AU600Ctrl</MD_FINFO>
+        <MD_FINFO>Polarization: Horizontal Antenna</MD_FINFO>
+        <MD_FINFO>Timing Definition:</MD_FINFO>
+        <MD_FINFO>Date: 31/10/2025</MD_FINFO>
+        <MD_FINFO>Name: timing_00002</MD_FINFO>
+        <MD_FINFO>Time: 10:29:44 a.m.</MD_FINFO>
+      </MEAS_DATA_HDR>
+    </SUB_ORDER_DEF>
+  </ORDER_DEF>
+</XMLSchema1>
