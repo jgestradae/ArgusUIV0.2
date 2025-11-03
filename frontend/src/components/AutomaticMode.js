@@ -1619,12 +1619,16 @@ export default function AutomaticMode() {
                       <span className="text-slate-400">IF Bandwidth:</span>
                       <span className="text-white">{wizardData.measurement.receiver_config.if_bandwidth} Hz</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Result Type:</span>
+                      <span className="text-white">{RESULT_TYPES[wizardData.measurement.result_type]?.label || wizardData.measurement.result_type}</span>
+                    </div>
                   </div>
                 </div>
               </div>
               
               <div className="flex justify-between">
-                <Button variant="secondary" onClick={() => setWizardStep(4)}>
+                <Button variant="secondary" onClick={() => setWizardStep(5)}>
                   Previous
                 </Button>
                 <Button onClick={handleCreateAMM} className="btn-spectrum">
