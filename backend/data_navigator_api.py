@@ -34,15 +34,28 @@ class DataNavigatorService:
         collection = self.db[collection_name]
         
         # Build query from filters
-        query = {"type": data_type.value}
+        # For measurement_results, we don't filter by "type" field as it doesn't have one
+        query = {}
+        if data_type != DataType.MEASUREMENT_RESULT:
+            query["type"] = data_type.value
         
         if filters:
             if filters.name_search:
-                query["name"] = {"$regex": filters.name_search, "$options": "i"}
+                # For measurement results, search in station_name or order_id
+                if data_type == DataType.MEASUREMENT_RESULT:
+                    query["$or"] = [
+                        {"station_name": {"$regex": filters.name_search, "$options": "i"}},
+                        {"order_id": {"$regex": filters.name_search, "$options": "i"}}
+                    ]
+                else:
+                    query["name"] = {"$regex": filters.name_search, "$options": "i"}
             if filters.created_after:
-                query.setdefault("created_at", {})["$gte"] = filters.created_after
+                # Use measurement_start for measurement results
+                date_field = "measurement_start" if data_type == DataType.MEASUREMENT_RESULT else "created_at"
+                query.setdefault(date_field, {})["$gte"] = filters.created_after
             if filters.created_before:
-                query.setdefault("created_at", {})["$lte"] = filters.created_before
+                date_field = "measurement_start" if data_type == DataType.MEASUREMENT_RESULT else "created_at"
+                query.setdefault(date_field, {})["$lte"] = filters.created_before
             if filters.tags:
                 query["tags"] = {"$in": filters.tags}
             if filters.created_by:
@@ -53,7 +66,9 @@ class DataNavigatorService:
         
         # Get paginated items
         skip = (page - 1) * page_size
-        cursor = collection.find(query).sort("created_at", -1).skip(skip).limit(page_size)
+        # Sort by measurement_start for measurement_results, created_at for others
+        sort_field = "measurement_start" if data_type == DataType.MEASUREMENT_RESULT else "created_at"
+        cursor = collection.find(query).sort(sort_field, -1).skip(skip).limit(page_size)
         items = await cursor.to_list(length=page_size)
         
         # Convert to DataItem objects
