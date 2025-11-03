@@ -809,43 +809,75 @@ class ArgusXMLProcessor:
             measurement_data = []
             
             # Look for various possible measurement data structures
-            # Method 1: meas_data elements
-            for meas_elem in root.findall(".//meas_data"):
+            # Method 1: MEAS_DATA elements (UPPERCASE - current Argus format)
+            for meas_elem in root.findall(".//MEAS_DATA"):
                 data_point = {}
                 
                 # Frequency
-                freq_elem = meas_elem.find("md_freq")
+                freq_elem = meas_elem.find("MD_M_FREQ")
                 if freq_elem is not None:
                     data_point["frequency_hz"] = freq_elem.text
                 
                 # Level
-                level_elem = meas_elem.find("md_lev")
+                level_elem = meas_elem.find("MD_LEV")
                 if level_elem is not None:
                     data_point["level_dbm"] = level_elem.text
                 
+                # Level unit
+                level_unit_elem = meas_elem.find("MD_D_LEV_U")
+                if level_unit_elem is not None:
+                    data_point["level_unit"] = level_unit_elem.text
+                
                 # Timestamp
-                time_elem = meas_elem.find("md_time")
+                time_elem = meas_elem.find("MD_TIME")
                 if time_elem is not None:
                     data_point["timestamp"] = time_elem.text
                 
                 # Direction/Bearing (for DF measurements)
-                bearing_elem = meas_elem.find("md_dir")
+                bearing_elem = meas_elem.find("MD_DIR")
                 if bearing_elem is not None:
                     data_point["bearing_deg"] = bearing_elem.text
                 
                 # Bandwidth
-                bw_elem = meas_elem.find("md_bw")
+                bw_elem = meas_elem.find("MD_BW")
                 if bw_elem is not None:
                     data_point["bandwidth_hz"] = bw_elem.text
                 
                 if data_point:
                     measurement_data.append(data_point)
             
-            # Method 2: Look for MEAS_RESULT_DATA or similar structures
+            # Method 2: meas_data elements (lowercase - legacy format)
             if not measurement_data:
-                for result_elem in root.findall(".//MEAS_RESULT_DATA"):
-                    # Parse alternative measurement data format
-                    pass
+                for meas_elem in root.findall(".//meas_data"):
+                    data_point = {}
+                    
+                    # Frequency
+                    freq_elem = meas_elem.find("md_freq")
+                    if freq_elem is not None:
+                        data_point["frequency_hz"] = freq_elem.text
+                    
+                    # Level
+                    level_elem = meas_elem.find("md_lev")
+                    if level_elem is not None:
+                        data_point["level_dbm"] = level_elem.text
+                    
+                    # Timestamp
+                    time_elem = meas_elem.find("md_time")
+                    if time_elem is not None:
+                        data_point["timestamp"] = time_elem.text
+                    
+                    # Direction/Bearing (for DF measurements)
+                    bearing_elem = meas_elem.find("md_dir")
+                    if bearing_elem is not None:
+                        data_point["bearing_deg"] = bearing_elem.text
+                    
+                    # Bandwidth
+                    bw_elem = meas_elem.find("md_bw")
+                    if bw_elem is not None:
+                        data_point["bandwidth_hz"] = bw_elem.text
+                    
+                    if data_point:
+                        measurement_data.append(data_point)
             
             # Create CSV file if we have measurement data
             result["data_points"] = len(measurement_data)
