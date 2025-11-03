@@ -1439,7 +1439,7 @@ export default function AutomaticMode() {
                   disabled={!wizardData.measurement.measurement_type || !wizardData.measurement.device_name}
                   className="btn-spectrum"
                 >
-                  Next: Review & Create
+                  Next: Result Type
                 </Button>
               </div>
             </CardContent>
@@ -1447,7 +1447,73 @@ export default function AutomaticMode() {
         );
 
       case 5:
-        // STEP 5: Review & Create
+        // STEP 5: Result Type Configuration
+        return (
+          <Card className="glass-card border-0">
+            <CardHeader>
+              <CardTitle className="text-xl text-white">Step 5: Result Type Configuration</CardTitle>
+              <CardDescription>Configure the type of measurement result you expect</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <Label htmlFor="result_type" className="text-white">Result Type</Label>
+                <Select
+                  value={wizardData.measurement.result_type}
+                  onValueChange={(value) => setWizardData(prev => ({
+                    ...prev,
+                    measurement: { ...prev.measurement, result_type: value }
+                  }))}
+                >
+                  <SelectTrigger className="input-spectrum">
+                    <SelectValue placeholder="Select result type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(RESULT_TYPES).map(([key, { label, description }]) => (
+                      <SelectItem key={key} value={key}>
+                        <div>
+                          <div className="font-medium">{label}</div>
+                          <div className="text-xs text-slate-400">{description}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {wizardData.measurement.result_type && (
+                  <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <BarChart3 className="w-5 h-5 text-blue-400 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-white mb-1">
+                          {RESULT_TYPES[wizardData.measurement.result_type].label}
+                        </h4>
+                        <p className="text-sm text-slate-300">
+                          {RESULT_TYPES[wizardData.measurement.result_type].description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-between">
+                <Button variant="secondary" onClick={() => setWizardStep(4)}>
+                  Previous
+                </Button>
+                <Button 
+                  onClick={() => setWizardStep(6)}
+                  disabled={!wizardData.measurement.result_type}
+                  className="btn-spectrum"
+                >
+                  Next: Review & Create
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 6:
+        // STEP 6: Review & Create
         return (
           <Card className="glass-card border-0">
             <CardHeader>
