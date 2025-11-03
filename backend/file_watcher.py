@@ -61,10 +61,10 @@ class ArgusResponseHandler(FileSystemEventHandler):
     
     async def _process_response(self, file_path: Path):
         """
-        Process a response file
+        Process a response file (XML or ZIP)
         
         Args:
-            file_path: Path to the response XML file
+            file_path: Path to the response XML or ZIP file
         """
         try:
             # Wait a moment to ensure file is fully written
@@ -76,6 +76,11 @@ class ArgusResponseHandler(FileSystemEventHandler):
                 return
             
             logger.info(f"Processing response: {file_path.name}")
+            
+            # Handle ZIP files (measurement results)
+            if file_path.suffix.lower() == '.zip':
+                await self._process_zip_measurement(file_path)
+                return
             
             # Parse the response
             response_data = self.xml_processor.parse_response(str(file_path))
