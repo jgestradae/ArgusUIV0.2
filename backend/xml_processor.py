@@ -789,6 +789,21 @@ class ArgusXMLProcessor:
                     operator = req_meas.find("RMP_O_NAME")
                     if operator is not None:
                         result["operator_name"] = operator.text
+                
+                # Extract location (GPS coordinates)
+                meas_loc = sub_order.find("MEAS_LOC_PARAM")
+                if meas_loc is not None:
+                    longitude_elem = meas_loc.find("MLP_LONG")
+                    latitude_elem = meas_loc.find("MLP_LAT")
+                    if longitude_elem is not None and longitude_elem.text:
+                        result["longitude"] = float(longitude_elem.text)
+                    if latitude_elem is not None and latitude_elem.text:
+                        result["latitude"] = float(latitude_elem.text)
+                
+                # Extract suborder name
+                suborder_name_elem = sub_order.find("SUBORDER_NAME")
+                if suborder_name_elem is not None:
+                    result["suborder_name"] = suborder_name_elem.text
             
             # Extract measurement data and create CSV
             measurement_data = []
