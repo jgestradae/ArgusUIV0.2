@@ -421,6 +421,27 @@ export default function DataNavigator() {
                       </>
                     )}
                     
+                    {/* Automatic Definition specific columns */}
+                    {dataType === 'automatic_definition' && (
+                      <>
+                        <td className="p-4">
+                          <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
+                            {item.measurement_type || 'N/A'}
+                          </Badge>
+                        </td>
+                        <td className="p-4 text-slate-300">{item.station_name || 'N/A'}</td>
+                        <td className="p-4">
+                          <Badge className={`${
+                            item.status === 'active' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                            item.status === 'paused' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                            'bg-slate-500/20 text-slate-300 border-slate-500/30'
+                          }`}>
+                            {item.status || 'draft'}
+                          </Badge>
+                        </td>
+                      </>
+                    )}
+                    
                     <td className="p-4 text-slate-300">{formatFileSize(item.file_size)}</td>
                     <td className="p-4 text-slate-400 text-xs">
                       {formatDate(item.created_at || item.measurement_start)}
