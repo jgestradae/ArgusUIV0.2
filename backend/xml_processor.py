@@ -744,14 +744,14 @@ class ArgusXMLProcessor:
                     if freq_mode is not None and freq_mode.text == "S":
                         freq_single = freq_param.find("FREQ_PAR_S")
                         if freq_single is not None:
-                            result["frequency_single"] = int(freq_single.text)
+                            result["frequency_single"] = int(float(freq_single.text))
                     elif freq_mode is not None and freq_mode.text == "R":
                         freq_low = freq_param.find("FREQ_PAR_RG_L")
                         freq_high = freq_param.find("FREQ_PAR_RG_U")
                         if freq_low is not None:
-                            result["frequency_range_low"] = int(freq_low.text)
+                            result["frequency_range_low"] = int(float(freq_low.text))
                         if freq_high is not None:
-                            result["frequency_range_high"] = int(freq_high.text)
+                            result["frequency_range_high"] = int(float(freq_high.text))
                 
                 # Extract station parameters
                 meas_stat = sub_order.find("MEAS_STAT_PARAM")
