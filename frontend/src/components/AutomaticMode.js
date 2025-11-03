@@ -53,6 +53,16 @@ const MEASUREMENT_TYPES = {
   COVERAGE: { label: 'Coverage Measurement', description: 'Coverage area analysis' }
 };
 
+const RESULT_TYPES = {
+  MR: { label: 'Measurement Result', description: 'Standard measurement results with all data points' },
+  CMR: { label: 'Compress Measurement Result', description: 'Compressed measurement data to save storage' },
+  MaxHold: { label: 'MaxHold', description: 'Maximum values during measurement period' },
+  AMR: { label: 'Measurement Result during Alarm', description: 'Results captured during alarm conditions' },
+  LOG: { label: 'Start/End of Alarm', description: 'Alarm event log data' },
+  TXT: { label: 'Text', description: 'Text format measurement data' },
+  ADC: { label: 'ADC Stream', description: 'Raw ADC data stream' }
+};
+
 const AMM_STATUS_COLORS = {
   draft: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
   active: 'bg-green-500/20 text-green-300 border-green-500/30',
