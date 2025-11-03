@@ -229,6 +229,151 @@ class ArgusResponseHandler(FileSystemEventHandler):
         except Exception as e:
             logger.error(f"Error processing measurement response: {e}", exc_info=True)
 
+
+    async def _process_zip_measurement(self, zip_file_path: Path):
+        """
+        Process ZIP measurement result file
+        Extract XML, parse data, store in MongoDB and file system
+        
+        Args:
+            zip_file_path: Path to the ZIP file containing measurement results
+        """
+        import zipfile
+        import shutil
+        
+        try:
+            from models import MeasurementResult
+            
+            logger.info(f"Processing ZIP measurement file: {zip_file_path.name}")
+            
+            # Extract order_id from filename: OR-251103-161416395-O.xml.zip -> OR251103161416395
+            filename_stem = zip_file_path.stem  # OR-251103-161416395-O.xml
+            if filename_stem.endswith('.xml'):
+                filename_stem = Path(filename_stem).stem  # OR-251103-161416395-O
+            
+            # Remove -O suffix and dashes to get order_id
+            parts = filename_stem.replace('-O', '').split('-')
+            order_id = ''.join(parts)  # OR251103161416395
+            
+            logger.info(f"Extracted order_id: {order_id}")
+            
+            # Create extraction directory
+            temp_extract_dir = self.xml_processor.data_path / "temp_extract" / order_id
+            temp_extract_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Extract ZIP file
+            extracted_xml_path = None
+            with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+                zip_ref.extractall(temp_extract_dir)
+                # Find the XML file inside
+                for file in temp_extract_dir.glob('*.xml'):
+                    extracted_xml_path = file
+                    break
+            
+            if not extracted_xml_path or not extracted_xml_path.exists():
+                logger.error(f"No XML file found in ZIP: {zip_file_path.name}")
+                return
+            
+            logger.info(f"Extracted XML: {extracted_xml_path.name}")
+            
+            # Parse the XML to extract metadata and measurement data
+            parsed_data = self.xml_processor.parse_measurement_result(str(extracted_xml_path))
+            
+            if not parsed_data:
+                logger.error(f"Failed to parse extracted XML from ZIP: {extracted_xml_path.name}")
+                return
+            
+            # Determine station_id for folder organization
+            station_name = parsed_data.get("station_name", "unknown")
+            station_pc = parsed_data.get("station_pc", "unknown")
+            station_id = station_pc if station_pc != "unknown" else station_name
+            
+            # Create permanent storage directory: /processed/<station_id>/<measurement_id>/
+            measurement_id = order_id
+            storage_dir = self.xml_processor.data_path / "processed" / station_id / measurement_id
+            storage_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Move extracted XML to permanent location
+            final_xml_path = storage_dir / extracted_xml_path.name
+            shutil.copy2(extracted_xml_path, final_xml_path)
+            logger.info(f"Stored XML at: {final_xml_path}")
+            
+            # Also store the original ZIP file
+            final_zip_path = storage_dir / zip_file_path.name
+            shutil.copy2(zip_file_path, final_zip_path)
+            logger.info(f"Stored ZIP at: {final_zip_path}")
+            
+            # Create MeasurementResult model
+            measurement_result = MeasurementResult(
+                order_id=order_id,
+                measurement_type=parsed_data.get("measurement_type", "FFM"),
+                station_name=station_name,
+                station_pc=station_pc,
+                signal_path=parsed_data.get("signal_path", "unknown"),
+                frequency_single=parsed_data.get("frequency_single"),
+                frequency_range_low=parsed_data.get("frequency_range_low"),
+                frequency_range_high=parsed_data.get("frequency_range_high"),
+                measurement_start=parsed_data.get("measurement_start", datetime.now()),
+                measurement_end=parsed_data.get("measurement_end"),
+                xml_file_path=str(final_xml_path),
+                csv_file_path=parsed_data.get("csv_file_path"),
+                status=parsed_data.get("status", "completed"),
+                result_type=parsed_data.get("result_type", "MR"),
+                data_points=parsed_data.get("data_points", 0),
+                file_size=final_xml_path.stat().st_size if final_xml_path.exists() else 0,
+                operator_name=parsed_data.get("operator_name")
+            )
+            
+            # Save to MongoDB collections
+            
+            # 1. measurements.meta collection
+            await self.db.measurement_results.insert_one(measurement_result.dict())
+            logger.info(f"Measurement metadata saved: {measurement_id}")
+            
+            # 2. orders collection (ORDER_DEF data)
+            order_metadata = {
+                "order_id": order_id,
+                "order_type": "OR",
+                "order_state": parsed_data.get("status", "Finished"),
+                "suborder_name": parsed_data.get("suborder_name"),
+                "measurement_type": parsed_data.get("measurement_type"),
+                "result_type": parsed_data.get("result_type", "MR"),
+                "created_at": datetime.now(),
+                "xml_file": str(final_xml_path),
+                "zip_file": str(final_zip_path)
+            }
+            await self.db.orders.insert_one(order_metadata)
+            logger.info(f"Order metadata saved: {order_id}")
+            
+            # 3. locations collection (GPS_POS data) - from MEAS_LOC_PARAM
+            if parsed_data.get("longitude") and parsed_data.get("latitude"):
+                location_data = {
+                    "order_id": order_id,
+                    "station_name": station_name,
+                    "longitude": parsed_data.get("longitude"),
+                    "latitude": parsed_data.get("latitude"),
+                    "timestamp": datetime.now()
+                }
+                await self.db.locations.insert_one(location_data)
+                logger.info(f"Location data saved for: {station_name}")
+            
+            # Clean up temporary extraction directory
+            shutil.rmtree(temp_extract_dir, ignore_errors=True)
+            
+            # Move original ZIP to processed folder
+            processed_zip_path = self.xml_processor.data_path / "xml_responses" / zip_file_path.name
+            processed_zip_path.parent.mkdir(parents=True, exist_ok=True)
+            if zip_file_path.exists():
+                zip_file_path.rename(processed_zip_path)
+                logger.info(f"ZIP moved to processed: {processed_zip_path}")
+            
+            logger.info(f"✓ ZIP measurement processing complete: {order_id}, {measurement_result.data_points} data points")
+            
+        except zipfile.BadZipFile as e:
+            logger.error(f"Invalid ZIP file {zip_file_path.name}: {e}")
+        except Exception as e:
+            logger.error(f"Error processing ZIP measurement {zip_file_path.name}: {e}", exc_info=True)
+
     async def _process_ifl_response(self, file_path: Path):
         """Process IFL/IOFL (Import Frequency List) response"""
         try:
