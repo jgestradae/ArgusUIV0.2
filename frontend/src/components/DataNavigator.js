@@ -299,6 +299,13 @@ export default function DataNavigator() {
                       <th className="text-left p-4 font-medium">Frequency</th>
                     </>
                   )}
+                  {dataType === 'automatic_definition' && (
+                    <>
+                      <th className="text-left p-4 font-medium">Type</th>
+                      <th className="text-left p-4 font-medium">Station</th>
+                      <th className="text-left p-4 font-medium">Status</th>
+                    </>
+                  )}
                   <th className="text-left p-4 font-medium">Size</th>
                   <th className="text-left p-4 font-medium">Created</th>
                   <th className="text-left p-4 font-medium">Actions</th>
