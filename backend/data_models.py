@@ -118,7 +118,7 @@ class DataItemFilter(BaseModel):
     created_by: Optional[str] = None
 
 class DataNavigatorResponse(BaseModel):
-    items: List[DataItem]
+    items: List[Any]  # Can be DataItem or dict for flexibility
     total_count: int
     page: int
     page_size: int
