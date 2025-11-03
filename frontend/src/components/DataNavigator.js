@@ -398,7 +398,9 @@ export default function DataNavigator() {
                     )}
                     
                     <td className="p-4 text-slate-300">{formatFileSize(item.file_size)}</td>
-                    <td className="p-4 text-slate-400 text-xs">{formatDate(item.created_at)}</td>
+                    <td className="p-4 text-slate-400 text-xs">
+                      {formatDate(item.created_at || item.measurement_start)}
+                    </td>
                     <td className="p-4">
                       <div className="flex items-center space-x-2">
                         <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
