@@ -293,18 +293,24 @@ export default function DataNavigator() {
                     <td className="p-4">
                       <div className="flex items-center space-x-3">
                         <div className={`w-2 h-2 rounded-full ${
-                          item.status === 'completed' ? 'bg-green-400' : 
+                          item.status === 'completed' || item.status === 'Finished' ? 'bg-green-400' : 
                           item.status === 'failed' ? 'bg-red-400' : 
                           'bg-yellow-400'
                         }`}></div>
                         <div>
-                          <div className="font-medium text-white">{item.name}</div>
-                          <div className="text-xs text-slate-400">{item.file_format?.toUpperCase()}</div>
+                          <div className="font-medium text-white">
+                            {item.name || item.order_id || item.id}
+                          </div>
+                          <div className="text-xs text-slate-400">
+                            {item.file_format?.toUpperCase() || (item.result_type || 'XML')}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="p-4 text-slate-300 max-w-xs truncate">
-                      {item.description || item.query_name || 'No description'}
+                      {item.description || item.query_name || 
+                       (dataType === 'measurement_result' && item.data_points ? 
+                        `${item.data_points} measurement points` : 'No description')}
                     </td>
                     
                     {/* Frequency List specific columns */}
