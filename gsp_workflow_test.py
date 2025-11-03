@@ -23,7 +23,7 @@ from pymongo import MongoClient
 import sys
 
 class GSPWorkflowTester:
-    def __init__(self, base_url="https://argus-spectrum.preview.emergentagent.com"):
+    def __init__(self, base_url="https://argus-connect.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.session = requests.Session()
