@@ -124,6 +124,23 @@ export default function DataNavigator() {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         setData(prev => ({ ...prev, [dataType]: response.data.transmitter_lists }));
+      } else if (dataType === 'automatic_definition') {
+        // Handle AMM configurations
+        const response = await axios.get(`${API}/amm/configurations`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        // Transform AMM configs to match DataNavigator format
+        const configs = response.data.configurations.map(config => ({
+          id: config.id,
+          name: config.name,
+          description: config.description,
+          measurement_type: config.measurement_type,
+          station_name: config.station_names?.join(', '),
+          created_at: config.created_at,
+          status: config.status,
+          file_size: 0 // AMM configs don't have file size
+        }));
+        setData(prev => ({ ...prev, [dataType]: { items: configs, total_count: configs.length } }));
       } else {
         // Original data types
         const params = new URLSearchParams({
