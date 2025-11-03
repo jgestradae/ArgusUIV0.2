@@ -63,8 +63,9 @@ class SubOrderTask(str, Enum):
 
 class ResultType(str, Enum):
     MR = "MR"         # Measurement Result
-    CMR = "CMR"       # Compressed Meas. Results
-    AMR = "AMR"       # Measurement Result during Alarm
+    CMR = "CMR"       # Compress measurement result
+    MAXHOLD = "MaxHold"  # MaxHold
+    AMR = "AMR"       # Measurement Result during an alarm
     LOG = "LOG"       # Start/End of Alarm
     TXT = "TXT"       # Text
     ADC = "ADC"       # ADC stream
