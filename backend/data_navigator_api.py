@@ -76,13 +76,9 @@ class DataNavigatorService:
         for item in items:
             # Create appropriate model based on type
             if data_type == DataType.MEASUREMENT_RESULT:
-                # Use models.MeasurementResult directly for real measurement data
-                from models import MeasurementResult as RealMeasurementResult
-                try:
-                    data_items.append(RealMeasurementResult(**item))
-                except Exception as e:
-                    # Fallback to data_models.MeasurementResult for old format
-                    data_items.append(MeasurementResult(**item))
+                # For real measurement results, we need to return them as-is (dict format)
+                # The frontend will handle the different structure
+                data_items.append(item)
             elif data_type == DataType.GRAPH:
                 data_items.append(MeasurementGraph(**item))
             elif data_type == DataType.AUDIO:
