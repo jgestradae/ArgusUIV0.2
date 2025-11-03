@@ -71,6 +71,11 @@ class DataNavigatorService:
         cursor = collection.find(query).sort(sort_field, -1).skip(skip).limit(page_size)
         items = await cursor.to_list(length=page_size)
         
+        # Remove _id field from all items (MongoDB ObjectId is not JSON serializable)
+        for item in items:
+            if '_id' in item:
+                del item['_id']
+        
         # Convert to DataItem objects
         data_items = []
         for item in items:
