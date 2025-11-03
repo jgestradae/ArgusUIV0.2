@@ -134,7 +134,7 @@ class MeasurementDefinition(BaseModel):
     station_names: List[str]
     
     # Result Configuration (ORM 4.1)
-    result_type: str = "MR"  # MR=Measurement Result, CMR=Compressed, SMR=Summary, LIMIT=Limits only
+    result_type: str = "MR"  # MR=Measurement Result, CMR=Compress measurement result, MaxHold=MaxHold, AMR=Measurement Result during an alarm
     
     # Frequency Configuration
     frequency_mode: str = "S"  # S=Single, R=Range, L=List
