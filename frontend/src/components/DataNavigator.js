@@ -357,9 +357,10 @@ export default function DataNavigator() {
                     {dataType === 'measurement_result' && (
                       <>
                         <td className="p-4 text-slate-300">
-                          {item.frequency ? `${(item.frequency / 1000000).toFixed(1)} MHz` : 
-                           item.frequency_range_start ? 
-                           `${(item.frequency_range_start / 1000000).toFixed(0)}-${(item.frequency_range_end / 1000000).toFixed(0)} MHz` :
+                          {item.frequency_single ? `${(item.frequency_single / 1000000).toFixed(1)} MHz` : 
+                           item.frequency ? `${(item.frequency / 1000000).toFixed(1)} MHz` : 
+                           item.frequency_range_low ? 
+                           `${(item.frequency_range_low / 1000000).toFixed(0)}-${(item.frequency_range_high / 1000000).toFixed(0)} MHz` :
                            'N/A'}
                         </td>
                         <td className="p-4">
