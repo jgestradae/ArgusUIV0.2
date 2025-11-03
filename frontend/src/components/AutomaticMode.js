@@ -136,7 +136,8 @@ export default function AutomaticMode() {
         azimuth: 0
       },
       measured_parameters: ['Level'],
-      alarm_configs: []
+      alarm_configs: [],
+      result_type: 'MR'  // Default: Measurement Result
     },
     
     // Range Definition
