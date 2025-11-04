@@ -56,6 +56,8 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
   const [editedData, setEditedData] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [markers, setMarkers] = useState([]);  // Array of {x, y, index} objects
+  const [showMarkerControls, setShowMarkerControls] = useState(false);
 
   useEffect(() => {
     loadItemData();
