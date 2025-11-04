@@ -321,7 +321,7 @@ def create_amm_router(db: AsyncIOMotorDatabase, scheduler: AMMScheduler) -> APIR
             )
     
 
-    @router.get("/measurement-definitions/{definition_id}")
+    @router.get("/api/amm/measurement-definitions/{definition_id}")
     async def get_measurement_definition(
         definition_id: str,
         db: AsyncIOMotorDatabase = Depends(lambda: db),
@@ -339,7 +339,7 @@ def create_amm_router(db: AsyncIOMotorDatabase, scheduler: AMMScheduler) -> APIR
         
         return definition
 
-    @router.get("/range-definitions/{definition_id}")
+    @router.get("/api/amm/range-definitions/{definition_id}")
     async def get_range_definition(
         definition_id: str,
         db: AsyncIOMotorDatabase = Depends(lambda: db),
