@@ -197,7 +197,11 @@ export default function AutomaticMode() {
   };
 
   const updateAvailableMeasurementTypes = (stationName) => {
-    if (!systemParameters || !systemParameters.signal_paths) return;
+    if (!systemParameters || !systemParameters.signal_paths) {
+      // If no GSP data, show all measurement types
+      setAvailableMeasurementTypes(Object.keys(MEASUREMENT_TYPES));
+      return;
+    }
     
     // Find signal paths for the selected station
     const stationPaths = systemParameters.signal_paths.filter(
@@ -214,7 +218,9 @@ export default function AutomaticMode() {
       });
     });
     
-    setAvailableMeasurementTypes(Array.from(measurementTypes));
+    // If no measurement types found, show all
+    const typesArray = Array.from(measurementTypes);
+    setAvailableMeasurementTypes(typesArray.length > 0 ? typesArray : Object.keys(MEASUREMENT_TYPES));
   };
 
   // Load signal paths when reaching step 4
