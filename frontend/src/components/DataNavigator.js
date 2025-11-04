@@ -147,7 +147,7 @@ export default function DataNavigator() {
         }));
         setData(prev => ({ ...prev, [dataType]: { items: configs, total_count: configs.length } }));
       } else {
-        // Original data types
+        // Original data types - require authentication
         const params = new URLSearchParams({
           page: pagination.page.toString(),
           page_size: pagination.pageSize.toString()
@@ -157,7 +157,9 @@ export default function DataNavigator() {
           params.append('name_search', searchTerm);
         }
         
-        const response = await axios.get(`${API}/data/${dataType}?${params}`);
+        const response = await axios.get(`${API}/data/${dataType}?${params}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
         setData(prev => ({ ...prev, [dataType]: response.data }));
       }
     } catch (error) {
