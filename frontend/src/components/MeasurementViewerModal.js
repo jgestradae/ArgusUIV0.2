@@ -62,7 +62,7 @@ export default function MeasurementViewerModal({ measurement, onClose }) {
       
       // Fetch the actual measurement data from CSV or XML
       const response = await axios.get(`${API}/measurements/${measurement.order_id}/data`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
       });
       
       setMeasurementData(response.data);

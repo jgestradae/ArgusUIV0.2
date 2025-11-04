@@ -25,7 +25,7 @@ const ReportList = () => {
       const response = await axios.get(`${backendUrl}/api/reports/list`, {
         params,
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('argus_token')}`
         }
       });
 
@@ -45,7 +45,7 @@ const ReportList = () => {
         `${backendUrl}/api/reports/${reportId}/download?format=${format}`,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('argus_token')}`
           }
         }
       );
@@ -80,7 +80,7 @@ const ReportList = () => {
         `${backendUrl}/api/reports/${reportId}`,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('argus_token')}`
           }
         }
       );
