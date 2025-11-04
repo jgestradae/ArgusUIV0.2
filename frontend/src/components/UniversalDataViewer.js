@@ -450,22 +450,81 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
         <div className="bg-slate-800/30 rounded-lg p-4">
           <ResponsiveContainer width="100%" height={400}>
             {graphType === GRAPH_TYPES.LEVEL_VS_TIME ? (
-              <LineChart data={chartData}>
+              <LineChart 
+                data={chartData}
+                onClick={(data) => {
+                  if (data && data.activePayload && data.activePayload[0]) {
+                    const point = data.activePayload[0].payload;
+                    addMarker({
+                      time: point.time,
+                      level: point.level,
+                      timestamp: point.timestamp
+                    }, point.index);
+                  }
+                }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="time" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} />
                 <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} label={{ value: 'Level (dBm)', angle: -90, position: 'insideLeft', fill: '#94a3b8' }} />
                 <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} labelStyle={{ color: '#94a3b8' }} />
                 <Legend />
                 <Line type="monotone" dataKey="level" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} name="Level (dBm)" />
+                {/* Render markers */}
+                {markers.map((marker, idx) => (
+                  <Line
+                    key={marker.id}
+                    type="monotone"
+                    dataKey={() => marker.level}
+                    stroke={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]}
+                    strokeWidth={0}
+                    dot={(props) => {
+                      if (props.payload && props.payload.index === marker.index) {
+                        return (
+                          <g>
+                            <circle cx={props.cx} cy={props.cy} r={6} fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]} stroke="#fff" strokeWidth={2} />
+                            <text x={props.cx} y={props.cy - 12} textAnchor="middle" fill="#fff" fontSize={10}>M{idx + 1}</text>
+                          </g>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                ))}
               </LineChart>
             ) : (
-              <ScatterChart data={chartData}>
+              <ScatterChart 
+                data={chartData}
+                onClick={(data) => {
+                  if (data && data.activePayload && data.activePayload[0]) {
+                    const point = data.activePayload[0].payload;
+                    addMarker({
+                      frequency: point.frequency,
+                      level: point.level,
+                      timestamp: point.timestamp
+                    }, chartData.findIndex(p => p.frequency === point.frequency && p.level === point.level));
+                  }
+                }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="frequency" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} label={{ value: 'Frequency (MHz)', position: 'insideBottom', offset: -5, fill: '#94a3b8' }} />
                 <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} label={{ value: 'Level (dBm)', angle: -90, position: 'insideLeft', fill: '#94a3b8' }} />
                 <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} labelStyle={{ color: '#94a3b8' }} />
                 <Legend />
                 <Scatter dataKey="level" fill="#3b82f6" name="Level (dBm)" />
+                {/* Render markers */}
+                {markers.map((marker, idx) => (
+                  <Scatter
+                    key={marker.id}
+                    data={[marker]}
+                    fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]}
+                    shape={(props) => (
+                      <g>
+                        <circle cx={props.cx} cy={props.cy} r={8} fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]} stroke="#fff" strokeWidth={2} />
+                        <text x={props.cx} y={props.cy - 15} textAnchor="middle" fill="#fff" fontSize={11} fontWeight="bold">M{idx + 1}</text>
+                      </g>
+                    )}
+                  />
+                ))}
               </ScatterChart>
             )}
           </ResponsiveContainer>
