@@ -1174,7 +1174,7 @@ export default function AutomaticMode() {
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(MEASUREMENT_TYPES)
-                      .filter(([key, _]) => availableMeasurementTypes.includes(key))
+                      .filter(([key, _]) => availableMeasurementTypes.length === 0 || availableMeasurementTypes.includes(key))
                       .map(([key, type]) => (
                         <SelectItem key={key} value={key}>
                           <div>
@@ -1186,7 +1186,7 @@ export default function AutomaticMode() {
                   </SelectContent>
                 </Select>
                 {availableMeasurementTypes.length === 0 && (
-                  <p className="text-xs text-yellow-400">No measurement types available for this station</p>
+                  <p className="text-xs text-yellow-400">GSP data not available - showing all measurement types</p>
                 )}
               </div>
               
