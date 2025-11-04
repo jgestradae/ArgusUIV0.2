@@ -122,6 +122,98 @@ class ArgusAPITester:
         """Test getting system logs"""
         return self.run_test("Get System Logs", "GET", "logs", 200, auth_required=True)
 
+    def test_system_logs_with_filters(self):
+        """Test getting system logs with various filters"""
+        # Test with level filter
+        success1, _ = self.run_test("System Logs - Level Filter", "GET", "logs?level=INFO&limit=50", 200, auth_required=True)
+        
+        # Test with source filter
+        success2, _ = self.run_test("System Logs - Source Filter", "GET", "logs?source=AUTH&limit=50", 200, auth_required=True)
+        
+        # Test with search filter
+        success3, _ = self.run_test("System Logs - Search Filter", "GET", "logs?search=login&limit=50", 200, auth_required=True)
+        
+        return success1 and success2 and success3
+
+    def test_system_logs_stats(self):
+        """Test getting system logs statistics"""
+        # Test with default 24 hours
+        success1, response1 = self.run_test("System Logs Stats (24h)", "GET", "logs/stats", 200, auth_required=True)
+        
+        # Test with custom hours parameter
+        success2, response2 = self.run_test("System Logs Stats (1h)", "GET", "logs/stats?hours=1", 200, auth_required=True)
+        
+        # Validate response structure
+        if success1 and isinstance(response1, dict):
+            required_fields = ['total_logs', 'by_level', 'by_source', 'recent_errors_count']
+            has_required_fields = all(field in response1 for field in required_fields)
+            if not has_required_fields:
+                print(f"   ❌ Missing required fields in stats response")
+                return False
+        
+        return success1 and success2
+
+    def test_system_logs_sources(self):
+        """Test getting available log sources"""
+        success, response = self.run_test("System Logs Sources", "GET", "logs/sources", 200, auth_required=True)
+        
+        if success and isinstance(response, dict) and 'sources' in response:
+            sources = response['sources']
+            print(f"   Available sources: {sources}")
+            return True
+        return success
+
+    def test_system_logs_levels(self):
+        """Test getting available log levels"""
+        success, response = self.run_test("System Logs Levels", "GET", "logs/levels", 200, auth_required=True)
+        
+        if success and isinstance(response, dict) and 'levels' in response:
+            levels = response['levels']
+            print(f"   Available levels: {levels}")
+            return True
+        return success
+
+    def test_authentication_logging(self):
+        """Test that authentication events are being logged"""
+        # First, try a failed login to generate a WARNING log
+        print(f"\n🔍 Testing Authentication Logging...")
+        
+        # Failed login attempt
+        failed_success, _ = self.run_test(
+            "Failed Login (for logging test)",
+            "POST",
+            "auth/login",
+            401,  # Expect 401 for wrong password
+            data={"username": "admin", "password": "wrongpassword"}
+        )
+        
+        if failed_success:
+            print(f"   ✅ Failed login attempt completed (expected 401)")
+            
+            # Wait a moment for log to be written
+            import time
+            time.sleep(1)
+            
+            # Check if the failed login was logged
+            success, response = self.run_test(
+                "Check Failed Login Log",
+                "GET",
+                "logs?source=AUTH&level=WARNING&limit=10",
+                200,
+                auth_required=True
+            )
+            
+            if success and isinstance(response, list):
+                failed_login_logs = [log for log in response if 'Failed login attempt' in log.get('message', '')]
+                if failed_login_logs:
+                    print(f"   ✅ Failed login logged successfully: {len(failed_login_logs)} entries")
+                    return True
+                else:
+                    print(f"   ❌ Failed login not found in logs")
+                    return False
+        
+        return False
+
     def test_unauthorized_access(self):
         """Test accessing protected endpoint without token"""
         old_token = self.token
