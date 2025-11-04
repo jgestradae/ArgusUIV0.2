@@ -591,7 +591,7 @@ class ArgusAPITester:
             print(f"         ❌ XML validation error: {str(e)}")
 
 def main():
-    print("🚀 Starting ArgusUI Backend API Tests - SMDI Module Focus")
+    print("🚀 Starting ArgusUI Backend API Tests - System Logs Module Focus")
     print("=" * 60)
     
     tester = ArgusAPITester()
