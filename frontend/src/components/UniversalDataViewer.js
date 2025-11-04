@@ -673,17 +673,24 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
           <div className="flex items-center space-x-2">
             {markers.length < 4 && itemData?.data_points && (
               <Select onValueChange={(value) => addMarkerAtPoint(parseInt(value))}>
-                <SelectTrigger className="w-48 input-spectrum">
+                <SelectTrigger className="w-64 input-spectrum">
                   <SelectValue placeholder="Add Marker..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {itemData.data_points.slice(0, 50).map((point, idx) => (
-                    <SelectItem key={idx} value={idx.toString()}>
-                      Point {idx + 1}: {point.level_dbm} dBm
-                    </SelectItem>
-                  ))}
+                  {itemData.data_points.slice(0, 50).map((point, idx) => {
+                    const xValue = graphType === GRAPH_TYPES.LEVEL_VS_TIME 
+                      ? (point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : `T${idx + 1}`)
+                      : `${(parseInt(point.frequency_hz) / 1000000).toFixed(3)} MHz`;
+                    const yValue = `${parseFloat(point.level_dbm).toFixed(1)} dBm`;
+                    
+                    return (
+                      <SelectItem key={idx} value={idx.toString()}>
+                        {xValue}: {yValue}
+                      </SelectItem>
+                    );
+                  })}
                   {itemData.data_points.length > 50 && (
-                    <SelectItem value="-1" disabled>...and {itemData.data_points.length - 50} more</SelectItem>
+                    <SelectItem value="-1" disabled>...and {itemData.data_points.length - 50} more points</SelectItem>
                   )}
                 </SelectContent>
               </Select>
