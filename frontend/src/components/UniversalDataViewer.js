@@ -1104,7 +1104,7 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
                 <SelectItem value={GRAPH_TYPES.LEVEL_VS_TIME}>Level vs Time</SelectItem>
                 <SelectItem value={GRAPH_TYPES.LEVEL_VS_FREQUENCY}>Level vs Frequency</SelectItem>
                 <SelectItem value={GRAPH_TYPES.SPECTROGRAM_2D}>2D Spectrogram</SelectItem>
-                <SelectItem value={GRAPH_TYPES.VIEW_3D} disabled>3D View (Coming Soon)</SelectItem>
+                <SelectItem value={GRAPH_TYPES.VIEW_3D}>3D Surface View</SelectItem>
               </SelectContent>
             </Select>
 
