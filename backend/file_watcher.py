@@ -67,15 +67,27 @@ class ArgusResponseHandler(FileSystemEventHandler):
             file_path: Path to the response XML or ZIP file
         """
         try:
+            from system_logger import SystemLogger
+            
             # Wait a moment to ensure file is fully written
             await asyncio.sleep(0.5)
             
             # Check if file still exists (might have been moved already)
             if not file_path.exists():
                 logger.warning(f"File no longer exists: {file_path.name}")
+                await SystemLogger.warning(
+                    SystemLogger.FILE_WATCHER,
+                    f"File no longer exists during processing: {file_path.name}",
+                    details={"file_name": file_path.name}
+                )
                 return
             
             logger.info(f"Processing response: {file_path.name}")
+            await SystemLogger.info(
+                SystemLogger.FILE_WATCHER,
+                f"Processing response file: {file_path.name}",
+                details={"file_name": file_path.name, "file_type": file_path.suffix}
+            )
             
             # Handle ZIP files (measurement results)
             if file_path.suffix.lower() == '.zip':
