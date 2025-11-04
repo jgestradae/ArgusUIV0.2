@@ -670,6 +670,176 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     return <div className="text-center py-12 text-slate-400">No data available</div>;
   };
 
+  // Render 3D Surface Plot (Frequency × Time × Level)
+  const render3DView = () => {
+    if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+          <p className="text-slate-400">No data available for 3D view</p>
+        </div>
+      );
+    }
+
+    // Prepare data for 3D surface plot
+    const surfaceData = {};
+    const uniqueFrequencies = new Set();
+    const uniqueTimestamps = new Set();
+
+    itemData.data_points.forEach(point => {
+      const freq = parseInt(point.frequency_hz) / 1000000; // Convert to MHz
+      const timestamp = point.timestamp ? new Date(point.timestamp).getTime() : 0;
+      const level = parseFloat(point.level_dbm);
+      
+      uniqueFrequencies.add(freq);
+      uniqueTimestamps.add(timestamp);
+      
+      if (!surfaceData[timestamp]) {
+        surfaceData[timestamp] = {};
+      }
+      surfaceData[timestamp][freq] = level;
+    });
+
+    const sortedFrequencies = Array.from(uniqueFrequencies).sort((a, b) => a - b);
+    const sortedTimestamps = Array.from(uniqueTimestamps).sort((a, b) => a - b);
+
+    // Create Z matrix (level values) for surface plot
+    const zMatrix = sortedTimestamps.map(timestamp => 
+      sortedFrequencies.map(freq => surfaceData[timestamp]?.[freq] || null)
+    );
+
+    // Convert timestamps to relative seconds from start
+    const timeInSeconds = sortedTimestamps.map((timestamp, idx) => {
+      if (idx === 0) return 0;
+      return (timestamp - sortedTimestamps[0]) / 1000;
+    });
+
+    useEffect(() => {
+      // Create 3D plot after component renders
+      const plot3D = () => {
+        const plotDiv = document.getElementById('plotly-3d-view');
+        if (!plotDiv) return;
+
+        const trace = {
+          type: 'surface',
+          x: sortedFrequencies, // Frequency (MHz)
+          y: timeInSeconds, // Time (seconds)
+          z: zMatrix, // Level (dBm)
+          colorscale: [
+            [0, 'rgb(0,0,255)'],      // Blue (low)
+            [0.25, 'rgb(0,255,255)'], // Cyan
+            [0.5, 'rgb(0,255,0)'],    // Green
+            [0.75, 'rgb(255,255,0)'], // Yellow
+            [1, 'rgb(255,0,0)']       // Red (high)
+          ],
+          colorbar: {
+            title: 'Level (dBm)',
+            titleside: 'right',
+            tickmode: 'linear',
+            tick0: Math.min(...zMatrix.flat().filter(v => v !== null)),
+            dtick: 10
+          }
+        };
+
+        const layout = {
+          title: {
+            text: '3D Measurement Visualization',
+            font: { color: '#fff' }
+          },
+          scene: {
+            xaxis: { 
+              title: 'Frequency (MHz)',
+              gridcolor: '#444',
+              zerolinecolor: '#444',
+              color: '#94a3b8'
+            },
+            yaxis: { 
+              title: 'Time (s)',
+              gridcolor: '#444',
+              zerolinecolor: '#444',
+              color: '#94a3b8'
+            },
+            zaxis: { 
+              title: 'Level (dBm)',
+              gridcolor: '#444',
+              zerolinecolor: '#444',
+              color: '#94a3b8'
+            },
+            bgcolor: '#1e293b',
+            camera: {
+              eye: { x: 1.5, y: 1.5, z: 1.3 }
+            }
+          },
+          paper_bgcolor: '#1e293b',
+          plot_bgcolor: '#1e293b',
+          font: { color: '#94a3b8' },
+          autosize: true,
+          margin: { l: 0, r: 0, t: 40, b: 0 }
+        };
+
+        const config = {
+          responsive: true,
+          displayModeBar: true,
+          displaylogo: false,
+          modeBarButtonsToRemove: ['sendDataToCloud'],
+          modeBarButtonsToAdd: []
+        };
+
+        Plotly.newPlot(plotDiv, [trace], layout, config);
+      };
+
+      // Delay to ensure DOM is ready
+      const timer = setTimeout(plot3D, 100);
+      return () => clearTimeout(timer);
+    }, [sortedFrequencies, timeInSeconds, zMatrix]);
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-slate-800/30 rounded-lg p-4">
+          <div id="plotly-3d-view" style={{ width: '100%', height: '600px' }}></div>
+        </div>
+
+        {/* 3D View Controls and Info */}
+        <div className="grid grid-cols-4 gap-4">
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Frequency Range</div>
+            <div className="text-sm font-semibold text-white">
+              {sortedFrequencies[0]?.toFixed(1)} - {sortedFrequencies[sortedFrequencies.length - 1]?.toFixed(1)} MHz
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Time Duration</div>
+            <div className="text-sm font-semibold text-white">
+              {timeInSeconds[timeInSeconds.length - 1]?.toFixed(1)} seconds
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Level Range</div>
+            <div className="text-sm font-semibold text-white">
+              {Math.min(...zMatrix.flat().filter(v => v !== null)).toFixed(1)} to {Math.max(...zMatrix.flat().filter(v => v !== null)).toFixed(1)} dBm
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Data Points</div>
+            <div className="text-sm font-semibold text-white">
+              {sortedFrequencies.length} × {sortedTimestamps.length} = {sortedFrequencies.length * sortedTimestamps.length}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+          <h4 className="text-sm font-semibold text-blue-300 mb-2">3D View Controls</h4>
+          <ul className="text-xs text-slate-300 space-y-1">
+            <li>• <strong>Rotate:</strong> Click and drag</li>
+            <li>• <strong>Zoom:</strong> Scroll wheel or pinch</li>
+            <li>• <strong>Pan:</strong> Right-click and drag (or Shift + drag)</li>
+            <li>• <strong>Reset:</strong> Double-click or use home button</li>
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
   // Render 2D Spectrogram (Frequency vs Time with Level as Color)
   const renderSpectrogramView = () => {
     if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
