@@ -1179,20 +1179,18 @@ export default function AutomaticMode() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(MEASUREMENT_TYPES)
-                      .filter(([key, _]) => availableMeasurementTypes.length === 0 || availableMeasurementTypes.includes(key))
-                      .map(([key, type]) => (
-                        <SelectItem key={key} value={key}>
-                          <div>
-                            <div className="font-medium">{type.label}</div>
-                            <div className="text-xs text-slate-400">{type.description}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
+                    {Object.entries(MEASUREMENT_TYPES).map(([key, type]) => (
+                      <SelectItem key={key} value={key}>
+                        <div>
+                          <div className="font-medium">{type.label}</div>
+                          <div className="text-xs text-slate-400">{type.description}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                {availableMeasurementTypes.length === 0 && (
-                  <p className="text-xs text-yellow-400">GSP data not available - showing all measurement types</p>
+                {availableMeasurementTypes.length > 0 && availableMeasurementTypes.length < Object.keys(MEASUREMENT_TYPES).length && (
+                  <p className="text-xs text-blue-400">Showing all types. GSP reports: {availableMeasurementTypes.join(', ')}</p>
                 )}
               </div>
               
