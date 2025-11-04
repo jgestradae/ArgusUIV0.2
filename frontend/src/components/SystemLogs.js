@@ -245,6 +245,7 @@ export default function SystemLogs() {
                 setSearchTerm('');
                 setLevelFilter('');
                 setSourceFilter('');
+                loadLogs();
               }}
               variant="secondary"
               className="btn-secondary"
