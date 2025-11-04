@@ -1316,16 +1316,55 @@ export default function AutomaticMode() {
                      wizardData.measurement.measurement_type === 'DSCAN' ? 'Direction Finding Scan' :
                      wizardData.measurement.measurement_type === 'PSCAN' ? 'Panoramic Scan' : 'Frequency List Scan'}
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="freq_start">Start Frequency (Hz)</Label>
                       <Input
                         id="freq_start"
                         type="number"
-                        value={wizardData.measurement.frequency_single}
+                        value={wizardData.measurement.frequency_range_start || 88000000}
                         onChange={(e) => setWizardData(prev => ({
                           ...prev,
-                          measurement: { ...prev.measurement, frequency_single: parseInt(e.target.value) }
+                          measurement: { 
+                            ...prev.measurement, 
+                            frequency_mode: 'R',
+                            frequency_range_start: parseInt(e.target.value) 
+                          }
+                        }))}
+                        className="input-spectrum"
+                        placeholder="e.g., 88000000 (88 MHz)"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="freq_end">End Frequency (Hz)</Label>
+                      <Input
+                        id="freq_end"
+                        type="number"
+                        value={wizardData.measurement.frequency_range_end || 108000000}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          measurement: { 
+                            ...prev.measurement, 
+                            frequency_mode: 'R',
+                            frequency_range_end: parseInt(e.target.value) 
+                          }
+                        }))}
+                        className="input-spectrum"
+                        placeholder="e.g., 108000000 (108 MHz)"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="freq_step">Step (Hz)</Label>
+                      <Input
+                        id="freq_step"
+                        type="number"
+                        value={wizardData.measurement.frequency_step || 100000}
+                        onChange={(e) => setWizardData(prev => ({
+                          ...prev,
+                          measurement: { 
+                            ...prev.measurement, 
+                            frequency_step: parseInt(e.target.value) 
+                          }
                         }))}
                         className="input-spectrum"
                         placeholder="e.g., 88000000 (88 MHz)"
