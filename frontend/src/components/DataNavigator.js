@@ -592,6 +592,17 @@ export default function DataNavigator() {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Measurement Viewer Modal */}
+      {showViewerModal && selectedMeasurement && (
+        <MeasurementViewerModal
+          measurement={selectedMeasurement}
+          onClose={() => {
+            setShowViewerModal(false);
+            setSelectedMeasurement(null);
+          }}
+        />
+      )}
     </div>
   );
 }
