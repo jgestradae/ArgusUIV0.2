@@ -296,6 +296,58 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     return `${hz} Hz`;
   };
 
+  // Detect and group scans based on timestamp patterns
+  const detectScans = (dataPoints) => {
+    if (!dataPoints || dataPoints.length === 0) return;
+
+    // Group data points by timestamp (assuming scans have the same or very close timestamps)
+    const scanGroups = {};
+    const timeThreshold = 1000; // 1 second threshold for grouping
+
+    dataPoints.forEach((point, index) => {
+      if (!point.timestamp) return;
+      
+      const timestamp = new Date(point.timestamp).getTime();
+      let foundGroup = false;
+      
+      // Check if this point belongs to an existing scan group
+      Object.keys(scanGroups).forEach(groupTime => {
+        const groupTimestamp = parseInt(groupTime);
+        if (Math.abs(timestamp - groupTimestamp) <= timeThreshold) {
+          scanGroups[groupTime].push({ ...point, originalIndex: index });
+          foundGroup = true;
+        }
+      });
+      
+      // If no group found, create a new one
+      if (!foundGroup) {
+        scanGroups[timestamp] = [{ ...point, originalIndex: index }];
+      }
+    });
+
+    // Convert to array and sort by timestamp
+    const detectedScans = Object.entries(scanGroups)
+      .map(([timestamp, points]) => ({
+        timestamp: parseInt(timestamp),
+        points: points.sort((a, b) => (a.frequency_hz || 0) - (b.frequency_hz || 0)),
+        scanNumber: 0 // Will be set below
+      }))
+      .sort((a, b) => a.timestamp - b.timestamp);
+
+    // Assign scan numbers
+    detectedScans.forEach((scan, index) => {
+      scan.scanNumber = index + 1;
+    });
+
+    setScans(detectedScans);
+    setIsSingleScan(detectedScans.length <= 1);
+    
+    if (detectedScans.length > 1) {
+      console.log(`Detected ${detectedScans.length} scans in measurement data`);
+      toast.success(`Detected ${detectedScans.length} scans in measurement data`);
+    }
+  };
+
   const addMarker = (data, index) => {
     if (markers.length >= 4) {
       toast.error('Maximum 4 markers allowed');
