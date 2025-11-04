@@ -667,6 +667,198 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     return <div className="text-center py-12 text-slate-400">No data available</div>;
   };
 
+  // Render 2D Spectrogram (Frequency vs Time with Level as Color)
+  const renderSpectrogramView = () => {
+    if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+          <p className="text-slate-400">No data available for spectrogram</p>
+        </div>
+      );
+    }
+
+    // Calculate min and max levels for color scaling
+    const levels = itemData.data_points.map(p => parseFloat(p.level_dbm));
+    const minLevel = Math.min(...levels);
+    const maxLevel = Math.max(...levels);
+    const levelRange = maxLevel - minLevel;
+
+    // Color scale function (blue to red through green/yellow)
+    const getLevelColor = (level) => {
+      const normalized = (level - minLevel) / levelRange;
+      
+      if (normalized < 0.25) {
+        // Blue to Cyan
+        const t = normalized / 0.25;
+        return `rgb(${Math.floor(0 * t)}, ${Math.floor(0 + 255 * t)}, 255)`;
+      } else if (normalized < 0.5) {
+        // Cyan to Green
+        const t = (normalized - 0.25) / 0.25;
+        return `rgb(0, 255, ${Math.floor(255 * (1 - t))})`;
+      } else if (normalized < 0.75) {
+        // Green to Yellow
+        const t = (normalized - 0.5) / 0.25;
+        return `rgb(${Math.floor(255 * t)}, 255, 0)`;
+      } else {
+        // Yellow to Red
+        const t = (normalized - 0.75) / 0.25;
+        return `rgb(255, ${Math.floor(255 * (1 - t))}, 0)`;
+      }
+    };
+
+    // Group data by timestamp and frequency for spectrogram
+    const spectrogramData = {};
+    const uniqueFrequencies = new Set();
+    const uniqueTimestamps = new Set();
+
+    itemData.data_points.forEach(point => {
+      const freq = parseInt(point.frequency_hz);
+      const timestamp = point.timestamp ? new Date(point.timestamp).getTime() : 0;
+      const level = parseFloat(point.level_dbm);
+      
+      uniqueFrequencies.add(freq);
+      uniqueTimestamps.add(timestamp);
+      
+      if (!spectrogramData[timestamp]) {
+        spectrogramData[timestamp] = {};
+      }
+      spectrogramData[timestamp][freq] = level;
+    });
+
+    const sortedFrequencies = Array.from(uniqueFrequencies).sort((a, b) => a - b);
+    const sortedTimestamps = Array.from(uniqueTimestamps).sort((a, b) => a - b);
+
+    const cellWidth = Math.max(2, Math.floor(1000 / sortedFrequencies.length));
+    const cellHeight = Math.max(20, Math.floor(400 / sortedTimestamps.length));
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-slate-800/30 rounded-lg p-4 overflow-x-auto">
+          <div className="flex space-x-4">
+            {/* Spectrogram Canvas */}
+            <div className="flex-1">
+              <svg width="1000" height="400" className="border border-slate-700">
+                {/* Y-axis labels (Time) */}
+                <g>
+                  {sortedTimestamps.map((timestamp, tidx) => {
+                    if (tidx % Math.ceil(sortedTimestamps.length / 10) === 0) {
+                      return (
+                        <text
+                          key={`time-${tidx}`}
+                          x="5"
+                          y={tidx * cellHeight + cellHeight / 2}
+                          fill="#94a3b8"
+                          fontSize="10"
+                        >
+                          {new Date(timestamp).toLocaleTimeString()}
+                        </text>
+                      );
+                    }
+                    return null;
+                  })}
+                </g>
+
+                {/* Spectrogram cells */}
+                {sortedTimestamps.map((timestamp, tidx) => (
+                  <g key={`row-${tidx}`}>
+                    {sortedFrequencies.map((freq, fidx) => {
+                      const level = spectrogramData[timestamp]?.[freq];
+                      if (level === undefined) return null;
+                      
+                      const color = getLevelColor(level);
+                      
+                      return (
+                        <rect
+                          key={`cell-${tidx}-${fidx}`}
+                          x={100 + fidx * cellWidth}
+                          y={tidx * cellHeight}
+                          width={cellWidth}
+                          height={cellHeight}
+                          fill={color}
+                          stroke="none"
+                        />
+                      );
+                    })}
+                  </g>
+                ))}
+
+                {/* X-axis labels (Frequency) */}
+                <g>
+                  {sortedFrequencies.map((freq, fidx) => {
+                    if (fidx % Math.ceil(sortedFrequencies.length / 10) === 0) {
+                      return (
+                        <text
+                          key={`freq-${fidx}`}
+                          x={100 + fidx * cellWidth}
+                          y="395"
+                          fill="#94a3b8"
+                          fontSize="10"
+                          transform={`rotate(-45, ${100 + fidx * cellWidth}, 395)`}
+                        >
+                          {(freq / 1000000).toFixed(1)} MHz
+                        </text>
+                      );
+                    }
+                    return null;
+                  })}
+                </g>
+              </svg>
+            </div>
+
+            {/* Color Scale Legend */}
+            <div className="w-16 flex flex-col justify-between">
+              <div className="text-xs text-slate-400 text-center mb-2">Level (dBm)</div>
+              <svg width="60" height="300">
+                <defs>
+                  <linearGradient id="colorScale" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="rgb(255, 0, 0)" />
+                    <stop offset="25%" stopColor="rgb(255, 255, 0)" />
+                    <stop offset="50%" stopColor="rgb(0, 255, 0)" />
+                    <stop offset="75%" stopColor="rgb(0, 255, 255)" />
+                    <stop offset="100%" stopColor="rgb(0, 0, 255)" />
+                  </linearGradient>
+                </defs>
+                <rect x="10" y="0" width="20" height="300" fill="url(#colorScale)" stroke="#fff" strokeWidth="1" />
+                <text x="35" y="10" fill="#fff" fontSize="10">{maxLevel.toFixed(1)}</text>
+                <text x="35" y="155" fill="#fff" fontSize="10">{((minLevel + maxLevel) / 2).toFixed(1)}</text>
+                <text x="35" y="300" fill="#fff" fontSize="10">{minLevel.toFixed(1)}</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Spectrogram Info */}
+        <div className="grid grid-cols-4 gap-4">
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Frequency Range</div>
+            <div className="text-sm font-semibold text-white">
+              {(sortedFrequencies[0] / 1000000).toFixed(1)} - {(sortedFrequencies[sortedFrequencies.length - 1] / 1000000).toFixed(1)} MHz
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Time Span</div>
+            <div className="text-sm font-semibold text-white">
+              {sortedTimestamps.length} scans
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Level Range</div>
+            <div className="text-sm font-semibold text-white">
+              {minLevel.toFixed(1)} to {maxLevel.toFixed(1)} dBm
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Resolution</div>
+            <div className="text-sm font-semibold text-white">
+              {sortedFrequencies.length} freq × {sortedTimestamps.length} time
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Render graph view
   const renderGraphView = () => {
     if (dataType !== 'measurement_result' || !itemData || !itemData.data_points) {
