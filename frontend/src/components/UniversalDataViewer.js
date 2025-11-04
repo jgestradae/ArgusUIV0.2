@@ -222,6 +222,9 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
   const [saving, setSaving] = useState(false);
   const [markers, setMarkers] = useState([]);  // Array of {x, y, index} objects
   const [showMarkerControls, setShowMarkerControls] = useState(false);
+  const [scans, setScans] = useState([]);  // Array of scans (grouped by time)
+  const [selectedScanIndex, setSelectedScanIndex] = useState(0);
+  const [isSingleScan, setIsSingleScan] = useState(true);
 
   useEffect(() => {
     loadItemData();
