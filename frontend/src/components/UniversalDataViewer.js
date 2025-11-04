@@ -678,21 +678,30 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
       );
     }
 
+    // Determine which data to display
+    let dataToDisplay = itemData.data_points;
+    if (!isSingleScan && scans.length > 0 && selectedScanIndex < scans.length) {
+      dataToDisplay = scans[selectedScanIndex].points;
+    }
+
     let chartData = [];
     
     if (graphType === GRAPH_TYPES.LEVEL_VS_TIME) {
-      chartData = itemData.data_points.map((point, index) => ({
+      chartData = dataToDisplay.map((point, index) => ({
         index: index + 1,
         time: point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : `Point ${index + 1}`,
         level: parseFloat(point.level_dbm),
         timestamp: point.timestamp
       }));
     } else if (graphType === GRAPH_TYPES.LEVEL_VS_FREQUENCY) {
-      chartData = itemData.data_points.map((point) => ({
+      chartData = dataToDisplay.map((point) => ({
         frequency: parseInt(point.frequency_hz) / 1000000,
         level: parseFloat(point.level_dbm),
         timestamp: point.timestamp
       }));
+    } else if (graphType === GRAPH_TYPES.SPECTROGRAM_2D) {
+      // Prepare spectrogram data - will be rendered separately
+      return renderSpectrogramView();
     }
 
     const handleChartClick = (data) => {
