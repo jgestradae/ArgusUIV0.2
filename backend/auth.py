@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from models import User, UserRole
 import os
+import asyncio
 
 # Configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this")
