@@ -1279,31 +1279,6 @@ export default function AutomaticMode() {
                         placeholder="e.g., 100000000 (100 MHz)"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="if_bandwidth">IF Bandwidth (Hz)</Label>
-                      <Select 
-                        value={wizardData.measurement.receiver_config.if_bandwidth.toString()}
-                        onValueChange={(value) => setWizardData(prev => ({
-                          ...prev,
-                          measurement: {
-                            ...prev.measurement,
-                            receiver_config: { ...prev.measurement.receiver_config, if_bandwidth: parseInt(value) }
-                          }
-                        }))}
-                      >
-                        <SelectTrigger className="input-spectrum">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="200">200 Hz</SelectItem>
-                          <SelectItem value="1000">1 kHz</SelectItem>
-                          <SelectItem value="9000">9 kHz</SelectItem>
-                          <SelectItem value="10000">10 kHz</SelectItem>
-                          <SelectItem value="120000">120 kHz</SelectItem>
-                          <SelectItem value="200000">200 kHz</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
                 </div>
               )}
