@@ -300,7 +300,31 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     };
     
     setMarkers(prev => [...prev, newMarker]);
-    toast.success(`Marker ${markers.length + 1} added`);
+    toast.success(`Marker ${markers.length + 1} added at ${data.time || data.frequency}`);
+  };
+
+  const addMarkerAtPoint = (pointIndex) => {
+    if (!itemData || !itemData.data_points) return;
+    
+    if (graphType === GRAPH_TYPES.LEVEL_VS_TIME) {
+      const point = itemData.data_points[pointIndex];
+      if (point) {
+        addMarker({
+          time: point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : `Point ${pointIndex + 1}`,
+          level: parseFloat(point.level_dbm),
+          timestamp: point.timestamp
+        }, pointIndex + 1);
+      }
+    } else {
+      const point = itemData.data_points[pointIndex];
+      if (point) {
+        addMarker({
+          frequency: parseInt(point.frequency_hz) / 1000000,
+          level: parseFloat(point.level_dbm),
+          timestamp: point.timestamp
+        }, pointIndex);
+      }
+    }
   };
 
   const removeMarker = (markerId) => {
