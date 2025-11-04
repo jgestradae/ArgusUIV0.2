@@ -595,8 +595,8 @@ export default function DataNavigator() {
         ))}
       </Tabs>
 
-      {/* Measurement Viewer Modal */}
-      {showViewerModal && selectedItem && (
+      {/* Universal Data Viewer Modal */}
+      {showViewerModal && selectedItem && selectedDataType && (
         <UniversalDataViewer
           item={selectedItem}
           dataType={selectedDataType}
@@ -604,6 +604,10 @@ export default function DataNavigator() {
             setShowViewerModal(false);
             setSelectedItem(null);
             setSelectedDataType(null);
+          }}
+          onSave={() => {
+            loadDataForType(selectedDataType);
+            setShowViewerModal(false);
           }}
         />
       )}
