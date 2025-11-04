@@ -1367,27 +1367,11 @@ export default function AutomaticMode() {
                           }
                         }))}
                         className="input-spectrum"
-                        placeholder="e.g., 88000000 (88 MHz)"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="freq_stop">Stop Frequency (Hz)</Label>
-                      <Input
-                        id="freq_stop"
-                        type="number"
-                        defaultValue="108000000"
-                        className="input-spectrum"
-                        placeholder="e.g., 108000000 (108 MHz)"
+                        placeholder="e.g., 100000 (100 kHz)"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="step_size">Step Size (Hz)</Label>
-                      <Input
-                        id="step_size"
-                        type="number"
-                        defaultValue="25000"
                         className="input-spectrum"
                         placeholder="e.g., 25000 (25 kHz)"
                       />
