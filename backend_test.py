@@ -596,25 +596,22 @@ def main():
     
     tester = ArgusAPITester()
     
-    # Test sequence - focusing on SMDI functionality as requested
+    # Test sequence - focusing on System Logs Module as requested
     tests = [
         ("Health Check", tester.test_health_check),
         ("Login", tester.test_login),
         ("Get Current User", tester.test_get_current_user),
         
-        # SMDI Tests - Primary Focus
-        ("SMDI Frequency Query (No Restriction)", tester.test_smdi_query_frequencies_no_restriction),
-        ("SMDI Frequency Query (Single Frequency)", tester.test_smdi_query_frequencies_single),
-        ("SMDI Frequency Query (Range)", tester.test_smdi_query_frequencies_range),
-        ("SMDI Frequency Query (Coordinates)", tester.test_smdi_query_frequencies_coordinates),
-        ("SMDI Transmitter Query (No Restriction)", tester.test_smdi_query_transmitters_no_restriction),
-        ("SMDI Transmitter Query (Range + Coordinates)", tester.test_smdi_query_transmitters_range_coordinates),
-        ("Get SMDI Frequency Lists", tester.test_smdi_get_frequency_lists),
-        ("Get SMDI Transmitter Lists", tester.test_smdi_get_transmitter_lists),
-        ("Get SMDI Queries", tester.test_smdi_get_queries),
-        ("Check XML Files in Inbox", tester.check_xml_files_in_inbox),
+        # System Logs Module Tests - Primary Focus
+        ("System Logs - Basic", tester.test_system_logs),
+        ("System Logs - With Filters", tester.test_system_logs_with_filters),
+        ("System Logs - Statistics", tester.test_system_logs_stats),
+        ("System Logs - Sources", tester.test_system_logs_sources),
+        ("System Logs - Levels", tester.test_system_logs_levels),
+        ("Authentication Logging Test", tester.test_authentication_logging),
+        ("Measurement Orders (existing endpoint)", tester.test_measurement_orders),
         
-        # Existing functionality tests (secondary)
+        # Additional tests to verify system functionality
         ("System Status", tester.test_system_status),
         ("Request GSP", tester.test_request_gsp),
         ("Get Signal Paths", tester.test_get_signal_paths),
@@ -622,10 +619,8 @@ def main():
         ("Get AMM Configurations", tester.test_get_amm_configurations),
         ("Execute AMM Now", tester.test_execute_amm_now),
         ("System Parameters", tester.test_system_parameters),
-        ("Measurement Orders", tester.test_measurement_orders),
         ("Direct Measurement", tester.test_direct_measurement),
         ("Measurement Configs", tester.test_measurement_configs),
-        ("System Logs", tester.test_system_logs),
         ("Unauthorized Access", tester.test_unauthorized_access),
     ]
     
