@@ -727,17 +727,49 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Select value={graphType} onValueChange={setGraphType}>
-            <SelectTrigger className="w-64 input-spectrum">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={GRAPH_TYPES.LEVEL_VS_TIME}>Level vs Time</SelectItem>
-              <SelectItem value={GRAPH_TYPES.LEVEL_VS_FREQUENCY}>Level vs Frequency</SelectItem>
-              <SelectItem value={GRAPH_TYPES.SPECTROGRAM_2D} disabled>2D Spectrogram (Coming Soon)</SelectItem>
-              <SelectItem value={GRAPH_TYPES.VIEW_3D} disabled>3D View (Coming Soon)</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center space-x-3">
+            <Select value={graphType} onValueChange={setGraphType}>
+              <SelectTrigger className="w-64 input-spectrum">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={GRAPH_TYPES.LEVEL_VS_TIME}>Level vs Time</SelectItem>
+                <SelectItem value={GRAPH_TYPES.LEVEL_VS_FREQUENCY}>Level vs Frequency</SelectItem>
+                <SelectItem value={GRAPH_TYPES.SPECTROGRAM_2D}>2D Spectrogram</SelectItem>
+                <SelectItem value={GRAPH_TYPES.VIEW_3D} disabled>3D View (Coming Soon)</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Scan Selector - only show for multiple scans and non-spectrogram views */}
+            {!isSingleScan && scans.length > 1 && graphType !== GRAPH_TYPES.SPECTROGRAM_2D && (
+              <div className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-2 border border-blue-500/30">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedScanIndex(Math.max(0, selectedScanIndex - 1))}
+                  disabled={selectedScanIndex === 0}
+                  className="h-8"
+                >
+                  ←
+                </Button>
+                <span className="text-sm text-white px-2">
+                  Scan {scans[selectedScanIndex]?.scanNumber || 1} of {scans.length}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedScanIndex(Math.min(scans.length - 1, selectedScanIndex + 1))}
+                  disabled={selectedScanIndex === scans.length - 1}
+                  className="h-8"
+                >
+                  →
+                </Button>
+                <span className="text-xs text-slate-400">
+                  {new Date(scans[selectedScanIndex]?.timestamp).toLocaleTimeString()}
+                </span>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center space-x-2">
             {markers.length < 4 && itemData?.data_points && (
