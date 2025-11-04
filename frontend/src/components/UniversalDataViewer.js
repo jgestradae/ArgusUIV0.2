@@ -610,6 +610,26 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
       }));
     }
 
+    const handleChartClick = (data) => {
+      if (data && data.activePayload && data.activePayload.length > 0) {
+        const point = data.activePayload[0].payload;
+        if (graphType === GRAPH_TYPES.LEVEL_VS_TIME) {
+          addMarker({
+            time: point.time,
+            level: point.level,
+            timestamp: point.timestamp
+          }, point.index);
+        } else {
+          const idx = chartData.findIndex(p => p.frequency === point.frequency && p.level === point.level);
+          addMarker({
+            frequency: point.frequency,
+            level: point.level,
+            timestamp: point.timestamp
+          }, idx);
+        }
+      }
+    };
+
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
