@@ -212,12 +212,12 @@ export default function SystemLogs() {
               />
             </div>
             
-            <Select value={levelFilter} onValueChange={setLevelFilter}>
+            <Select value={levelFilter || "all"} onValueChange={(val) => setLevelFilter(val === "all" ? "" : val)}>
               <SelectTrigger className="input-spectrum">
                 <SelectValue placeholder="Filter by level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Levels</SelectItem>
+                <SelectItem value="all">All Levels</SelectItem>
                 <SelectItem value="error">Error</SelectItem>
                 <SelectItem value="warning">Warning</SelectItem>
                 <SelectItem value="info">Info</SelectItem>
@@ -225,15 +225,18 @@ export default function SystemLogs() {
               </SelectContent>
             </Select>
             
-            <Select value={sourceFilter} onValueChange={setSourceFilter}>
+            <Select value={sourceFilter || "all"} onValueChange={(val) => setSourceFilter(val === "all" ? "" : val)}>
               <SelectTrigger className="input-spectrum">
                 <SelectValue placeholder="Filter by source" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Sources</SelectItem>
+                <SelectItem value="all">All Sources</SelectItem>
                 <SelectItem value="api">API</SelectItem>
                 <SelectItem value="xml_processor">XML Processor</SelectItem>
                 <SelectItem value="argus">Argus</SelectItem>
+                <SelectItem value="auth">AUTH</SelectItem>
+                <SelectItem value="file_watcher">FILE_WATCHER</SelectItem>
+                <SelectItem value="amm_scheduler">AMM_SCHEDULER</SelectItem>
               </SelectContent>
             </Select>
             
