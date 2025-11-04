@@ -1067,6 +1067,9 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     } else if (graphType === GRAPH_TYPES.SPECTROGRAM_2D) {
       // Prepare spectrogram data - will be rendered separately
       return renderSpectrogramView();
+    } else if (graphType === GRAPH_TYPES.VIEW_3D) {
+      // Prepare 3D surface plot data
+      return render3DView();
     }
 
     const handleChartClick = (data) => {
