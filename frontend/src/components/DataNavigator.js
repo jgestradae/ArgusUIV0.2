@@ -179,8 +179,9 @@ export default function DataNavigator() {
     }
   };
 
-  const handleViewMeasurement = (item) => {
-    setSelectedMeasurement(item);
+  const handleViewMeasurement = (item, dataType) => {
+    setSelectedItem(item);
+    setSelectedDataType(dataType);
     setShowViewerModal(true);
   };
 
