@@ -45,10 +45,31 @@ class AuthManager:
         """Authenticate user with username and password"""
         user_doc = await self.db.users.find_one({"username": username, "is_active": True})
         if not user_doc:
+            # Log failed login attempt - user not found
+            try:
+                from system_logger import SystemLogger
+                await SystemLogger.warning(
+                    SystemLogger.AUTH,
+                    f"Failed login attempt: User '{username}' not found",
+                    details={"username": username, "reason": "user_not_found"}
+                )
+            except:
+                pass
             return None
         
         user = User(**user_doc)
         if not self.verify_password(password, user_doc["password_hash"]):
+            # Log failed login attempt - incorrect password
+            try:
+                from system_logger import SystemLogger
+                await SystemLogger.warning(
+                    SystemLogger.AUTH,
+                    f"Failed login attempt: Incorrect password for user '{username}'",
+                    user_id=user.id,
+                    details={"username": username, "reason": "incorrect_password"}
+                )
+            except:
+                pass
             return None
         
         # Update last login
@@ -56,6 +77,18 @@ class AuthManager:
             {"id": user.id},
             {"$set": {"last_login": datetime.utcnow()}}
         )
+        
+        # Log successful login
+        try:
+            from system_logger import SystemLogger
+            await SystemLogger.info(
+                SystemLogger.AUTH,
+                f"User '{username}' logged in successfully",
+                user_id=user.id,
+                details={"username": username, "role": user.role}
+            )
+        except:
+            pass
         
         return user
     
