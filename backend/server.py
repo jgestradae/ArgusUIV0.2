@@ -137,6 +137,11 @@ async def lifespan(app: FastAPI):
     app.include_router(reports_api.router, prefix="/api", tags=["Reports"])
     logger.info("Reports Module initialized")
     
+    # Initialize System Logs API
+    import system_logs_api
+    app.include_router(system_logs_api.router, prefix="/api", tags=["System Logs"])
+    logger.info("System Logs API initialized")
+    
     # Initialize SOAP Web Services (Optional - requires Python 3.11/3.12)
     global soap_app
     try:
