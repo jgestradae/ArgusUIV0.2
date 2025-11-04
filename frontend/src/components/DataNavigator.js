@@ -463,7 +463,7 @@ export default function DataNavigator() {
                           variant="ghost" 
                           size="sm" 
                           className="text-blue-400 hover:text-blue-300"
-                          onClick={() => handleViewMeasurement(item)}
+                          onClick={() => handleViewMeasurement(item, dataType)}
                           disabled={dataType !== 'measurement_result'}
                         >
                           <Eye className="w-4 h-4" />
