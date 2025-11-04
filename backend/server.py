@@ -1462,6 +1462,8 @@ async def get_measurement_data(
 ):
     """Get detailed measurement data including all data points"""
     try:
+        import xml.etree.ElementTree as ET
+        
         # Find measurement result
         measurement = await db.measurement_results.find_one({"order_id": order_id})
         
@@ -1477,6 +1479,42 @@ async def get_measurement_data(
             with open(csv_file_path, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 data_points = list(reader)
+        else:
+            # Fallback: Parse XML directly
+            xml_file_path = measurement.get("xml_file_path")
+            if xml_file_path and Path(xml_file_path).exists():
+                logger.info(f"CSV not found, parsing XML directly: {xml_file_path}")
+                tree = ET.parse(xml_file_path)
+                root = tree.getroot()
+                
+                # Parse MEAS_DATA elements
+                for meas_elem in root.findall(".//MEAS_DATA"):
+                    point = {}
+                    
+                    freq_elem = meas_elem.find("MD_M_FREQ")
+                    if freq_elem is not None and freq_elem.text:
+                        point["frequency_hz"] = freq_elem.text
+                    
+                    level_elem = meas_elem.find("MD_LEV")
+                    if level_elem is not None and level_elem.text:
+                        point["level_dbm"] = level_elem.text
+                    
+                    level_unit_elem = meas_elem.find("MD_D_LEV_U")
+                    if level_unit_elem is not None and level_unit_elem.text:
+                        point["level_unit"] = level_unit_elem.text
+                    
+                    time_elem = meas_elem.find("MD_TIME")
+                    if time_elem is not None and time_elem.text:
+                        point["timestamp"] = time_elem.text
+                    
+                    bearing_elem = meas_elem.find("MD_DIR")
+                    if bearing_elem is not None and bearing_elem.text:
+                        point["bearing_deg"] = bearing_elem.text
+                    
+                    if point:
+                        data_points.append(point)
+                
+                logger.info(f"Parsed {len(data_points)} data points from XML")
         
         # Remove MongoDB _id
         if '_id' in measurement:
