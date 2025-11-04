@@ -657,16 +657,8 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
             {graphType === GRAPH_TYPES.LEVEL_VS_TIME ? (
               <LineChart 
                 data={chartData}
-                onClick={(data) => {
-                  if (data && data.activePayload && data.activePayload[0]) {
-                    const point = data.activePayload[0].payload;
-                    addMarker({
-                      time: point.time,
-                      level: point.level,
-                      timestamp: point.timestamp
-                    }, point.index);
-                  }
-                }}
+                onClick={handleChartClick}
+                style={{ cursor: 'crosshair' }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="time" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} />
@@ -674,41 +666,49 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
                 <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} labelStyle={{ color: '#94a3b8' }} />
                 <Legend />
                 <Line type="monotone" dataKey="level" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} name="Level (dBm)" />
-                {/* Render markers */}
-                {markers.map((marker, idx) => (
-                  <Line
-                    key={marker.id}
-                    type="monotone"
-                    dataKey={() => marker.level}
-                    stroke={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]}
-                    strokeWidth={0}
-                    dot={(props) => {
-                      if (props.payload && props.payload.index === marker.index) {
-                        return (
-                          <g>
-                            <circle cx={props.cx} cy={props.cy} r={6} fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]} stroke="#fff" strokeWidth={2} />
-                            <text x={props.cx} y={props.cy - 12} textAnchor="middle" fill="#fff" fontSize={10}>M{idx + 1}</text>
-                          </g>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                ))}
+                {/* Render markers as reference lines */}
+                {markers.map((marker, idx) => {
+                  const markerData = chartData.find(d => d.index === marker.index);
+                  if (!markerData) return null;
+                  return (
+                    <Line
+                      key={marker.id}
+                      data={[markerData]}
+                      type="monotone"
+                      dataKey="level"
+                      stroke="transparent"
+                      strokeWidth={0}
+                      dot={(props) => (
+                        <g>
+                          <circle 
+                            cx={props.cx} 
+                            cy={props.cy} 
+                            r={8} 
+                            fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]} 
+                            stroke="#fff" 
+                            strokeWidth={2} 
+                          />
+                          <text 
+                            x={props.cx} 
+                            y={props.cy - 12} 
+                            textAnchor="middle" 
+                            fill="#fff" 
+                            fontSize={11}
+                            fontWeight="bold"
+                          >
+                            M{idx + 1}
+                          </text>
+                        </g>
+                      )}
+                    />
+                  );
+                })}
               </LineChart>
             ) : (
               <ScatterChart 
                 data={chartData}
-                onClick={(data) => {
-                  if (data && data.activePayload && data.activePayload[0]) {
-                    const point = data.activePayload[0].payload;
-                    addMarker({
-                      frequency: point.frequency,
-                      level: point.level,
-                      timestamp: point.timestamp
-                    }, chartData.findIndex(p => p.frequency === point.frequency && p.level === point.level));
-                  }
-                }}
+                onClick={handleChartClick}
+                style={{ cursor: 'crosshair' }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="frequency" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} label={{ value: 'Frequency (MHz)', position: 'insideBottom', offset: -5, fill: '#94a3b8' }} />
@@ -724,8 +724,24 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
                     fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]}
                     shape={(props) => (
                       <g>
-                        <circle cx={props.cx} cy={props.cy} r={8} fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]} stroke="#fff" strokeWidth={2} />
-                        <text x={props.cx} y={props.cy - 15} textAnchor="middle" fill="#fff" fontSize={11} fontWeight="bold">M{idx + 1}</text>
+                        <circle 
+                          cx={props.cx} 
+                          cy={props.cy} 
+                          r={8} 
+                          fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]} 
+                          stroke="#fff" 
+                          strokeWidth={2} 
+                        />
+                        <text 
+                          x={props.cx} 
+                          y={props.cy - 15} 
+                          textAnchor="middle" 
+                          fill="#fff" 
+                          fontSize={11} 
+                          fontWeight="bold"
+                        >
+                          M{idx + 1}
+                        </text>
                       </g>
                     )}
                   />
@@ -733,6 +749,7 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
               </ScatterChart>
             )}
           </ResponsiveContainer>
+          <p className="text-xs text-slate-400 mt-2 text-center">Click on the graph to add markers (up to 4)</p>
         </div>
 
         {/* Marker Controls */}
