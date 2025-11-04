@@ -345,8 +345,70 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "System Logger Module"
+    implemented: true
+    working: "NA"
+    file: "backend/system_logger.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created centralized system logger module with support for multiple log levels (INFO, WARNING, ERROR, DEBUG, CRITICAL) and sources (API, XML_PROCESSOR, ARGUS, FILE_WATCHER, AMM_SCHEDULER, AUTH, DATABASE, SMDI, MEASUREMENT, SYSTEM, REPORT). Provides both async logging to MongoDB and console output."
+
+  - task: "Enhanced Authentication Logging"
+    implemented: true
+    working: "NA"
+    file: "backend/auth.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Added comprehensive logging to authentication module. Logs successful logins, failed login attempts with reasons (user not found, incorrect password), including user IDs and details."
+
+  - task: "File Watcher Logging"
+    implemented: true
+    working: "NA"
+    file: "backend/file_watcher.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Added logging to file watcher for file processing events. Logs file detection, parsing success/failure, order updates, and processing errors with file names and order IDs."
+
+  - task: "AMM Scheduler Logging"
+    implemented: true
+    working: "NA"
+    file: "backend/amm_scheduler.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Added logging to AMM scheduler for execution events. Logs AMM execution starts, completions, and errors with config IDs, names, and order IDs."
+
+  - task: "System Logs API"
+    implemented: true
+    working: "NA"
+    file: "backend/system_logs_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created comprehensive System Logs API with endpoints: GET /api/logs (with filtering by level, source, user, order, date range, search), GET /api/logs/stats (statistics), GET /api/logs/sources, GET /api/logs/levels, DELETE /api/logs/{id}, DELETE /api/logs (bulk), POST /api/logs/export (CSV/JSON). All endpoints require authentication."
+
 agent_communication:
     - agent: "main"
       message: "Completed Phase 1-3 of SMDI integration. Backend: Created smdi_models.py with Pydantic models for query params and results. Extended xml_processor.py with IFL/ITL XML generation and parsing methods. Updated file_watcher.py to process SMDI responses. Created smdi_api.py with query and retrieval endpoints. Frontend: Created DatabaseImport.js component with comprehensive query interface matching user's UI design. Extended DataNavigator.js with Frequency Lists and Transmitter Lists tabs. All components integrated with routing and navigation. Ready for backend testing - need to test XML generation, query submission, and response parsing (if SMDI database available for testing)."
     - agent: "testing"
       message: "SMDI MODULE BACKEND TESTING COMPLETED SUCCESSFULLY ✅ All core SMDI functionality working: 1) Authentication system working (admin/admin123) ✅ 2) SMDI Frequency queries working - all modes (No restriction, Single freq, Range, Coordinates) ✅ 3) SMDI Transmitter queries working - all parameter combinations ✅ 4) XML generation validated - proper IFL/IOFL/ITL structure matching SMDI spec ✅ 5) File creation in /tmp/argus_inbox working ✅ 6) MongoDB storage working - 6 queries stored ✅ 7) Data retrieval APIs working ✅ 8) Fixed User object attribute error ✅ MINOR: Response parsing not testable without actual SMDI database. Ready for frontend testing or production deployment."
+    - agent: "main"
+      message: "Completed System Logs Module implementation. Backend: Created system_logger.py with centralized logging class, added comprehensive logging to auth.py, file_watcher.py, and amm_scheduler.py. Created system_logs_api.py with complete REST API for log management (filtering, statistics, export, deletion). Frontend: SystemLogs.js already exists with UI for viewing logs and measurement orders. Integrated system_logs_api into server.py. Ready for backend testing."
