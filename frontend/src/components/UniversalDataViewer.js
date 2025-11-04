@@ -530,6 +530,57 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
           </ResponsiveContainer>
         </div>
 
+        {/* Marker Controls */}
+        {markers.length > 0 && (
+          <div className="bg-slate-800/50 rounded-lg p-4 border border-blue-500/30">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-white flex items-center">
+                <Target className="w-4 h-4 mr-2" />
+                Markers ({markers.length}/4)
+              </h4>
+              <Button variant="ghost" size="sm" onClick={clearAllMarkers}>
+                Clear All
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {markers.map((marker, idx) => (
+                <div key={marker.id} className="flex items-center justify-between bg-slate-700/30 rounded p-2">
+                  <div className="flex items-center space-x-2">
+                    <div 
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                      style={{ backgroundColor: ['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx] }}
+                    >
+                      M{idx + 1}
+                    </div>
+                    <div className="text-xs">
+                      {graphType === GRAPH_TYPES.LEVEL_VS_TIME ? (
+                        <>
+                          <div className="text-slate-300">{marker.time}</div>
+                          <div className="text-blue-300 font-mono">{marker.level?.toFixed(1)} dBm</div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-slate-300">{marker.frequency?.toFixed(3)} MHz</div>
+                          <div className="text-blue-300 font-mono">{marker.level?.toFixed(1)} dBm</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => removeMarker(marker.id)}
+                    className="text-red-400 hover:text-red-300 h-6 w-6 p-0"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-slate-400 mt-2">Click on the graph to add markers (max 4)</p>
+          </div>
+        )}
+
         {/* Statistics */}
         {itemData.data_points.length > 0 && (
           <div className="grid grid-cols-4 gap-4">
