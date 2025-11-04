@@ -177,6 +177,11 @@ export default function DataNavigator() {
     }
   };
 
+  const handleViewMeasurement = (item) => {
+    setSelectedMeasurement(item);
+    setShowViewerModal(true);
+  };
+
   const deleteItem = async (itemId, dataType) => {
     try {
       // Handle SMDI data types separately
