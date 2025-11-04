@@ -169,7 +169,18 @@ class AMMScheduler:
     async def _execute_amm(self, amm_config: AMMConfiguration):
         """Execute an AMM configuration"""
         try:
+            from system_logger import SystemLogger
+            
             logger.info(f"Starting execution of AMM: {amm_config.name}")
+            await SystemLogger.info(
+                SystemLogger.AMM_SCHEDULER,
+                f"Starting execution of AMM configuration: {amm_config.name}",
+                details={
+                    "config_id": amm_config.id,
+                    "config_name": amm_config.name,
+                    "measurement_type": amm_config.measurement_type
+                }
+            )
             
             # Create execution record
             execution = AMMExecution(
