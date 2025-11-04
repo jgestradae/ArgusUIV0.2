@@ -1108,8 +1108,8 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
               </SelectContent>
             </Select>
 
-            {/* Scan Selector - only show for multiple scans and non-spectrogram views */}
-            {!isSingleScan && scans.length > 1 && graphType !== GRAPH_TYPES.SPECTROGRAM_2D && (
+            {/* Scan Selector - only show for multiple scans and non-spectrogram/3D views */}
+            {!isSingleScan && scans.length > 1 && graphType !== GRAPH_TYPES.SPECTROGRAM_2D && graphType !== GRAPH_TYPES.VIEW_3D && (
               <div className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-2 border border-blue-500/30">
                 <Button
                   variant="ghost"
