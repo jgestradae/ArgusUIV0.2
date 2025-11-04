@@ -251,6 +251,15 @@ class AMMScheduler:
             
         except Exception as e:
             logger.error(f"Error executing AMM {amm_config.id}: {e}")
+            await SystemLogger.error(
+                SystemLogger.AMM_SCHEDULER,
+                f"Error executing AMM configuration {amm_config.name}: {str(e)}",
+                details={
+                    "config_id": amm_config.id,
+                    "config_name": amm_config.name,
+                    "error": str(e)
+                }
+            )
             
             # Update execution with error
             await self.db.amm_executions.update_one(
