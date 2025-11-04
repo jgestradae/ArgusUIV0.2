@@ -1349,28 +1349,6 @@ export default function AutomaticMode() {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        className="input-spectrum"
-                        placeholder="e.g., 25000 (25 kHz)"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="scan_if_bandwidth">IF Bandwidth (Hz)</Label>
-                      <Select defaultValue="9000">
-                        <SelectTrigger className="input-spectrum">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="200">200 Hz</SelectItem>
-                          <SelectItem value="1000">1 kHz</SelectItem>
-                          <SelectItem value="9000">9 kHz</SelectItem>
-                          <SelectItem value="10000">10 kHz</SelectItem>
-                          <SelectItem value="120000">120 kHz</SelectItem>
-                          <SelectItem value="200000">200 kHz</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
                 </div>
               )}
               
