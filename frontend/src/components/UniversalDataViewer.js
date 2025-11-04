@@ -670,6 +670,23 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
           </Select>
 
           <div className="flex items-center space-x-2">
+            {markers.length < 4 && itemData?.data_points && (
+              <Select onValueChange={(value) => addMarkerAtPoint(parseInt(value))}>
+                <SelectTrigger className="w-48 input-spectrum">
+                  <SelectValue placeholder="Add Marker..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {itemData.data_points.slice(0, 50).map((point, idx) => (
+                    <SelectItem key={idx} value={idx.toString()}>
+                      Point {idx + 1}: {point.level_dbm} dBm
+                    </SelectItem>
+                  ))}
+                  {itemData.data_points.length > 50 && (
+                    <SelectItem value="-1" disabled>...and {itemData.data_points.length - 50} more</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
             <Button variant="ghost" size="sm"><ZoomIn className="w-4 h-4" /></Button>
             <Button variant="ghost" size="sm"><ZoomOut className="w-4 h-4" /></Button>
             <Button variant="ghost" size="sm"><Maximize2 className="w-4 h-4" /></Button>
