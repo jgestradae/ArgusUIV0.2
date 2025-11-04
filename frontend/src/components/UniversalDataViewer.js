@@ -68,13 +68,13 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
       // Load data based on type
       if (dataType === 'measurement_result') {
         const response = await axios.get(`${API}/measurements/${item.order_id}/data`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
         setItemData(response.data);
       } else if (dataType === 'automatic_definition') {
         // For AMM, fetch full configuration details
         const response = await axios.get(`${API}/amm/configurations/${item.id}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
         setItemData(response.data);
         setEditedData(response.data);
@@ -102,7 +102,7 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
       
       if (dataType === 'automatic_definition') {
         await axios.put(`${API}/amm/configurations/${item.id}`, editedData, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
         toast.success('Configuration updated successfully');
         if (onSave) onSave();
