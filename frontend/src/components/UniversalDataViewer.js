@@ -436,6 +436,17 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
           </div>
         )}
 
+        {/* Range Definition Section */}
+        {itemData.range_definition_id && (
+          <div className="space-y-4 border-t border-slate-700 pt-4">
+            <h3 className="text-lg font-semibold text-white flex items-center">
+              <Target className="w-5 h-5 mr-2" />
+              Associated Range Definition
+            </h3>
+            <RangeDefinitionView rangeDefId={itemData.range_definition_id} />
+          </div>
+        )}
+
         {/* Properties Table */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-white">AMM Parameters</h3>
