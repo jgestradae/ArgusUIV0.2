@@ -46,8 +46,8 @@ const SCHEDULE_TYPES = {
 const MEASUREMENT_TYPES = {
   FFM: { label: 'Fixed Frequency Mode', description: 'Single frequency measurement' },
   SCAN: { label: 'Frequency Scan', description: 'Scan across frequency range' },
+  PSCAN: { label: 'P-Scan (Panoramic)', description: 'Panoramic scan with spectrum display' },
   DSCAN: { label: 'D-Scan', description: 'Direction finding scan' },
-  PSCAN: { label: 'P-Scan', description: 'Panoramic scan' },
   FLSCAN: { label: 'Frequency List Scan', description: 'Scan predefined frequencies' },
   LOCATION: { label: 'Location Measurement', description: 'Direction finding and location' },
   COVERAGE: { label: 'Coverage Measurement', description: 'Coverage area analysis' }
