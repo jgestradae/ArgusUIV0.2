@@ -228,6 +228,7 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
   const [scans, setScans] = useState([]);  // Array of scans (grouped by time)
   const [selectedScanIndex, setSelectedScanIndex] = useState(0);
   const [isSingleScan, setIsSingleScan] = useState(true);
+  const plotly3DRef = React.useRef(null); // Ref for 3D plot container
 
   useEffect(() => {
     loadItemData();
