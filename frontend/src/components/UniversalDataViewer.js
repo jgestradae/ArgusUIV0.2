@@ -62,7 +62,7 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
   }, [item]);
 
   const loadItemData = async () => {
-    try:
+    try {
       setLoading(true);
       
       // Load data based on type
