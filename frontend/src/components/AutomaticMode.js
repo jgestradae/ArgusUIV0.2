@@ -703,7 +703,10 @@ export default function AutomaticMode() {
                   {availableStations.map((station, index) => (
                     <button
                       key={index}
-                      onClick={() => setWizardData(prev => ({ ...prev, selected_station: station }))}
+                      onClick={() => {
+                        setWizardData(prev => ({ ...prev, selected_station: station }));
+                        updateAvailableMeasurementTypes(station.name);
+                      }}
                       className={`w-full p-4 rounded-lg border-2 transition-all ${
                         wizardData.selected_station?.name === station.name
                           ? 'border-cyan-500 bg-cyan-500/10'
