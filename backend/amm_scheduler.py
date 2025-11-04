@@ -237,6 +237,17 @@ class AMMScheduler:
             )
             
             logger.info(f"AMM execution started successfully: {order_id}")
+            await SystemLogger.info(
+                SystemLogger.AMM_SCHEDULER,
+                f"AMM execution completed successfully: {amm_config.name}",
+                order_id=order_id,
+                details={
+                    "config_id": amm_config.id,
+                    "config_name": amm_config.name,
+                    "order_id": order_id,
+                    "execution_id": execution.id
+                }
+            )
             
         except Exception as e:
             logger.error(f"Error executing AMM {amm_config.id}: {e}")
