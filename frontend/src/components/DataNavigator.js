@@ -106,7 +106,7 @@ export default function DataNavigator() {
   const loadStatistics = async () => {
     try {
       const response = await axios.get(`${API}/data/statistics`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
       });
       setStatistics(response.data);
     } catch (error) {
@@ -122,18 +122,18 @@ export default function DataNavigator() {
       // Handle SMDI data types separately
       if (dataType === 'frequency_list') {
         const response = await axios.get(`${API}/smdi/frequency-lists`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
         setData(prev => ({ ...prev, [dataType]: response.data.frequency_lists }));
       } else if (dataType === 'transmitter_list') {
         const response = await axios.get(`${API}/smdi/transmitter-lists`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
         setData(prev => ({ ...prev, [dataType]: response.data.transmitter_lists }));
       } else if (dataType === 'automatic_definition') {
         // Handle AMM configurations
         const response = await axios.get(`${API}/amm/configurations`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
         // API returns array directly
         const configs = response.data.map(config => ({
@@ -160,7 +160,7 @@ export default function DataNavigator() {
         }
         
         const response = await axios.get(`${API}/data/${dataType}?${params}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
         setData(prev => ({ ...prev, [dataType]: response.data }));
       }
@@ -194,11 +194,11 @@ export default function DataNavigator() {
       // Handle SMDI data types separately
       if (dataType === 'frequency_list') {
         await axios.delete(`${API}/smdi/frequency-lists/${itemId}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
       } else if (dataType === 'transmitter_list') {
         await axios.delete(`${API}/smdi/transmitter-lists/${itemId}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
       } else {
         await axios.delete(`${API}/data/${dataType}/${itemId}`);
