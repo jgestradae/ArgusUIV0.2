@@ -132,16 +132,17 @@ export default function DataNavigator() {
         const response = await axios.get(`${API}/amm/configurations`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
-        // Transform AMM configs to match DataNavigator format
-        const configs = response.data.configurations.map(config => ({
+        // API returns array directly
+        const configs = response.data.map(config => ({
           id: config.id,
           name: config.name,
           description: config.description,
-          measurement_type: config.measurement_type,
-          station_name: config.station_names?.join(', '),
+          measurement_type: 'AMM', // All are AMM type
+          station_name: 'Various', // AMM can have multiple stations
           created_at: config.created_at,
           status: config.status,
-          file_size: 0 // AMM configs don't have file size
+          file_size: 0, // AMM configs don't have file size
+          ...config // Include all original fields
         }));
         setData(prev => ({ ...prev, [dataType]: { items: configs, total_count: configs.length } }));
       } else {
