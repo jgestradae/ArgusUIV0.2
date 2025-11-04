@@ -36,6 +36,97 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Helper component to display measurement definition
+function MeasurementDefinitionView({ measurementDefId }) {
+  const [measurementDef, setMeasurementDef] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMeasurementDef = async () => {
+      try {
+        const response = await axios.get(`${API}/amm/measurement-definitions/${measurementDefId}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
+        });
+        setMeasurementDef(response.data);
+      } catch (error) {
+        console.error('Error loading measurement definition:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (measurementDefId) {
+      fetchMeasurementDef();
+    }
+  }, [measurementDefId]);
+
+  if (loading) {
+    return <div className="text-slate-400 text-sm">Loading measurement definition...</div>;
+  }
+
+  if (!measurementDef) {
+    return <div className="text-slate-400 text-sm">No measurement definition found</div>;
+  }
+
+  return (
+    <div className="bg-slate-800/30 rounded-lg p-4 space-y-3">
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <span className="text-slate-400">Measurement Type:</span>
+          <span className="text-white ml-2 font-semibold">{measurementDef.measurement_type || 'N/A'}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">Signal Path:</span>
+          <span className="text-white ml-2">{measurementDef.signal_path || 'N/A'}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">Frequency Mode:</span>
+          <span className="text-white ml-2">{measurementDef.frequency_mode === 'S' ? 'Single' : 'Range'}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">Frequency:</span>
+          <span className="text-white ml-2">
+            {measurementDef.frequency_single 
+              ? `${(measurementDef.frequency_single / 1000000).toFixed(1)} MHz` 
+              : measurementDef.frequency_range_low 
+              ? `${(measurementDef.frequency_range_low / 1000000).toFixed(0)}-${(measurementDef.frequency_range_high / 1000000).toFixed(0)} MHz`
+              : 'N/A'}
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-400">IF Bandwidth:</span>
+          <span className="text-white ml-2">{measurementDef.if_bandwidth ? `${measurementDef.if_bandwidth} Hz` : 'N/A'}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">Detector:</span>
+          <span className="text-white ml-2">{measurementDef.detector || 'N/A'}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">Demodulation:</span>
+          <span className="text-white ml-2">{measurementDef.demodulation || 'N/A'}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">Measurement Time:</span>
+          <span className="text-white ml-2">{measurementDef.measurement_time ? `${measurementDef.measurement_time}s` : 'N/A'}</span>
+        </div>
+      </div>
+      
+      {measurementDef.measured_parameters && measurementDef.measured_parameters.length > 0 && (
+        <div className="pt-2 border-t border-slate-700">
+          <span className="text-slate-400 text-sm">Measured Parameters:</span>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {measurementDef.measured_parameters.map((param, idx) => (
+              <Badge key={idx} className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
+                {param}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const VIEW_MODES = {
   TEXT: 'text',
   GRAPH: 'graph',
