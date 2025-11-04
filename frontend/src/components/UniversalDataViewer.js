@@ -124,6 +124,32 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     return `${hz} Hz`;
   };
 
+  const addMarker = (data, index) => {
+    if (markers.length >= 4) {
+      toast.error('Maximum 4 markers allowed');
+      return;
+    }
+    
+    const newMarker = {
+      id: Date.now(),
+      index: index,
+      ...data
+    };
+    
+    setMarkers(prev => [...prev, newMarker]);
+    toast.success(`Marker ${markers.length + 1} added`);
+  };
+
+  const removeMarker = (markerId) => {
+    setMarkers(prev => prev.filter(m => m.id !== markerId));
+    toast.success('Marker removed');
+  };
+
+  const clearAllMarkers = () => {
+    setMarkers([]);
+    toast.success('All markers cleared');
+  };
+
   // Render measurement result as table
   const renderMeasurementTable = () => {
     if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
