@@ -234,6 +234,18 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     loadItemData();
   }, [item]);
 
+  // 3D Plot rendering effect
+  useEffect(() => {
+    // Only render 3D plot when in graph mode, VIEW_3D is selected, and we have data
+    if (viewMode === VIEW_MODES.GRAPH && graphType === GRAPH_TYPES.VIEW_3D && itemData && itemData.data_points && itemData.data_points.length > 0) {
+      const timer = setTimeout(() => {
+        render3DPlot();
+      }, 100); // Small delay to ensure DOM is ready
+      
+      return () => clearTimeout(timer);
+    }
+  }, [viewMode, graphType, itemData]);
+
   const loadItemData = async () => {
     try {
       setLoading(true);
