@@ -25,6 +25,8 @@ import { toast } from 'sonner';
 import {
   LineChart,
   Line,
+  AreaChart,
+  Area,
   ScatterChart,
   Scatter,
   XAxis,
@@ -35,6 +37,7 @@ import {
   ResponsiveContainer,
   ReferenceDot
 } from 'recharts';
+import Plotly from 'plotly.js-dist-min';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
