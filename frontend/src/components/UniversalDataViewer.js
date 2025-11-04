@@ -38,6 +38,76 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Helper component to display range definition
+function RangeDefinitionView({ rangeDefId }) {
+  const [rangeDef, setRangeDef] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRangeDef = async () => {
+      try {
+        const response = await axios.get(`${API}/amm/range-definitions/${rangeDefId}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
+        });
+        setRangeDef(response.data);
+      } catch (error) {
+        console.error('Error loading range definition:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (rangeDefId) {
+      fetchRangeDef();
+    }
+  }, [rangeDefId]);
+
+  if (loading) {
+    return <div className="text-slate-400 text-sm">Loading range definition...</div>;
+  }
+
+  if (!rangeDef) {
+    return <div className="text-slate-400 text-sm">No range definition found</div>;
+  }
+
+  return (
+    <div className="bg-slate-800/30 rounded-lg p-4 space-y-3">
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <span className="text-slate-400">Frequency Range:</span>
+          <span className="text-white ml-2 font-semibold">
+            {rangeDef.frequency_range_low && rangeDef.frequency_range_high
+              ? `${(rangeDef.frequency_range_low / 1000000).toFixed(0)} - ${(rangeDef.frequency_range_high / 1000000).toFixed(0)} MHz`
+              : 'N/A'}
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-400">Frequency Step:</span>
+          <span className="text-white ml-2">
+            {rangeDef.frequency_step ? `${(rangeDef.frequency_step / 1000).toFixed(0)} kHz` : 'N/A'}
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-400">Date Range:</span>
+          <span className="text-white ml-2">
+            {rangeDef.date_range_start && rangeDef.date_range_end
+              ? `${new Date(rangeDef.date_range_start).toLocaleDateString()} - ${new Date(rangeDef.date_range_end).toLocaleDateString()}`
+              : 'N/A'}
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-400">Time Range:</span>
+          <span className="text-white ml-2">
+            {rangeDef.time_range_start && rangeDef.time_range_end
+              ? `${rangeDef.time_range_start} - ${rangeDef.time_range_end}`
+              : 'N/A'}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Helper component to display measurement definition
 function MeasurementDefinitionView({ measurementDefId }) {
   const [measurementDef, setMeasurementDef] = useState(null);
