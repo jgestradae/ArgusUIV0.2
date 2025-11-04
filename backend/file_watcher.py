@@ -99,6 +99,11 @@ class ArgusResponseHandler(FileSystemEventHandler):
             
             if not response_data:
                 logger.warning(f"Failed to parse response: {file_path.name}")
+                await SystemLogger.error(
+                    SystemLogger.FILE_WATCHER,
+                    f"Failed to parse response file: {file_path.name}",
+                    details={"file_name": file_path.name}
+                )
                 return
             
             order_id = response_data.get("order_id")
@@ -106,6 +111,16 @@ class ArgusResponseHandler(FileSystemEventHandler):
             order_state = response_data.get("order_state")
             
             logger.info(f"Response parsed - Order: {order_id}, Type: {order_type}, State: {order_state}")
+            await SystemLogger.info(
+                SystemLogger.FILE_WATCHER,
+                f"Response parsed successfully - Order: {order_id}, Type: {order_type}, State: {order_state}",
+                order_id=order_id,
+                details={
+                    "file_name": file_path.name,
+                    "order_type": order_type,
+                    "order_state": order_state
+                }
+            )
             
             # Update order in database
             if order_id:
