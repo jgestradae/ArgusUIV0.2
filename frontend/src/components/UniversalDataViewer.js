@@ -684,15 +684,10 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
   };
 
   // Render 3D Surface Plot (Frequency × Time × Level)
-  const render3DView = () => {
-    if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
-      return (
-        <div className="text-center py-12">
-          <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400">No data available for 3D view</p>
-        </div>
-      );
-    }
+  // Function to render 3D plot (non-React function, called from useEffect)
+  const render3DPlot = () => {
+    const plotDiv = plotly3DRef.current;
+    if (!plotDiv || !itemData || !itemData.data_points) return;
 
     // Prepare data for 3D surface plot
     const surfaceData = {};
@@ -727,84 +722,111 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
       return (timestamp - sortedTimestamps[0]) / 1000;
     });
 
-    useEffect(() => {
-      // Create 3D plot after component renders
-      const plot3D = () => {
-        const plotDiv = document.getElementById('plotly-3d-view');
-        if (!plotDiv) return;
+    const trace = {
+      type: 'surface',
+      x: sortedFrequencies, // Frequency (MHz)
+      y: timeInSeconds, // Time (seconds)
+      z: zMatrix, // Level (dBm)
+      colorscale: [
+        [0, 'rgb(0,0,255)'],      // Blue (low)
+        [0.25, 'rgb(0,255,255)'], // Cyan
+        [0.5, 'rgb(0,255,0)'],    // Green
+        [0.75, 'rgb(255,255,0)'], // Yellow
+        [1, 'rgb(255,0,0)']       // Red (high)
+      ],
+      colorbar: {
+        title: 'Level (dBm)',
+        titleside: 'right',
+        tickmode: 'linear',
+        tick0: Math.min(...zMatrix.flat().filter(v => v !== null)),
+        dtick: 10
+      }
+    };
 
-        const trace = {
-          type: 'surface',
-          x: sortedFrequencies, // Frequency (MHz)
-          y: timeInSeconds, // Time (seconds)
-          z: zMatrix, // Level (dBm)
-          colorscale: [
-            [0, 'rgb(0,0,255)'],      // Blue (low)
-            [0.25, 'rgb(0,255,255)'], // Cyan
-            [0.5, 'rgb(0,255,0)'],    // Green
-            [0.75, 'rgb(255,255,0)'], // Yellow
-            [1, 'rgb(255,0,0)']       // Red (high)
-          ],
-          colorbar: {
-            title: 'Level (dBm)',
-            titleside: 'right',
-            tickmode: 'linear',
-            tick0: Math.min(...zMatrix.flat().filter(v => v !== null)),
-            dtick: 10
-          }
-        };
+    const layout = {
+      title: {
+        text: '3D Measurement Visualization',
+        font: { color: '#fff' }
+      },
+      scene: {
+        xaxis: { 
+          title: 'Frequency (MHz)',
+          gridcolor: '#444',
+          zerolinecolor: '#444',
+          color: '#94a3b8'
+        },
+        yaxis: { 
+          title: 'Time (s)',
+          gridcolor: '#444',
+          zerolinecolor: '#444',
+          color: '#94a3b8'
+        },
+        zaxis: { 
+          title: 'Level (dBm)',
+          gridcolor: '#444',
+          zerolinecolor: '#444',
+          color: '#94a3b8'
+        },
+        bgcolor: '#1e293b',
+        camera: {
+          eye: { x: 1.5, y: 1.5, z: 1.3 }
+        }
+      },
+      paper_bgcolor: '#1e293b',
+      plot_bgcolor: '#1e293b',
+      font: { color: '#94a3b8' },
+      autosize: true,
+      margin: { l: 0, r: 0, t: 40, b: 0 }
+    };
 
-        const layout = {
-          title: {
-            text: '3D Measurement Visualization',
-            font: { color: '#fff' }
-          },
-          scene: {
-            xaxis: { 
-              title: 'Frequency (MHz)',
-              gridcolor: '#444',
-              zerolinecolor: '#444',
-              color: '#94a3b8'
-            },
-            yaxis: { 
-              title: 'Time (s)',
-              gridcolor: '#444',
-              zerolinecolor: '#444',
-              color: '#94a3b8'
-            },
-            zaxis: { 
-              title: 'Level (dBm)',
-              gridcolor: '#444',
-              zerolinecolor: '#444',
-              color: '#94a3b8'
-            },
-            bgcolor: '#1e293b',
-            camera: {
-              eye: { x: 1.5, y: 1.5, z: 1.3 }
-            }
-          },
-          paper_bgcolor: '#1e293b',
-          plot_bgcolor: '#1e293b',
-          font: { color: '#94a3b8' },
-          autosize: true,
-          margin: { l: 0, r: 0, t: 40, b: 0 }
-        };
+    const config = {
+      responsive: true,
+      displayModeBar: true,
+      displaylogo: false,
+      modeBarButtonsToRemove: ['sendDataToCloud'],
+      modeBarButtonsToAdd: []
+    };
 
-        const config = {
-          responsive: true,
-          displayModeBar: true,
-          displaylogo: false,
-          modeBarButtonsToRemove: ['sendDataToCloud'],
-          modeBarButtonsToAdd: []
-        };
+    Plotly.newPlot(plotDiv, [trace], layout, config);
+  };
 
-        Plotly.newPlot(plotDiv, [trace], layout, config);
-      };
+  const render3DView = () => {
+    if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+          <p className="text-slate-400">No data available for 3D view</p>
+        </div>
+      );
+    }
 
-      // Delay to ensure DOM is ready
-      const timer = setTimeout(plot3D, 100);
-      return () => clearTimeout(timer);
-    }, [sortedFrequencies, timeInSeconds, zMatrix]);
+    // Calculate stats for display
+    const surfaceData = {};
+    const uniqueFrequencies = new Set();
+    const uniqueTimestamps = new Set();
+    const allLevels = [];
+
+    itemData.data_points.forEach(point => {
+      const freq = parseInt(point.frequency_hz) / 1000000;
+      const timestamp = point.timestamp ? new Date(point.timestamp).getTime() : 0;
+      const level = parseFloat(point.level_dbm);
+      
+      uniqueFrequencies.add(freq);
+      uniqueTimestamps.add(timestamp);
+      allLevels.push(level);
+      
+      if (!surfaceData[timestamp]) {
+        surfaceData[timestamp] = {};
+      }
+      surfaceData[timestamp][freq] = level;
+    });
+
+    const sortedFrequencies = Array.from(uniqueFrequencies).sort((a, b) => a - b);
+    const sortedTimestamps = Array.from(uniqueTimestamps).sort((a, b) => a - b);
+    const timeInSeconds = sortedTimestamps.map((timestamp, idx) => {
+      if (idx === 0) return 0;
+      return (timestamp - sortedTimestamps[0]) / 1000;
+    });
 
     return (
       <div className="space-y-4">
