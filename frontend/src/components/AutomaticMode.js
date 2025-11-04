@@ -137,6 +137,9 @@ export default function AutomaticMode() {
       station_names: ['Station_001'],
       frequency_mode: 'S',
       frequency_single: 100000000,
+      frequency_range_start: 88000000,
+      frequency_range_end: 108000000,
+      frequency_step: 100000,
       receiver_config: {
         if_bandwidth: 9000,
         rf_attenuation: 'Auto',
