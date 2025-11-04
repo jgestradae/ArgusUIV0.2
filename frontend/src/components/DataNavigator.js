@@ -105,7 +105,9 @@ export default function DataNavigator() {
 
   const loadStatistics = async () => {
     try {
-      const response = await axios.get(`${API}/data/statistics`);
+      const response = await axios.get(`${API}/data/statistics`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
       setStatistics(response.data);
     } catch (error) {
       console.error('Error loading statistics:', error);
