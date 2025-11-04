@@ -456,7 +456,13 @@ export default function DataNavigator() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-blue-400 hover:text-blue-300"
+                          onClick={() => handleViewMeasurement(item)}
+                          disabled={dataType !== 'measurement_result'}
+                        >
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-300">
