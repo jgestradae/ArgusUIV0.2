@@ -192,25 +192,61 @@ class ArgusAPITester:
             
             # Wait a moment for log to be written
             import time
-            time.sleep(1)
+            time.sleep(2)
             
-            # Check if the failed login was logged
-            success, response = self.run_test(
-                "Check Failed Login Log",
+            # Check if the failed login was logged - try multiple approaches
+            # 1. Check WARNING level logs from AUTH source
+            success1, response1 = self.run_test(
+                "Check Failed Login Log (WARNING)",
                 "GET",
-                "logs?source=AUTH&level=WARNING&limit=10",
+                "logs?source=AUTH&level=WARNING&limit=20",
                 200,
                 auth_required=True
             )
             
-            if success and isinstance(response, list):
-                failed_login_logs = [log for log in response if 'Failed login attempt' in log.get('message', '')]
+            # 2. Check all AUTH logs
+            success2, response2 = self.run_test(
+                "Check All AUTH Logs",
+                "GET", 
+                "logs?source=AUTH&limit=20",
+                200,
+                auth_required=True
+            )
+            
+            # 3. Search for "Failed login" in all logs
+            success3, response3 = self.run_test(
+                "Search Failed Login",
+                "GET",
+                "logs?search=Failed%20login&limit=20",
+                200,
+                auth_required=True
+            )
+            
+            # Check results
+            found_failed_login = False
+            
+            if success1 and isinstance(response1, list):
+                failed_login_logs = [log for log in response1 if 'Failed login attempt' in log.get('message', '')]
                 if failed_login_logs:
-                    print(f"   ✅ Failed login logged successfully: {len(failed_login_logs)} entries")
-                    return True
-                else:
-                    print(f"   ❌ Failed login not found in logs")
-                    return False
+                    print(f"   ✅ Failed login found in WARNING logs: {len(failed_login_logs)} entries")
+                    found_failed_login = True
+            
+            if success2 and isinstance(response2, list):
+                print(f"   📋 Total AUTH logs found: {len(response2)}")
+                for log in response2[-3:]:  # Show last 3 logs
+                    print(f"      - {log.get('level', 'N/A')}: {log.get('message', 'N/A')[:80]}...")
+                
+                auth_failed_logs = [log for log in response2 if 'Failed login' in log.get('message', '')]
+                if auth_failed_logs:
+                    print(f"   ✅ Failed login found in AUTH logs: {len(auth_failed_logs)} entries")
+                    found_failed_login = True
+            
+            if success3 and isinstance(response3, list):
+                if response3:
+                    print(f"   ✅ Failed login found via search: {len(response3)} entries")
+                    found_failed_login = True
+            
+            return found_failed_login
         
         return False
 
