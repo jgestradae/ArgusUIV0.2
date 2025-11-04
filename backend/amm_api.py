@@ -328,9 +328,10 @@ def create_amm_router(db: AsyncIOMotorDatabase, scheduler: AMMScheduler) -> APIR
         current_user: User = Depends(get_current_user)
     ):
         """Get a specific measurement definition by ID"""
+        # Query by 'id' field, not '_id'
         definition = await db.measurement_definitions.find_one({"id": definition_id})
         if not definition:
-            raise HTTPException(status_code=404, detail="Measurement definition not found")
+            raise HTTPException(status_code=404, detail=f"Measurement definition not found: {definition_id}")
         
         # Remove MongoDB _id
         if '_id' in definition:
@@ -345,9 +346,10 @@ def create_amm_router(db: AsyncIOMotorDatabase, scheduler: AMMScheduler) -> APIR
         current_user: User = Depends(get_current_user)
     ):
         """Get a specific range definition by ID"""
+        # Query by 'id' field, not '_id'
         definition = await db.range_definitions.find_one({"id": definition_id})
         if not definition:
-            raise HTTPException(status_code=404, detail="Range definition not found")
+            raise HTTPException(status_code=404, detail=f"Range definition not found: {definition_id}")
         
         # Remove MongoDB _id
         if '_id' in definition:
