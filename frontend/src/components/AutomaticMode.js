@@ -82,6 +82,9 @@ export default function AutomaticMode() {
   // AMM Wizard State
   const [wizardStep, setWizardStep] = useState(1);
   const [availableStations, setAvailableStations] = useState([]);
+  const [availableMeasurementTypes, setAvailableMeasurementTypes] = useState([]);
+  const [selectedSignalPath, setSelectedSignalPath] = useState(null);
+  const [systemParameters, setSystemParameters] = useState(null);
   const [loadingStations, setLoadingStations] = useState(false);
   const [signalPaths, setSignalPaths] = useState([]);
   const [loadingSignalPaths, setLoadingSignalPaths] = useState(false);
