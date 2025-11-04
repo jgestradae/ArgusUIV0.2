@@ -262,6 +262,17 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
           </div>
         </div>
 
+        {/* Measurement Definition Section */}
+        {itemData.measurement_definition_id && (
+          <div className="space-y-4 border-t border-slate-700 pt-4">
+            <h3 className="text-lg font-semibold text-white flex items-center">
+              <Radio className="w-5 h-5 mr-2" />
+              Associated Measurement Definition
+            </h3>
+            <MeasurementDefinitionView measurementDefId={itemData.measurement_definition_id} />
+          </div>
+        )}
+
         {/* Properties Table */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-white">AMM Parameters</h3>
