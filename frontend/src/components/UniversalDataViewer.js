@@ -708,40 +708,26 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
                 <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} labelStyle={{ color: '#94a3b8' }} />
                 <Legend />
                 <Line type="monotone" dataKey="level" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} name="Level (dBm)" />
-                {/* Render markers as reference lines */}
+                {/* Render markers as reference dots */}
                 {markers.map((marker, idx) => {
-                  const markerData = chartData.find(d => d.index === marker.index);
-                  if (!markerData) return null;
+                  const markerPoint = chartData.find(d => d.index === marker.index);
+                  if (!markerPoint) return null;
                   return (
-                    <Line
+                    <ReferenceDot
                       key={marker.id}
-                      data={[markerData]}
-                      type="monotone"
-                      dataKey="level"
-                      stroke="transparent"
-                      strokeWidth={0}
-                      dot={(props) => (
-                        <g>
-                          <circle 
-                            cx={props.cx} 
-                            cy={props.cy} 
-                            r={8} 
-                            fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]} 
-                            stroke="#fff" 
-                            strokeWidth={2} 
-                          />
-                          <text 
-                            x={props.cx} 
-                            y={props.cy - 12} 
-                            textAnchor="middle" 
-                            fill="#fff" 
-                            fontSize={11}
-                            fontWeight="bold"
-                          >
-                            M{idx + 1}
-                          </text>
-                        </g>
-                      )}
+                      x={markerPoint.time}
+                      y={marker.level}
+                      r={8}
+                      fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]}
+                      stroke="#fff"
+                      strokeWidth={2}
+                      label={{
+                        value: `M${idx + 1}`,
+                        position: 'top',
+                        fill: '#fff',
+                        fontSize: 11,
+                        fontWeight: 'bold'
+                      }}
                     />
                   );
                 })}
@@ -758,40 +744,29 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
                 <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} labelStyle={{ color: '#94a3b8' }} />
                 <Legend />
                 <Scatter dataKey="level" fill="#3b82f6" name="Level (dBm)" />
-                {/* Render markers */}
+                {/* Render markers as reference dots */}
                 {markers.map((marker, idx) => (
-                  <Scatter
+                  <ReferenceDot
                     key={marker.id}
-                    data={[marker]}
+                    x={marker.frequency}
+                    y={marker.level}
+                    r={8}
                     fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]}
-                    shape={(props) => (
-                      <g>
-                        <circle 
-                          cx={props.cx} 
-                          cy={props.cy} 
-                          r={8} 
-                          fill={['#ef4444', '#10b981', '#f59e0b', '#8b5cf6'][idx]} 
-                          stroke="#fff" 
-                          strokeWidth={2} 
-                        />
-                        <text 
-                          x={props.cx} 
-                          y={props.cy - 15} 
-                          textAnchor="middle" 
-                          fill="#fff" 
-                          fontSize={11} 
-                          fontWeight="bold"
-                        >
-                          M{idx + 1}
-                        </text>
-                      </g>
-                    )}
+                    stroke="#fff"
+                    strokeWidth={2}
+                    label={{
+                      value: `M${idx + 1}`,
+                      position: 'top',
+                      fill: '#fff',
+                      fontSize: 11,
+                      fontWeight: 'bold'
+                    }}
                   />
                 ))}
               </ScatterChart>
             )}
           </ResponsiveContainer>
-          <p className="text-xs text-slate-400 mt-2 text-center">Click on the graph to add markers (up to 4)</p>
+          <p className="text-xs text-slate-400 mt-2 text-center">Use "Add Marker" dropdown above to place markers on the graph</p>
         </div>
 
         {/* Marker Controls */}
