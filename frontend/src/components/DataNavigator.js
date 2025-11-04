@@ -90,6 +90,8 @@ export default function DataNavigator() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({});
   const [pagination, setPagination] = useState({ page: 1, pageSize: 50 });
+  const [selectedMeasurement, setSelectedMeasurement] = useState(null);
+  const [showViewerModal, setShowViewerModal] = useState(false);
 
   useEffect(() => {
     loadStatistics();
