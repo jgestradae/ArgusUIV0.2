@@ -16,7 +16,9 @@ import {
   Maximize2,
   ZoomIn,
   ZoomOut,
-  Settings
+  Settings,
+  Radio,
+  Target
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
