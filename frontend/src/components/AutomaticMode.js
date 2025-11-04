@@ -172,6 +172,7 @@ export default function AutomaticMode() {
 
   useEffect(() => {
     loadData();
+    loadSystemParameters();
     // Auto-refresh every 30 seconds
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
@@ -183,6 +184,38 @@ export default function AutomaticMode() {
       loadAvailableStations();
     }
   }, [activeTab, wizardStep]);
+
+  const loadSystemParameters = async () => {
+    try {
+      const response = await axios.get(`${API}/system/parameters`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
+      });
+      setSystemParameters(response.data);
+    } catch (error) {
+      console.error('Error loading system parameters:', error);
+    }
+  };
+
+  const updateAvailableMeasurementTypes = (stationName) => {
+    if (!systemParameters || !systemParameters.signal_paths) return;
+    
+    // Find signal paths for the selected station
+    const stationPaths = systemParameters.signal_paths.filter(
+      path => path.station === stationName
+    );
+    
+    // Extract all unique measurement types from all devices in all paths
+    const measurementTypes = new Set();
+    stationPaths.forEach(path => {
+      path.devices.forEach(device => {
+        if (device.measurement_params) {
+          device.measurement_params.forEach(param => measurementTypes.add(param));
+        }
+      });
+    });
+    
+    setAvailableMeasurementTypes(Array.from(measurementTypes));
+  };
 
   // Load signal paths when reaching step 4
   useEffect(() => {
