@@ -1455,6 +1455,45 @@ async def health_check():
         "version": "1.0.0"
     }
 
+@app.get("/api/measurements/{order_id}/data")
+async def get_measurement_data(
+    order_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Get detailed measurement data including all data points"""
+    try:
+        # Find measurement result
+        measurement = await db.measurement_results.find_one({"order_id": order_id})
+        
+        if not measurement:
+            raise HTTPException(status_code=404, detail="Measurement not found")
+        
+        # Read CSV file if it exists
+        csv_file_path = measurement.get("csv_file_path")
+        data_points = []
+        
+        if csv_file_path and Path(csv_file_path).exists():
+            import csv
+            with open(csv_file_path, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                data_points = list(reader)
+        
+        # Remove MongoDB _id
+        if '_id' in measurement:
+            del measurement['_id']
+        
+        return {
+            "measurement": measurement,
+            "data_points": data_points,
+            "has_data": len(data_points) > 0
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching measurement data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include routers in app
 app.include_router(api_router)
 
