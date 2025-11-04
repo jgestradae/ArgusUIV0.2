@@ -12,8 +12,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 # MongoDB connection
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/")
+DB_NAME = os.environ.get("DB_NAME", "argus_ui")
 client = AsyncIOMotorClient(MONGO_URL)
-db = client.argus_ui
+db = client[DB_NAME]
 
 router = APIRouter(prefix="/logs", tags=["System Logs"])
 
