@@ -831,7 +831,7 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     return (
       <div className="space-y-4">
         <div className="bg-slate-800/30 rounded-lg p-4">
-          <div id="plotly-3d-view" style={{ width: '100%', height: '600px' }}></div>
+          <div ref={plotly3DRef} style={{ width: '100%', height: '600px' }}></div>
         </div>
 
         {/* 3D View Controls and Info */}
@@ -851,7 +851,7 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
           <div className="bg-slate-800/30 rounded-lg p-3">
             <div className="text-xs text-slate-400">Level Range</div>
             <div className="text-sm font-semibold text-white">
-              {Math.min(...zMatrix.flat().filter(v => v !== null)).toFixed(1)} to {Math.max(...zMatrix.flat().filter(v => v !== null)).toFixed(1)} dBm
+              {Math.min(...allLevels).toFixed(1)} to {Math.max(...allLevels).toFixed(1)} dBm
             </div>
           </div>
           <div className="bg-slate-800/30 rounded-lg p-3">
