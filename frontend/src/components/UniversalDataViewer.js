@@ -240,6 +240,11 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
           headers: { 'Authorization': `Bearer ${localStorage.getItem('argus_token')}` }
         });
         setItemData(response.data);
+        
+        // Detect and group scans for scan measurements
+        if (response.data.data_points && response.data.data_points.length > 0) {
+          detectScans(response.data.data_points);
+        }
       } else if (dataType === 'automatic_definition') {
         // For AMM, fetch full configuration details
         const response = await axios.get(`${API}/amm/configurations/${item.id}`, {
