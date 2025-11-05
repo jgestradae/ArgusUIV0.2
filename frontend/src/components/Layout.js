@@ -215,29 +215,51 @@ export default function Layout({ children }) {
 
         {/* Main content */}
         <div className="lg:pl-72">
-        {/* Mobile header */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b border-slate-700/50 glass">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center space-x-2">
-            <Radio className="w-6 h-6 text-blue-400" />
-            <span className="font-bold text-white">ArgusUI</span>
-          </div>
-          <div className="w-10" /> {/* Spacer */}
-        </div>
+          {/* Mobile header */}
+          <header className="lg:hidden flex items-center justify-between p-4 border-b border-slate-700/50 glass" role="banner">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(true)}
+              aria-label={t('accessibility.open_menu')}
+              aria-expanded={sidebarOpen}
+            >
+              <Menu className="w-5 h-5" aria-hidden="true" />
+            </Button>
+            <div className="flex items-center space-x-2">
+              <Radio className="w-6 h-6 text-blue-400" aria-hidden="true" />
+              <span className="font-bold text-white">{t('app.name')}</span>
+            </div>
+            <div className="w-10" aria-hidden="true" />
+          </header>
 
-        {/* Page content */}
-        <main className="min-h-screen p-4 lg:p-8">
-          <div className="animate-fade-in">
+          {/* Page content */}
+          <main id="main-content" className="p-6" role="main" tabIndex="-1">
             {children}
-          </div>
-        </main>
+          </main>
+
+          {/* Footer */}
+          <footer className="p-6 border-t border-slate-700/50 mt-12 glass-card" role="contentinfo">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <div className="flex items-center space-x-4">
+                  <img src="/ane-logo.svg" alt="ANE Logo" className="h-10" onError={(e) => e.target.style.display = 'none'} />
+                  <div>
+                    <p className="text-sm font-semibold text-white">{t('app.footer.organization')}</p>
+                    <p className="text-xs text-slate-400">{t('app.footer.rights')} © 2025</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-6 text-sm">
+                  <Link to="/accessibility-statement" className="text-slate-300 hover:text-blue-400 transition-colors">
+                    {t('app.footer.accessibility')}
+                  </Link>
+                  <span className="text-slate-500">{t('app.footer.version', { version: t('app.version') })}</span>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
