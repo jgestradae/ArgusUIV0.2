@@ -71,6 +71,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/automatic-calendar" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AMMCalendarView />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/data-navigator" element={
               <ProtectedRoute>
                 <Layout>
