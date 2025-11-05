@@ -957,7 +957,7 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     const cellWidth = Math.max(2, Math.floor(1000 / sortedFrequencies.length));
     const cellHeight = Math.max(20, Math.floor(400 / sortedTimestamps.length));
 
-    return (
+    const spectrogramContent = (
       <div className="space-y-4">
         <div className="bg-slate-800/30 rounded-lg p-4 overflow-x-auto">
           <div className="flex space-x-4">
