@@ -886,6 +886,23 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
       );
     }
 
+    // Graph Type Selector Panel at the top
+    const graphTypeSelector = (
+      <div className="flex items-center space-x-3 mb-4">
+        <Select value={graphType} onValueChange={setGraphType}>
+          <SelectTrigger className="w-64 input-spectrum">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={GRAPH_TYPES.LEVEL_VS_TIME}>Level vs Time</SelectItem>
+            <SelectItem value={GRAPH_TYPES.LEVEL_VS_FREQUENCY}>Level vs Frequency</SelectItem>
+            <SelectItem value={GRAPH_TYPES.SPECTROGRAM_2D}>2D Spectrogram</SelectItem>
+            <SelectItem value={GRAPH_TYPES.VIEW_3D}>3D Surface View</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    );
+
     // Calculate min and max levels for color scaling
     const levels = itemData.data_points.map(p => parseFloat(p.level_dbm));
     const minLevel = Math.min(...levels);
