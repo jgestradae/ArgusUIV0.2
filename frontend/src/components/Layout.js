@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button';
 import { 
   Radio, 
@@ -21,6 +22,7 @@ import {
   Download
 } from 'lucide-react';
 import { toast } from 'sonner';
+import AccessibilityToolbar from './AccessibilityToolbar';
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
