@@ -228,6 +228,8 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
   const [scans, setScans] = useState([]);  // Array of scans (grouped by time)
   const [selectedScanIndex, setSelectedScanIndex] = useState(0);
   const [isSingleScan, setIsSingleScan] = useState(true);
+  const [selectedFrequency, setSelectedFrequency] = useState(null); // For Level vs Time: selected frequency to track
+  const [availableFrequencies, setAvailableFrequencies] = useState([]); // List of available frequencies
   const plotly3DRef = React.useRef(null); // Ref for 3D plot container
 
   useEffect(() => {
