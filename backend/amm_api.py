@@ -357,4 +357,126 @@ def create_amm_router(db: AsyncIOMotorDatabase, scheduler: AMMScheduler) -> APIR
         
         return definition
 
+    @router.get("/api/amm/calendar-events")
+    async def get_calendar_events(
+        start_date: str = Query(..., description="Start date in ISO format"),
+        end_date: str = Query(..., description="End date in ISO format"),
+        db: AsyncIOMotorDatabase = Depends(lambda: db),
+        current_user: User = Depends(get_current_user)
+    ):
+        """Get calendar events for AMM configurations and executions"""
+        try:
+            start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            
+            events = []
+            
+            # Get all active AMM configurations
+            amm_configs = await db.amm_configurations.find({}).to_list(None)
+            
+            for config in amm_configs:
+                # Get timing definition
+                timing = await db.timing_definitions.find_one({"id": config.get("timing_definition_id")})
+                
+                if not timing:
+                    continue
+                
+                # Determine color based on status
+                status_colors = {
+                    "active": "#10b981",      # green
+                    "inactive": "#6b7280",    # gray
+                    "draft": "#f59e0b",       # amber
+                    "error": "#ef4444"        # red
+                }
+                
+                color = status_colors.get(config.get("status", "inactive"), "#6b7280")
+                
+                # Create event based on timing type
+                timing_type = timing.get("timing_type")
+                
+                if timing_type == "immediate":
+                    # Show as single event on creation date
+                    event_date = datetime.fromisoformat(config.get("created_at").replace('Z', '+00:00')) if isinstance(config.get("created_at"), str) else config.get("created_at", datetime.utcnow())
+                    if start <= event_date <= end:
+                        events.append({
+                            "id": config.get("id"),
+                            "title": f"{config.get('name')} (Immediate)",
+                            "start": event_date.isoformat(),
+                            "end": event_date.isoformat(),
+                            "color": color,
+                            "status": config.get("status"),
+                            "type": "immediate",
+                            "config_id": config.get("id")
+                        })
+                
+                elif timing_type == "scheduled":
+                    # Show on scheduled date/time
+                    scheduled_date = timing.get("scheduled_date")
+                    scheduled_time = timing.get("scheduled_time")
+                    
+                    if scheduled_date:
+                        event_datetime = datetime.fromisoformat(f"{scheduled_date}T{scheduled_time or '00:00:00'}")
+                        if start <= event_datetime <= end:
+                            events.append({
+                                "id": f"{config.get('id')}_scheduled",
+                                "title": f"{config.get('name')} (Scheduled)",
+                                "start": event_datetime.isoformat(),
+                                "end": event_datetime.isoformat(),
+                                "color": color,
+                                "status": config.get("status"),
+                                "type": "scheduled",
+                                "config_id": config.get("id")
+                            })
+                
+                elif timing_type == "periodic":
+                    # Show recurring events based on interval
+                    period_type = timing.get("period_type")
+                    interval_value = timing.get("interval_value", 1)
+                    start_time = timing.get("start_time", "00:00:00")
+                    
+                    # Generate events within date range
+                    current = start
+                    while current <= end:
+                        event_datetime = datetime.combine(current.date(), datetime.fromisoformat(f"2000-01-01T{start_time}").time())
+                        
+                        if start <= event_datetime <= end:
+                            events.append({
+                                "id": f"{config.get('id')}_{event_datetime.isoformat()}",
+                                "title": f"{config.get('name')} ({period_type.capitalize()})",
+                                "start": event_datetime.isoformat(),
+                                "end": event_datetime.isoformat(),
+                                "color": color,
+                                "status": config.get("status"),
+                                "type": "periodic",
+                                "period_type": period_type,
+                                "config_id": config.get("id")
+                            })
+                        
+                        # Increment based on period type
+                        if period_type == "daily":
+                            current = current.replace(day=current.day + interval_value) if current.day + interval_value <= 31 else current.replace(month=current.month + 1, day=1)
+                        elif period_type == "weekly":
+                            from datetime import timedelta
+                            current = current + timedelta(weeks=interval_value)
+                        elif period_type == "monthly":
+                            if current.month + interval_value > 12:
+                                current = current.replace(year=current.year + 1, month=(current.month + interval_value) % 12 or 12)
+                            else:
+                                current = current.replace(month=current.month + interval_value)
+                        else:
+                            break  # Unknown period type
+            
+            return {
+                "success": True,
+                "data": {
+                    "events": events,
+                    "start_date": start.isoformat(),
+                    "end_date": end.isoformat()
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting calendar events: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error getting calendar events: {str(e)}")
+
     return router
