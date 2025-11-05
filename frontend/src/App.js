@@ -15,10 +15,12 @@ import DatabaseImport from './components/DatabaseImport';
 import ReportGeneration from './components/ReportGeneration';
 import ReportList from './components/ReportList';
 import GeolocationMap from './components/GeolocationMap';
+import AMMCalendarView from './components/AMMCalendarView';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 import 'leaflet/dist/leaflet.css';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 function App() {
   return (
