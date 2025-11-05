@@ -79,29 +79,29 @@ const ReportGeneration = () => {
   const selectedReportType = reportTypes.find(rt => rt.value === reportType);
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 p-6">
+    <div className="h-full overflow-y-auto p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="glass-card border-0 rounded-lg p-6 mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <FileText className="w-6 h-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Report Generation</h1>
+            <FileText className="w-6 h-6 text-blue-400" />
+            <h1 className="text-2xl font-bold text-white">Report Generation</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="text-slate-400">
             Create comprehensive reports in multiple formats (PDF, CSV, Excel, DOCX, XML)
           </p>
         </div>
 
         {/* Success Message */}
         {generatedReportId && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6 flex items-start gap-3">
+            <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-green-800 font-medium">Report generation started!</p>
-              <p className="text-green-700 text-sm mt-1">
-                Report ID: <code className="bg-green-100 px-2 py-0.5 rounded">{generatedReportId}</code>
+              <p className="text-green-300 font-medium">Report generation started!</p>
+              <p className="text-green-200 text-sm mt-1">
+                Report ID: <code className="bg-green-500/20 text-green-300 px-2 py-0.5 rounded">{generatedReportId}</code>
               </p>
-              <p className="text-green-700 text-sm mt-1">
+              <p className="text-green-200 text-sm mt-1">
                 You can check the status in the Reports List page
               </p>
             </div>
@@ -109,7 +109,7 @@ const ReportGeneration = () => {
         )}
 
         {/* Main Form */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="glass-card border-0 rounded-lg p-6">
           {/* Report Type */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">
