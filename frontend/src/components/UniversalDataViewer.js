@@ -1139,13 +1139,23 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     let chartData = [];
     
     if (graphType === GRAPH_TYPES.LEVEL_VS_TIME) {
-      chartData = dataToDisplay.map((point, index) => ({
+      // For Level vs Time, use all data points but filter by selected frequency
+      let timeSeriesData = itemData.data_points;
+      
+      // Filter by selected frequency if one is selected
+      if (selectedFrequency) {
+        timeSeriesData = itemData.data_points.filter(p => p.frequency_hz === selectedFrequency);
+      }
+      
+      chartData = timeSeriesData.map((point, index) => ({
         index: index + 1,
         time: point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : `Point ${index + 1}`,
         level: parseFloat(point.level_dbm),
+        frequency: parseInt(point.frequency_hz) / 1000000,
         timestamp: point.timestamp
       }));
     } else if (graphType === GRAPH_TYPES.LEVEL_VS_FREQUENCY) {
+      // For Level vs Frequency, only show the selected scan
       chartData = dataToDisplay.map((point) => ({
         frequency: parseInt(point.frequency_hz) / 1000000,
         level: parseFloat(point.level_dbm),
