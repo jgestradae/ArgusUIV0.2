@@ -1205,8 +1205,24 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
               </SelectContent>
             </Select>
 
-            {/* Scan Selector - only show for multiple scans and non-spectrogram/3D views */}
-            {!isSingleScan && scans.length > 1 && graphType !== GRAPH_TYPES.SPECTROGRAM_2D && graphType !== GRAPH_TYPES.VIEW_3D && (
+            {/* Frequency Selector - only show for Level vs Time */}
+            {graphType === GRAPH_TYPES.LEVEL_VS_TIME && availableFrequencies.length > 1 && (
+              <Select value={selectedFrequency?.toString()} onValueChange={(val) => setSelectedFrequency(parseInt(val))}>
+                <SelectTrigger className="w-64 input-spectrum">
+                  <SelectValue placeholder="Select Frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableFrequencies.map((freq) => (
+                    <SelectItem key={freq} value={freq.toString()}>
+                      {(freq / 1000000).toFixed(3)} MHz
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {/* Scan Selector - only show for Level vs Frequency with multiple scans */}
+            {graphType === GRAPH_TYPES.LEVEL_VS_FREQUENCY && !isSingleScan && scans.length > 1 && (
               <div className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-2 border border-blue-500/30">
                 <Button
                   variant="ghost"
