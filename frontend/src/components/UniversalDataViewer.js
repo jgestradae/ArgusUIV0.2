@@ -423,6 +423,155 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     toast.success('All markers cleared');
   };
 
+  // Export data in various formats
+  const handleExport = (format = 'csv') => {
+    if (!itemData) {
+      toast.error('No data to export');
+      return;
+    }
+
+    try {
+      if (dataType === 'measurement_result') {
+        exportMeasurementData(format);
+      } else if (dataType === 'automatic_definition') {
+        exportAMMConfig(format);
+      } else if (dataType === 'frequency_list') {
+        exportFrequencyList(format);
+      } else if (dataType === 'transmitter_list') {
+        exportTransmitterList(format);
+      } else {
+        exportGenericData(format);
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export data');
+    }
+  };
+
+  const exportMeasurementData = (format) => {
+    const dataPoints = itemData.data_points || [];
+    
+    if (format === 'csv') {
+      // CSV format
+      const headers = ['Timestamp', 'Frequency (MHz)', 'Level (dBm)', 'Bandwidth (Hz)', 'Modulation'];
+      const rows = dataPoints.map(point => [
+        point.timestamp || '',
+        point.frequency_hz ? (parseInt(point.frequency_hz) / 1000000).toFixed(6) : '',
+        parseFloat(point.level_dbm).toFixed(2),
+        point.bandwidth_hz || '',
+        point.modulation || ''
+      ]);
+      
+      const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+      downloadFile(csvContent, `measurement_${item.order_id}.csv`, 'text/csv');
+      
+    } else if (format === 'json') {
+      // JSON format
+      const jsonData = {
+        order_id: item.order_id,
+        measurement_type: itemData.measurement_type,
+        location: itemData.location,
+        data_points: dataPoints,
+        markers: markers,
+        scans: scans.length
+      };
+      downloadFile(JSON.stringify(jsonData, null, 2), `measurement_${item.order_id}.json`, 'application/json');
+      
+    } else if (format === 'xml') {
+      // XML format
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<MeasurementResult>\n';
+      xml += `  <OrderID>${item.order_id}</OrderID>\n`;
+      xml += `  <MeasurementType>${itemData.measurement_type || 'unknown'}</MeasurementType>\n`;
+      xml += '  <DataPoints>\n';
+      dataPoints.forEach((point, idx) => {
+        xml += `    <Point index="${idx + 1}">\n`;
+        xml += `      <Timestamp>${point.timestamp || ''}</Timestamp>\n`;
+        xml += `      <Frequency unit="Hz">${point.frequency_hz || ''}</Frequency>\n`;
+        xml += `      <Level unit="dBm">${point.level_dbm || ''}</Level>\n`;
+        xml += `      <Bandwidth unit="Hz">${point.bandwidth_hz || ''}</Bandwidth>\n`;
+        xml += `      <Modulation>${point.modulation || ''}</Modulation>\n`;
+        xml += '    </Point>\n';
+      });
+      xml += '  </DataPoints>\n';
+      xml += '</MeasurementResult>\n';
+      downloadFile(xml, `measurement_${item.order_id}.xml`, 'application/xml');
+    }
+    
+    toast.success(`Exported to ${format.toUpperCase()}`);
+  };
+
+  const exportAMMConfig = (format) => {
+    if (format === 'json') {
+      downloadFile(JSON.stringify(itemData, null, 2), `amm_config_${item.id}.json`, 'application/json');
+    } else if (format === 'csv') {
+      const headers = ['Field', 'Value'];
+      const rows = Object.entries(itemData).map(([key, value]) => [
+        key,
+        typeof value === 'object' ? JSON.stringify(value) : value
+      ]);
+      const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+      downloadFile(csvContent, `amm_config_${item.id}.csv`, 'text/csv');
+    }
+    toast.success(`Exported to ${format.toUpperCase()}`);
+  };
+
+  const exportFrequencyList = (format) => {
+    const frequencies = itemData.frequencies || [];
+    if (format === 'csv') {
+      const headers = ['Frequency (Hz)', 'Service', 'Bandwidth', 'Location'];
+      const rows = frequencies.map(freq => [
+        freq.frequency_hz,
+        freq.service_type,
+        freq.bandwidth_hz,
+        freq.location
+      ]);
+      const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+      downloadFile(csvContent, `frequency_list_${item.id}.csv`, 'text/csv');
+    } else if (format === 'json') {
+      downloadFile(JSON.stringify(frequencies, null, 2), `frequency_list_${item.id}.json`, 'application/json');
+    }
+    toast.success(`Exported to ${format.toUpperCase()}`);
+  };
+
+  const exportTransmitterList = (format) => {
+    const transmitters = itemData.transmitters || [];
+    if (format === 'csv') {
+      const headers = ['Transmitter ID', 'Frequency', 'Power', 'Location', 'Status'];
+      const rows = transmitters.map(tx => [
+        tx.id,
+        tx.frequency,
+        tx.power,
+        tx.location,
+        tx.status
+      ]);
+      const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+      downloadFile(csvContent, `transmitter_list_${item.id}.csv`, 'text/csv');
+    } else if (format === 'json') {
+      downloadFile(JSON.stringify(transmitters, null, 2), `transmitter_list_${item.id}.json`, 'application/json');
+    }
+    toast.success(`Exported to ${format.toUpperCase()}`);
+  };
+
+  const exportGenericData = (format) => {
+    if (format === 'json') {
+      downloadFile(JSON.stringify(itemData, null, 2), `data_export_${Date.now()}.json`, 'application/json');
+    }
+    toast.success(`Exported to ${format.toUpperCase()}`);
+  };
+
+  const downloadFile = (content, filename, mimeType) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Render measurement result as table
   const renderMeasurementTable = () => {
     if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
