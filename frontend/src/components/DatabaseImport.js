@@ -230,7 +230,7 @@ const DatabaseImport = () => {
                     onChange={(e) => setIncludeBandwidth(e.target.checked)}
                     className="w-4 h-4"
                   />
-                  <span className="text-sm text-gray-600">Include bandwidth</span>
+                  <span className="text-sm text-slate-400">Include bandwidth</span>
                 </label>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
@@ -245,7 +245,7 @@ const DatabaseImport = () => {
             </div>
             
             <div className="mt-3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 List Name
               </label>
               <input
@@ -296,7 +296,7 @@ const DatabaseImport = () => {
                     step="0.000001"
                     className="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <span className="text-gray-600">MHz</span>
+                  <span className="text-slate-400">MHz</span>
                 </div>
               )}
               
@@ -319,8 +319,8 @@ const DatabaseImport = () => {
                     step="0.000001"
                     className="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <span className="text-gray-600">MHz</span>
-                  <span className="text-gray-600">-</span>
+                  <span className="text-slate-400">MHz</span>
+                  <span className="text-slate-400">-</span>
                   <input
                     type="number"
                     value={freqRangeHigh}
@@ -329,7 +329,7 @@ const DatabaseImport = () => {
                     step="0.000001"
                     className="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <span className="text-gray-600">MHz</span>
+                  <span className="text-slate-400">MHz</span>
                 </div>
               )}
               
@@ -436,7 +436,7 @@ const DatabaseImport = () => {
               {locMode === 'COORD' && (
                 <div className="ml-6 space-y-3">
                   <div className="flex items-center gap-2">
-                    <span className="w-24 text-gray-700 font-medium">Longitude:</span>
+                    <span className="w-24 text-slate-300 font-medium">Longitude:</span>
                     <input
                       type="number"
                       value={longitudeDeg}
@@ -473,7 +473,7 @@ const DatabaseImport = () => {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <span className="w-24 text-gray-700 font-medium">Latitude:</span>
+                    <span className="w-24 text-slate-300 font-medium">Latitude:</span>
                     <input
                       type="number"
                       value={latitudeDeg}
@@ -510,7 +510,7 @@ const DatabaseImport = () => {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <span className="w-24 text-gray-700 font-medium">Radius:</span>
+                    <span className="w-24 text-slate-300 font-medium">Radius:</span>
                     <input
                       type="number"
                       value={radius}
@@ -518,7 +518,7 @@ const DatabaseImport = () => {
                       placeholder="30"
                       className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <span className="text-gray-600">km</span>
+                    <span className="text-slate-400">km</span>
                   </div>
                 </div>
               )}
@@ -535,7 +535,7 @@ const DatabaseImport = () => {
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   Service
                 </label>
                 <select
@@ -551,7 +551,7 @@ const DatabaseImport = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   Signature
                 </label>
                 <input
@@ -563,7 +563,7 @@ const DatabaseImport = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   Call Sign
                 </label>
                 <input
@@ -575,7 +575,7 @@ const DatabaseImport = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   Licensee
                 </label>
                 <input
@@ -587,7 +587,7 @@ const DatabaseImport = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   License State
                 </label>
                 <input
@@ -599,7 +599,7 @@ const DatabaseImport = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   System Name
                 </label>
                 <input
@@ -619,7 +619,7 @@ const DatabaseImport = () => {
             <h2 className="text-lg font-semibold mb-3">Options</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   Database Selection
                 </label>
                 <select
@@ -651,7 +651,7 @@ const DatabaseImport = () => {
           <div className="flex justify-end gap-3 pt-4 border-t">
             <button
               onClick={() => window.history.back()}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+              className="px-6 py-2 border border-gray-300 text-slate-300 rounded-md hover:bg-gray-50"
             >
               Cancel
             </button>
