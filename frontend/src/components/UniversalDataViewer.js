@@ -1082,6 +1082,13 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
         </div>
       </div>
     );
+
+    return (
+      <div className="space-y-4">
+        {graphTypeSelector}
+        {spectrogramContent}
+      </div>
+    );
   };
 
   // Render graph view
