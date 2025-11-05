@@ -104,7 +104,7 @@ const ReportList = () => {
       case 'failed':
         return <XCircle className="w-5 h-5 text-red-600" />;
       default:
-        return <Clock className="w-5 h-5 text-gray-600" />;
+        return <Clock className="w-5 h-5 text-slate-400" />;
     }
   };
 
@@ -131,17 +131,17 @@ const ReportList = () => {
   ];
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 p-6">
+    <div className="h-full overflow-y-auto bg-transparent p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="glass-card border-0 rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <FileText className="w-6 h-6 text-blue-600" />
-                <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
+                <h1 className="text-2xl font-bold text-white">Reports</h1>
               </div>
-              <p className="text-gray-600">
+              <p className="text-slate-400">
                 View, download, and manage generated reports
               </p>
             </div>
@@ -156,7 +156,7 @@ const ReportList = () => {
         </div>
 
         {/* Filter Tabs */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="glass-card border-0 rounded-lg shadow-sm p-4 mb-6">
           <div className="flex flex-wrap gap-2">
             {reportTypes.map(type => (
               <button
@@ -165,7 +165,7 @@ const ReportList = () => {
                 className={`px-4 py-2 rounded-md font-medium transition-all ${
                   filter === type.value
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-100 text-slate-300 hover:bg-gray-200'
                 }`}
               >
                 {type.label}
@@ -176,25 +176,25 @@ const ReportList = () => {
 
         {/* Reports List */}
         {loading ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+          <div className="glass-card border-0 rounded-lg shadow-sm p-12 text-center">
             <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4 animate-spin" />
-            <p className="text-gray-600">Loading reports...</p>
+            <p className="text-slate-400">Loading reports...</p>
           </div>
         ) : reports.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+          <div className="glass-card border-0 rounded-lg shadow-sm p-12 text-center">
             <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-2">No reports found</p>
-            <p className="text-gray-500 text-sm">Create a new report to get started</p>
+            <p className="text-slate-400 mb-2">No reports found</p>
+            <p className="text-slate-500 text-sm">Create a new report to get started</p>
           </div>
         ) : (
           <div className="space-y-4">
             {reports.map(report => (
-              <div key={report.id} className="bg-white rounded-lg shadow-sm p-6">
+              <div key={report.id} className="glass-card border-0 rounded-lg shadow-sm p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       {getStatusIcon(report.status)}
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-white">
                         {report.report_name}
                       </h3>
                       {getStatusBadge(report.status)}
@@ -202,27 +202,27 @@ const ReportList = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
                       <div>
-                        <span className="text-gray-600">Type:</span>
-                        <span className="ml-2 font-medium text-gray-900">
+                        <span className="text-slate-400">Type:</span>
+                        <span className="ml-2 font-medium text-white">
                           {report.report_type.replace('_', ' ').toUpperCase()}
                         </span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Created By:</span>
-                        <span className="ml-2 font-medium text-gray-900">
+                        <span className="text-slate-400">Created By:</span>
+                        <span className="ml-2 font-medium text-white">
                           {report.created_by}
                         </span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Created:</span>
-                        <span className="ml-2 font-medium text-gray-900">
+                        <span className="text-slate-400">Created:</span>
+                        <span className="ml-2 font-medium text-white">
                           {new Date(report.created_at).toLocaleString()}
                         </span>
                       </div>
                     </div>
 
                     {report.description && (
-                      <p className="text-gray-600 text-sm mt-3">{report.description}</p>
+                      <p className="text-slate-400 text-sm mt-3">{report.description}</p>
                     )}
 
                     {report.error_message && (
