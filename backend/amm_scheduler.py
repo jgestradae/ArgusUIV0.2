@@ -178,7 +178,7 @@ class AMMScheduler:
                 details={
                     "config_id": amm_config.id,
                     "config_name": amm_config.name,
-                    "measurement_type": amm_config.measurement_type
+                    "status": amm_config.status
                 }
             )
             
