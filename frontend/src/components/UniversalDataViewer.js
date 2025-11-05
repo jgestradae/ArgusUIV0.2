@@ -828,8 +828,27 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
       return (timestamp - sortedTimestamps[0]) / 1000;
     });
 
+    // Graph Type Selector Panel
+    const graphTypeSelector = (
+      <div className="flex items-center space-x-3">
+        <Select value={graphType} onValueChange={setGraphType}>
+          <SelectTrigger className="w-64 input-spectrum">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={GRAPH_TYPES.LEVEL_VS_TIME}>Level vs Time</SelectItem>
+            <SelectItem value={GRAPH_TYPES.LEVEL_VS_FREQUENCY}>Level vs Frequency</SelectItem>
+            <SelectItem value={GRAPH_TYPES.SPECTROGRAM_2D}>2D Spectrogram</SelectItem>
+            <SelectItem value={GRAPH_TYPES.VIEW_3D}>3D Surface View</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    );
+
     return (
       <div className="space-y-4">
+        {graphTypeSelector}
+        
         <div className="bg-slate-800/30 rounded-lg p-4">
           <div ref={plotly3DRef} style={{ width: '100%', height: '600px' }}></div>
         </div>
