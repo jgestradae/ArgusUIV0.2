@@ -16,6 +16,7 @@ import ReportGeneration from './components/ReportGeneration';
 import ReportList from './components/ReportList';
 import GeolocationMap from './components/GeolocationMap';
 import AMMCalendarView from './components/AMMCalendarView';
+import AccessibilityStatement from './components/AccessibilityStatement';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
