@@ -1664,10 +1664,19 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
 
             <div className="flex-1"></div>
 
-            <Button variant="secondary" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
+            <Select onValueChange={(format) => handleExport(format)}>
+              <SelectTrigger className="w-40 h-9 input-spectrum">
+                <Download className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Export" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="csv">Export as CSV</SelectItem>
+                <SelectItem value="json">Export as JSON</SelectItem>
+                {dataType === 'measurement_result' && (
+                  <SelectItem value="xml">Export as XML</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Content */}
