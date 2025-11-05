@@ -27,6 +27,7 @@ import AccessibilityToolbar from './AccessibilityToolbar';
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout, isAdmin } = useAuth();
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
