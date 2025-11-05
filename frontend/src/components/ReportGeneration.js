@@ -112,7 +112,7 @@ const ReportGeneration = () => {
         <div className="glass-card border-0 rounded-lg p-6">
           {/* Report Type */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-slate-300 mb-3">
               Report Type
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -126,8 +126,8 @@ const ReportGeneration = () => {
                       : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                   }`}
                 >
-                  <div className="font-medium text-gray-900">{type.label}</div>
-                  <div className="text-sm text-gray-600 mt-1">{type.description}</div>
+                  <div className="font-medium text-white">{type.label}</div>
+                  <div className="text-sm text-slate-400 mt-1">{type.description}</div>
                 </div>
               ))}
             </div>
@@ -138,7 +138,7 @@ const ReportGeneration = () => {
           {/* Report Details */}
           <div className="space-y-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 Report Name *
               </label>
               <input
@@ -151,7 +151,7 @@ const ReportGeneration = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 Description (Optional)
               </label>
               <textarea
@@ -174,7 +174,7 @@ const ReportGeneration = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   Start Date
                 </label>
                 <input
@@ -185,7 +185,7 @@ const ReportGeneration = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   End Date
                 </label>
                 <input
@@ -202,7 +202,7 @@ const ReportGeneration = () => {
 
           {/* Export Format */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-slate-300 mb-3">
               Export Format
             </label>
             <div className="grid grid-cols-5 gap-2">
@@ -213,7 +213,7 @@ const ReportGeneration = () => {
                   className={`px-4 py-2 rounded-md font-medium transition-all ${
                     exportFormat === format
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 text-slate-300 hover:bg-gray-200'
                   }`}
                 >
                   {format}
@@ -226,7 +226,7 @@ const ReportGeneration = () => {
           <div className="flex justify-end gap-3 pt-4 border-t">
             <button
               onClick={() => window.history.back()}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+              className="px-6 py-2 border border-gray-300 text-slate-300 rounded-md hover:bg-gray-50"
             >
               Cancel
             </button>
