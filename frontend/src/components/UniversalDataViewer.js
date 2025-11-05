@@ -1299,7 +1299,10 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
                 <Line type="monotone" dataKey="level" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} name="Level (dBm)" />
                 {/* Render markers as reference dots */}
                 {markers.map((marker, idx) => {
-                  const markerPoint = chartData.find(d => d.index === marker.index);
+                  // Find matching data point by time and level
+                  const markerPoint = chartData.find(d => 
+                    d.time === marker.time && Math.abs(d.level - marker.level) < 0.01
+                  );
                   if (!markerPoint) return null;
                   return (
                     <ReferenceDot
