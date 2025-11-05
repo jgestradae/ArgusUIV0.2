@@ -360,6 +360,13 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     setScans(detectedScans);
     setIsSingleScan(detectedScans.length <= 1);
     
+    // Extract unique frequencies for frequency selection (Level vs Time)
+    const uniqueFreqs = [...new Set(dataPoints.map(p => p.frequency_hz))].sort((a, b) => a - b);
+    setAvailableFrequencies(uniqueFreqs);
+    if (uniqueFreqs.length > 0 && !selectedFrequency) {
+      setSelectedFrequency(uniqueFreqs[0]); // Default to first frequency
+    }
+    
     if (detectedScans.length > 1) {
       console.log(`Detected ${detectedScans.length} scans in measurement data`);
       toast.success(`Detected ${detectedScans.length} scans in measurement data`);
