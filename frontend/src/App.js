@@ -142,6 +142,9 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/accessibility-statement" element={
+              <AccessibilityStatement />
+            } />
           </Routes>
           <Toaster position="top-right" />
         </div>
