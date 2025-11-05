@@ -187,21 +187,21 @@ const DatabaseImport = () => {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 p-6">
+    <div className="h-full overflow-y-auto p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="glass-card border-0 rounded-lg p-6 mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <Database className="w-6 h-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Database Import</h1>
+            <Database className="w-6 h-6 text-blue-400" />
+            <h1 className="text-2xl font-bold text-white">Database Import</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="text-slate-400">
             Import frequency lists and transmitter data from external spectrum management databases using SMDI protocol
           </p>
         </div>
 
         {/* Main Form */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="glass-card border-0 rounded-lg p-6">
           {/* Result Type Selection */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold mb-3">Result Type</h2>
