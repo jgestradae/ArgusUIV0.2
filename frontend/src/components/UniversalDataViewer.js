@@ -1375,28 +1375,28 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
         )}
 
         {/* Statistics */}
-        {itemData.data_points.length > 0 && (
+        {dataToDisplay && dataToDisplay.length > 0 && (
           <div className="grid grid-cols-4 gap-4">
             <div className="bg-slate-800/30 rounded-lg p-3">
-              <div className="text-xs text-slate-400">Data Points</div>
-              <div className="text-lg font-semibold text-white">{itemData.data_points.length}</div>
+              <div className="text-xs text-slate-400">Data Points {!isSingleScan && `(Scan ${scans[selectedScanIndex]?.scanNumber || 1})`}</div>
+              <div className="text-lg font-semibold text-white">{dataToDisplay.length}</div>
             </div>
             <div className="bg-slate-800/30 rounded-lg p-3">
               <div className="text-xs text-slate-400">Min Level</div>
               <div className="text-lg font-semibold text-green-300">
-                {Math.min(...itemData.data_points.map(p => parseFloat(p.level_dbm))).toFixed(1)} dBm
+                {Math.min(...dataToDisplay.map(p => parseFloat(p.level_dbm))).toFixed(1)} dBm
               </div>
             </div>
             <div className="bg-slate-800/30 rounded-lg p-3">
               <div className="text-xs text-slate-400">Max Level</div>
               <div className="text-lg font-semibold text-red-300">
-                {Math.max(...itemData.data_points.map(p => parseFloat(p.level_dbm))).toFixed(1)} dBm
+                {Math.max(...dataToDisplay.map(p => parseFloat(p.level_dbm))).toFixed(1)} dBm
               </div>
             </div>
             <div className="bg-slate-800/30 rounded-lg p-3">
               <div className="text-xs text-slate-400">Avg Level</div>
               <div className="text-lg font-semibold text-blue-300">
-                {(itemData.data_points.reduce((sum, p) => sum + parseFloat(p.level_dbm), 0) / itemData.data_points.length).toFixed(1)} dBm
+                {(dataToDisplay.reduce((sum, p) => sum + parseFloat(p.level_dbm), 0) / dataToDisplay.length).toFixed(1)} dBm
               </div>
             </div>
           </div>
