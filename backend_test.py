@@ -727,10 +727,10 @@ class ArgusAPITester:
             ns = {'adc': 'http://www.rohde-schwarz.com/ARGUS/ORM_ADC'}
             header = root.find("adc:HEADER", ns)
             if header is not None:
-                cmd = header.find("CMD")
-                order_id = header.find("ID")
-                station = header.find("STATION")
-                order_type = header.find("ORDER_TYPE")
+                cmd = header.find("adc:CMD", ns)
+                order_id = header.find("adc:ID", ns)
+                station = header.find("adc:STATION", ns)
+                order_type = header.find("adc:ORDER_TYPE", ns)
                 
                 if cmd is not None:
                     print(f"         ✅ CMD: {cmd.text}")
