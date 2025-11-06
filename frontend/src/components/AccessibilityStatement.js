@@ -24,7 +24,7 @@ const AccessibilityStatement = () => {
           </h2>
           <div className="space-y-4 text-slate-300">
             <p>
-              <strong className="text-white">Español:</strong> La Agencia Nacional de Infraestructura (ANE) 
+              <strong className="text-white">Español:</strong> La Agencia Nacional del Espectro (ANE) 
               se compromete a garantizar que ArgusUI sea accesible para todas las personas, incluidas aquellas 
               con discapacidades. Nos esforzamos por cumplir con los estándares de accesibilidad establecidos 
               en la NTC 5854, las Pautas de Accesibilidad para el Contenido Web (WCAG) 2.1 nivel AA, y el 
