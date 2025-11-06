@@ -123,14 +123,15 @@ export default function Login() {
               type="submit" 
               className="w-full btn-spectrum h-11 text-base font-semibold"
               disabled={loading}
+              aria-label={t('auth.access_system')}
             >
               {loading ? (
                 <div className="flex items-center space-x-2">
                   <div className="spinner"></div>
-                  <span>Authenticating...</span>
+                  <span>{t('messages.loading')}</span>
                 </div>
               ) : (
-                'Access System'
+                t('auth.access_system')
               )}
             </Button>
           </form>
