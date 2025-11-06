@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard';
 import SystemStatus from './components/SystemStatus';
 import SystemParameters from './components/SystemParameters';
 import DirectMeasurement from './components/DirectMeasurement';
+import DirectMeasurementADC from './components/DirectMeasurementADC';
 import AutomaticMode from './components/AutomaticMode';
 import Configuration from './components/Configuration';
 import SystemLogs from './components/SystemLogs';
