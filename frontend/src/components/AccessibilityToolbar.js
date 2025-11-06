@@ -19,8 +19,7 @@ const AccessibilityToolbar = () => {
     i18n.changeLanguage(lng);
     localStorage.setItem('i18nextLng', lng);
     setIsOpen(false);
-    // Force reload to ensure all components update
-    window.location.reload();
+    // No reload needed - React will re-render automatically
   };
 
   // Normalize language code (handle en-US, es-CO, etc.)
