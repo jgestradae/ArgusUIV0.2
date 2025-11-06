@@ -282,7 +282,7 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
                     pass
                 active_websockets.remove(ws)
             
-            logger.info(f"UDP capture stopped by {current_user['username']}")
+            logger.info(f"UDP capture stopped by {current_user.username}")
             
             return {
                 'success': True,
