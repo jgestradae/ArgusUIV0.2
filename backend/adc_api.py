@@ -256,7 +256,7 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
             raise HTTPException(status_code=500, detail=str(e))
     
     @router.post("/capture/stop")
-    async def stop_udp_capture(current_user: dict = Depends(get_current_user)):
+    async def stop_udp_capture(current_user: User = Depends(get_current_user)):
         """
         Stop UDP listener
         
