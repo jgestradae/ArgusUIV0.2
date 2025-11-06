@@ -242,7 +242,7 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
             
             await udp_listener.start(callback=broadcast_callback)
             
-            logger.info(f"UDP capture started by {current_user['username']}")
+            logger.info(f"UDP capture started by {current_user.username}")
             
             return {
                 'success': True,
