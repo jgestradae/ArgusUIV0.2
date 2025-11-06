@@ -67,17 +67,17 @@ export default function Login() {
           
           <div className="space-y-2">
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              ArgusUI
+              {t('app.name')}
             </CardTitle>
             <CardDescription className="text-slate-400 text-lg">
-              Spectrum Monitoring Control System
+              {t('app.description')}
             </CardDescription>
           </div>
           
           {/* System status indicator */}
           <div className="flex items-center justify-center space-x-2 text-sm text-slate-300">
             <Activity className="w-4 h-4 text-green-400 animate-pulse" />
-            <span>System Online</span>
+            <span>{t('system_status.operational')}</span>
           </div>
         </CardHeader>
         
