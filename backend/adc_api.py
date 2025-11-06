@@ -135,7 +135,7 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
     @router.post("/orders/single-freq")
     async def create_single_freq_order(
         request: SingleFreqOrderRequest,
-        current_user: dict = Depends(get_current_user)
+        current_user: User = Depends(get_current_user)
     ):
         """
         Create and submit a single frequency measurement order to Argus INBOX
