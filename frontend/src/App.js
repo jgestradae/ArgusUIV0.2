@@ -62,7 +62,7 @@ function App() {
             <Route path="/direct-measurement" element={
               <ProtectedRoute>
                 <Layout>
-                  <DirectMeasurement />
+                  <DirectMeasurementADC />
                 </Layout>
               </ProtectedRoute>
             } />
