@@ -46,7 +46,7 @@ export const AccessibilityProvider = ({ children }) => {
       const banner = document.createElement('div');
       banner.id = 'screen-reader-banner';
       banner.className = 'screen-reader-banner';
-      banner.innerHTML = '🔊 Screen Reader Mode Active - Enhanced Focus Indicators Enabled';
+      banner.innerHTML = '🔊 Text-to-Speech Active - Click elements to hear them read aloud';
       banner.setAttribute('role', 'status');
       banner.setAttribute('aria-live', 'polite');
       document.body.appendChild(banner);
