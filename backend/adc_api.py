@@ -201,7 +201,7 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
             raise HTTPException(status_code=500, detail=str(e))
     
     @router.post("/capture/start")
-    async def start_udp_capture(current_user: dict = Depends(get_current_user)):
+    async def start_udp_capture(current_user: User = Depends(get_current_user)):
         """
         Start UDP listener for real-time data capture
         
