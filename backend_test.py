@@ -745,7 +745,7 @@ class ArgusAPITester:
                 return
             
             # Check BODY
-            body = root.find("BODY")
+            body = root.find("adc:BODY", ns)
             if body is not None:
                 # Check for frequency parameters
                 freq_start = body.find("FREQ_START")
