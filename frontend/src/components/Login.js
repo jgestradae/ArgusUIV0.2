@@ -92,28 +92,30 @@ export default function Login() {
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Username</label>
+              <label className="text-sm font-medium text-slate-300">{t('auth.username')}</label>
               <Input
                 type="text"
-                placeholder="Enter your username"
+                placeholder={t('auth.username')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="input-spectrum h-11"
                 required
                 disabled={loading}
+                aria-label={t('auth.username')}
               />
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Password</label>
+              <label className="text-sm font-medium text-slate-300">{t('auth.password')}</label>
               <Input
                 type="password"
-                placeholder="Enter your password"
+                placeholder={t('auth.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="input-spectrum h-11"
                 required
                 disabled={loading}
+                aria-label={t('auth.password')}
               />
             </div>
             
