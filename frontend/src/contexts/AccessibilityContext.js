@@ -82,15 +82,51 @@ export const AccessibilityProvider = ({ children }) => {
   };
 
   const toggleScreenReaderMode = () => {
-    setScreenReaderMode(prev => !prev);
+    const newValue = !screenReaderMode;
+    setScreenReaderMode(newValue);
+    
+    // Enable/disable text-to-speech
+    if (newValue) {
+      // Check if browser supports speech synthesis
+      if ('speechSynthesis' in window) {
+        setSpeechEnabled(true);
+        speak('Screen reader mode activated. Enhanced focus indicators enabled.');
+      } else {
+        setSpeechEnabled(false);
+        console.warn('Speech synthesis not supported in this browser');
+      }
+    } else {
+      setSpeechEnabled(false);
+      speak('Screen reader mode deactivated.');
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+    }
+  };
+
+  // Text-to-speech function
+  const speak = (text, lang = 'en-US') => {
+    if (!('speechSynthesis' in window)) return;
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 0.8;
+    
+    window.speechSynthesis.speak(utterance);
   };
 
   const value = {
     highContrast,
     screenReaderMode,
     reducedMotion,
+    speechEnabled,
     toggleHighContrast,
-    toggleScreenReaderMode
+    toggleScreenReaderMode,
+    speak
   };
 
   return (
