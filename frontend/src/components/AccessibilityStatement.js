@@ -31,7 +31,7 @@ const AccessibilityStatement = () => {
               Manual de Gobierno en Línea (GEL) de Colombia.
             </p>
             <p>
-              <strong className="text-white">English:</strong> The National Infrastructure Agency (ANE) is 
+              <strong className="text-white">English:</strong> The National Spectrum Agency (ANE) is 
               committed to ensuring that ArgusUI is accessible to all people, including those with disabilities. 
               We strive to comply with accessibility standards established in NTC 5854, Web Content Accessibility 
               Guidelines (WCAG) 2.1 Level AA, and Colombia's Government Online Manual (GEL).
