@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implement SOAP Web Services layer with 7 services (GetSystemParameters, GetStationStatus, ScheduleMeasurement, RequestMeasurementResult, PushMeasurementResult, GetOperatorList, GetReportList) using Spyne server and Zeep client. WS-Security token authentication. Auto-generated WSDL."
+user_problem_statement: "Implement ORM-ADC Direct Measurement module: ADC-compatible XML order generation (SCAN and SINGLE_FREQ), file-based order placement to Argus INBOX, UDP listener on port 4090 for real-time data capture, WebSocket streaming to frontend, MongoDB storage, and Live UDP Monitor interface with text/graph views."
 
 backend:
   - task: "Authentication System"
