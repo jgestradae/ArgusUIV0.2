@@ -30,12 +30,12 @@ export default function Login() {
     const result = await login(username, password);
     
     if (result.success) {
-      toast.success('Welcome to ArgusUI', {
-        description: 'Successfully logged into the spectrum monitoring system'
+      toast.success(t('auth.login_success'), {
+        description: t('dashboard.welcome')
       });
     } else {
       setError(result.error);
-      toast.error('Login Failed', {
+      toast.error(t('auth.login_failed'), {
         description: result.error
       });
     }
