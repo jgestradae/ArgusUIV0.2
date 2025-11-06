@@ -422,15 +422,18 @@ test_plan:
 
   - task: "ADC Order Generator"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/adc_order_generator.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Created ADCOrderGenerator class for generating ADC-compatible XML orders. Supports SCAN (frequency range) and SINGLE_FREQ (single frequency) measurement types. XML format follows ORM ADC specification with proper namespace (http://www.rohde-schwarz.com/ARGUS/ORM_ADC). Orders are written to Argus INBOX directory for automatic execution. Module initialized successfully in server.py."
+        - working: true
+          agent: "testing"
+          comment: "ADC Order Generator fully functional. SCAN orders: ✅ Creates proper XML with FREQ_START/FREQ_STOP/FREQ_STEP parameters ✅ Validates frequency ranges (stop > start) ✅ Saves to /tmp/argus_inbox with correct naming ✅ XML structure validated with proper ADC namespace. SINGLE_FREQ orders: ✅ Creates proper XML with FREQUENCY parameter ✅ Supports all measurement types (LEVEL, DF, DEMOD, SPECTRUM) ✅ Proper XML validation with namespace http://www.rohde-schwarz.com/ARGUS/ORM_ADC ✅ MongoDB storage working correctly."
 
   - task: "UDP Listener for ADC Data"
     implemented: true
