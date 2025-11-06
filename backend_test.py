@@ -748,9 +748,9 @@ class ArgusAPITester:
             body = root.find("adc:BODY", ns)
             if body is not None:
                 # Check for frequency parameters
-                freq_start = body.find("FREQ_START")
-                freq_stop = body.find("FREQ_STOP")
-                frequency = body.find("FREQUENCY")
+                freq_start = body.find("adc:FREQ_START", ns)
+                freq_stop = body.find("adc:FREQ_STOP", ns)
+                frequency = body.find("adc:FREQUENCY", ns)
                 
                 if freq_start is not None and freq_stop is not None:
                     start_hz = int(freq_start.text)
