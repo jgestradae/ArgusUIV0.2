@@ -52,10 +52,22 @@
   },
   "dashboard": {
     "title": "Panel de Control",
-    "welcome": "Bienvenido a ArgusUI",
+    "welcome": "Bienvenido",
     "system_overview": "Resumen del Sistema",
     "recent_activity": "Actividad Reciente",
-    "quick_actions": "Acciones Rápidas"
+    "quick_actions": "Acciones Rápidas",
+    "argus_status": "Estado Argus",
+    "online": "En Línea",
+    "offline": "Fuera de Línea",
+    "active_measurements": "Mediciones Activas",
+    "monitoring_stations": "Estaciones de Monitoreo",
+    "pending_orders": "Órdenes Pendientes",
+    "last_updated": "Última actualización",
+    "currently_running": "En ejecución",
+    "stations_available": "Estaciones disponibles",
+    "orders_in_queue": "Órdenes en cola",
+    "recent_measurements": "Mediciones Recientes",
+    "recent_orders": "Órdenes Recientes"
   },
   "system_status": {
     "title": "Estado del Sistema",
