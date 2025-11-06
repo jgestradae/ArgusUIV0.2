@@ -295,7 +295,7 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
             raise HTTPException(status_code=500, detail=str(e))
     
     @router.get("/capture/status")
-    async def get_capture_status(current_user: dict = Depends(get_current_user)):
+    async def get_capture_status(current_user: User = Depends(get_current_user)):
         """Get current UDP capture status"""
         global udp_listener
         
