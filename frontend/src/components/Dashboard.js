@@ -111,16 +111,16 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-400">Argus Status</p>
+                <p className="text-sm font-medium text-slate-400">{t('dashboard.argus_status')}</p>
                 <p className={`text-2xl font-bold ${getStatusColor(systemStatus?.system_health)}`}>
-                  {systemStatus?.argus_running ? 'Online' : 'Offline'}
+                  {systemStatus?.argus_running ? t('dashboard.online') : t('dashboard.offline')}
                 </p>
               </div>
               <Activity className={`w-8 h-8 ${getStatusColor(systemStatus?.system_health)}`} />
             </div>
             <div className="flex items-center mt-4">
               <div className={`status-indicator ${systemStatus?.argus_running ? 'online' : 'offline'} mr-2`}></div>
-              <p className="text-xs text-slate-400">Last updated: {new Date(systemStatus?.last_update).toLocaleTimeString()}</p>
+              <p className="text-xs text-slate-400">{t('dashboard.last_updated')}: {new Date(systemStatus?.last_update).toLocaleTimeString()}</p>
             </div>
           </CardContent>
         </Card>
@@ -129,14 +129,14 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-400">Active Measurements</p>
+                <p className="text-sm font-medium text-slate-400">{t('dashboard.active_measurements')}</p>
                 <p className="text-2xl font-bold text-blue-400">{systemStatus?.active_measurements || 0}</p>
               </div>
               <Zap className="w-8 h-8 text-blue-400" />
             </div>
             <div className="flex items-center mt-4">
               <TrendingUp className="w-4 h-4 text-green-400 mr-2" />
-              <p className="text-xs text-slate-400">Currently running</p>
+              <p className="text-xs text-slate-400">{t('dashboard.currently_running')}</p>
             </div>
           </CardContent>
         </Card>
@@ -145,7 +145,7 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-400">Monitoring Stations</p>
+                <p className="text-sm font-medium text-slate-400">{t('dashboard.monitoring_stations')}</p>
                 <p className="text-2xl font-bold text-cyan-400">{systemStatus?.stations?.length || 0}</p>
               </div>
               <Radio className="w-8 h-8 text-cyan-400" />
