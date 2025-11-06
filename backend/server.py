@@ -142,6 +142,16 @@ async def lifespan(app: FastAPI):
     app.include_router(system_logs_api.router, prefix="/api", tags=["System Logs"])
     logger.info("System Logs API initialized")
     
+    # Initialize ADC (Automatic Data Control) Module
+    from adc_order_generator import ADCOrderGenerator
+    import adc_api
+    adc_inbox_path = os.getenv("ADC_INBOX_PATH", inbox_path)  # Use same INBOX or separate ADC INBOX
+    adc_data_path = os.getenv("ADC_DATA_PATH", f"{data_path}/adc")
+    adc_generator = ADCOrderGenerator(adc_inbox_path, adc_data_path)
+    adc_router = adc_api.create_adc_router(db, adc_generator)
+    app.include_router(adc_router)
+    logger.info(f"ADC Module initialized - INBOX: {adc_inbox_path}")
+    
     # Initialize SOAP Web Services (Optional - requires Python 3.11/3.12)
     global soap_app
     try:
