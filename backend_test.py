@@ -717,10 +717,11 @@ class ArgusAPITester:
             print(f"      📋 Validating ADC XML {filename}:")
             
             # Check namespace
-            if root.tag == "ORDER" and "rohde-schwarz.com/ARGUS/ORM_ADC" in str(root.attrib):
-                print(f"         ✅ ADC Namespace: {root.attrib}")
+            namespace = root.get('xmlns', '')
+            if root.tag == "ORDER" and "rohde-schwarz.com/ARGUS/ORM_ADC" in namespace:
+                print(f"         ✅ ADC Namespace: {namespace}")
             else:
-                print(f"         ❌ Missing or incorrect ADC namespace")
+                print(f"         ❌ Missing or incorrect ADC namespace. Found: {namespace}")
                 return
             
             # Check HEADER
