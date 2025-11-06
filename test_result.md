@@ -420,12 +420,84 @@ test_plan:
           agent: "testing"
           comment: "System Logs API fully functional. All endpoints tested successfully: 1) GET /api/logs with filtering (level, source, search) ✅ 2) GET /api/logs/stats returns proper statistics with counts by level/source ✅ 3) GET /api/logs/sources returns available sources ['AMM_SCHEDULER', 'AUTH'] ✅ 4) GET /api/logs/levels returns available levels ['INFO', 'WARNING', 'ERROR'] ✅ 5) Authentication required for all endpoints ✅ 6) Fixed database configuration to use correct DB_NAME ✅"
 
+  - task: "ADC Order Generator"
+    implemented: true
+    working: "NA"
+    file: "backend/adc_order_generator.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created ADCOrderGenerator class for generating ADC-compatible XML orders. Supports SCAN (frequency range) and SINGLE_FREQ (single frequency) measurement types. XML format follows ORM ADC specification with proper namespace (http://www.rohde-schwarz.com/ARGUS/ORM_ADC). Orders are written to Argus INBOX directory for automatic execution. Module initialized successfully in server.py."
+
+  - task: "UDP Listener for ADC Data"
+    implemented: true
+    working: "NA"
+    file: "backend/udp_listener.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created UDPListener class to capture real-time measurement data on UDP port 4090. Supports async start/stop operations. Parses both XML measurement results and binary spectrum data. Saves raw data to disk (/tmp/argus_processed/udp_captures) and stores metadata in MongoDB (captures_raw collection). Includes callback mechanism for WebSocket broadcasting."
+
+  - task: "ADC API Endpoints"
+    implemented: true
+    working: "NA"
+    file: "backend/adc_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created comprehensive ADC API with endpoints: POST /api/adc/orders/scan (submit SCAN order), POST /api/adc/orders/single-freq (submit single frequency order), POST /api/adc/capture/start (start UDP listener), POST /api/adc/capture/stop (stop UDP listener), GET /api/adc/capture/status (check capture status), GET /api/adc/orders (list orders), GET /api/adc/captures (list captures), WebSocket /api/adc/ws/stream (real-time data streaming). All endpoints require authentication. Orders are stored in adc_orders MongoDB collection."
+
+frontend:
+  - task: "Direct Measurement ADC Interface"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/DirectMeasurementADC.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created DirectMeasurementADC component with three tabs: 1) Create Order - form to configure and submit SCAN or SINGLE_FREQ orders with station ID, frequency parameters, detector type, bandwidth, etc. 2) Live Monitor - embedded LiveUDPMonitor component. 3) Order History - displays recent ADC orders with order ID, type, station, and creation details. Integrated with ADC API endpoints. Replaced old DirectMeasurement in App.js routing."
+
+  - task: "Live UDP Monitor Interface"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/LiveUDPMonitor.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Created LiveUDPMonitor component with capture control panel and three views: 1) Graph View - real-time Plotly spectrum display (frequency vs level), 2) Text View - scrollable log of raw captured data with timestamps and metadata, 3) Recent Captures - historical captures from database. WebSocket integration for live data streaming. Start/Stop capture buttons. Export captured data to JSON. Uses react-plotly.js for visualization."
+
+metadata:
+  created_by: "main_agent"
+  version: "2.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "ADC Order Generator"
+    - "UDP Listener for ADC Data"
+    - "ADC API Endpoints"
+    - "Direct Measurement ADC Interface"
+    - "Live UDP Monitor Interface"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
 agent_communication:
     - agent: "main"
-      message: "Completed Phase 1-3 of SMDI integration. Backend: Created smdi_models.py with Pydantic models for query params and results. Extended xml_processor.py with IFL/ITL XML generation and parsing methods. Updated file_watcher.py to process SMDI responses. Created smdi_api.py with query and retrieval endpoints. Frontend: Created DatabaseImport.js component with comprehensive query interface matching user's UI design. Extended DataNavigator.js with Frequency Lists and Transmitter Lists tabs. All components integrated with routing and navigation. Ready for backend testing - need to test XML generation, query submission, and response parsing (if SMDI database available for testing)."
-    - agent: "testing"
-      message: "SMDI MODULE BACKEND TESTING COMPLETED SUCCESSFULLY ✅ All core SMDI functionality working: 1) Authentication system working (admin/admin123) ✅ 2) SMDI Frequency queries working - all modes (No restriction, Single freq, Range, Coordinates) ✅ 3) SMDI Transmitter queries working - all parameter combinations ✅ 4) XML generation validated - proper IFL/IOFL/ITL structure matching SMDI spec ✅ 5) File creation in /tmp/argus_inbox working ✅ 6) MongoDB storage working - 6 queries stored ✅ 7) Data retrieval APIs working ✅ 8) Fixed User object attribute error ✅ MINOR: Response parsing not testable without actual SMDI database. Ready for frontend testing or production deployment."
-    - agent: "main"
-      message: "Completed System Logs Module implementation. Backend: Created system_logger.py with centralized logging class, added comprehensive logging to auth.py, file_watcher.py, and amm_scheduler.py. Created system_logs_api.py with complete REST API for log management (filtering, statistics, export, deletion). Frontend: SystemLogs.js already exists with UI for viewing logs and measurement orders. Integrated system_logs_api into server.py. Ready for backend testing."
-    - agent: "testing"
-      message: "SYSTEM LOGS MODULE BACKEND TESTING COMPLETED SUCCESSFULLY ✅ All System Logs functionality working perfectly: 1) System Logger Module - Centralized logging with multiple levels and sources ✅ 2) Authentication Logging - Success/failure login events properly logged ✅ 3) File Watcher Logging - File processing events logged with context ✅ 4) AMM Scheduler Logging - Execution events and errors logged ✅ 5) System Logs API - All endpoints working (GET /api/logs, /api/logs/stats, /api/logs/sources, /api/logs/levels) ✅ 6) Filtering by level, source, search working ✅ 7) Statistics endpoint returns proper counts ✅ 8) Fixed database configuration issue (DB_NAME) ✅ 9) Authentication required for all endpoints ✅ 10) GET /api/measurements/orders (existing endpoint) working ✅ CRITICAL FIX: Updated system_logger.py and system_logs_api.py to use DB_NAME environment variable instead of hardcoded 'argus_ui' database. System Logs Module ready for production use."
+      message: "ORM-ADC Direct Measurement Module Implementation Complete. Backend: Created adc_order_generator.py (ADC XML order generation for SCAN/SINGLE_FREQ), udp_listener.py (UDP port 4090 listener with XML/binary parsing), adc_api.py (REST + WebSocket endpoints). Corrected implementation from initial wrong TCP-based approach to correct file-based ADC orders written to Argus INBOX. Frontend: Created DirectMeasurementADC.js (order creation UI with tabs), LiveUDPMonitor.js (real-time data viewer with Plotly graphs). Integrated into server.py with proper initialization. Added react-plotly.js dependency. Environment variables configured in backend/.env (ADC_INBOX_PATH, UDP_CAPTURE_PORT). All modules initialized successfully in backend logs. Ready for backend testing."
