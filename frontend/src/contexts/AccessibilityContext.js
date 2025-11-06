@@ -39,9 +39,29 @@ export const AccessibilityProvider = ({ children }) => {
       document.documentElement.classList.add('screen-reader-mode');
       // Set aria-live regions to be more verbose
       document.documentElement.setAttribute('data-screen-reader', 'true');
+      
+      // Add visual indicator banner
+      const banner = document.createElement('div');
+      banner.id = 'screen-reader-banner';
+      banner.className = 'screen-reader-banner';
+      banner.innerHTML = '🔊 Screen Reader Mode Active - Enhanced Focus Indicators Enabled';
+      banner.setAttribute('role', 'status');
+      banner.setAttribute('aria-live', 'polite');
+      document.body.appendChild(banner);
+      
+      // Announce to screen reader
+      setTimeout(() => {
+        banner.setAttribute('aria-live', 'assertive');
+      }, 100);
     } else {
       document.documentElement.classList.remove('screen-reader-mode');
       document.documentElement.removeAttribute('data-screen-reader');
+      
+      // Remove visual indicator
+      const banner = document.getElementById('screen-reader-banner');
+      if (banner) {
+        banner.remove();
+      }
     }
     localStorage.setItem('screenReaderMode', screenReaderMode);
   }, [screenReaderMode]);
