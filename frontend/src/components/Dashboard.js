@@ -101,8 +101,8 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-white">System Dashboard</h1>
-        <p className="text-slate-400">Welcome back, {user?.username}. Monitor your spectrum operations.</p>
+        <h1 className="text-3xl font-bold text-white">{t('dashboard.title')}</h1>
+        <p className="text-slate-400">{t('dashboard.welcome')}, {user?.username}</p>
       </div>
 
       {/* Status Cards */}
