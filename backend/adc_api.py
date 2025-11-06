@@ -176,13 +176,13 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
                 'detector': request.detector,
                 'measurement_type': request.measurement_type,
                 'priority': request.priority,
-                'created_by': current_user['username'],
+                'created_by': current_user.username,
                 'created_at': datetime.utcnow().isoformat(),
                 'status': 'submitted',
                 'inbox_path': result['inbox_path']
             })
             
-            logger.info(f"Single freq order created: {order_id} by {current_user['username']}")
+            logger.info(f"Single freq order created: {order_id} by {current_user.username}")
             
             return {
                 'success': True,
