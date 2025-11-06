@@ -317,6 +317,11 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
         try:
             orders = await db.adc_orders.find().sort('created_at', -1).limit(limit).to_list(length=limit)
             
+            # Convert MongoDB documents to JSON-serializable format
+            for order in orders:
+                if '_id' in order:
+                    del order['_id']  # Remove MongoDB ObjectId
+            
             return {
                 'success': True,
                 'orders': orders,
