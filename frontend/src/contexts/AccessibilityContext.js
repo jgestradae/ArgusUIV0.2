@@ -23,6 +23,8 @@ export const AccessibilityProvider = ({ children }) => {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 
+  const [speechEnabled, setSpeechEnabled] = useState(false);
+
   useEffect(() => {
     // Apply high contrast mode
     if (highContrast) {
