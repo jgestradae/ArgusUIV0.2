@@ -511,6 +511,273 @@ class ArgusAPITester:
             auth_required=True
         )
 
+    # ============================================================================
+    # ADC Testing Methods (ORM-ADC Direct Measurement Module)
+    # ============================================================================
+
+    def test_adc_scan_order(self):
+        """Test ADC SCAN order creation"""
+        scan_data = {
+            "station_id": "TestStation_HQ4",
+            "freq_start": 88000000,  # 88 MHz
+            "freq_stop": 108000000,  # 108 MHz
+            "freq_step": 25000,
+            "bandwidth": 10000,
+            "detector": "RMS",
+            "priority": 2,
+            "meas_time": -1,
+            "attenuation": "Auto"
+        }
+        return self.run_test(
+            "ADC SCAN Order Creation",
+            "POST",
+            "adc/orders/scan",
+            200,
+            data=scan_data,
+            auth_required=True
+        )
+
+    def test_adc_single_freq_order(self):
+        """Test ADC single frequency order creation"""
+        single_freq_data = {
+            "station_id": "TestStation_HQ4",
+            "frequency": 100000000,  # 100 MHz
+            "bandwidth": 10000,
+            "detector": "RMS",
+            "priority": 2,
+            "meas_time": 1000,
+            "attenuation": "Auto",
+            "measurement_type": "LEVEL"
+        }
+        return self.run_test(
+            "ADC Single Frequency Order Creation",
+            "POST",
+            "adc/orders/single-freq",
+            200,
+            data=single_freq_data,
+            auth_required=True
+        )
+
+    def test_adc_capture_status_initial(self):
+        """Test ADC capture status (should be inactive initially)"""
+        return self.run_test(
+            "ADC Capture Status (Initial)",
+            "GET",
+            "adc/capture/status",
+            200,
+            auth_required=True
+        )
+
+    def test_adc_capture_start(self):
+        """Test starting ADC UDP capture"""
+        return self.run_test(
+            "ADC Capture Start",
+            "POST",
+            "adc/capture/start",
+            200,
+            auth_required=True
+        )
+
+    def test_adc_capture_status_running(self):
+        """Test ADC capture status (should be active after start)"""
+        return self.run_test(
+            "ADC Capture Status (Running)",
+            "GET",
+            "adc/capture/status",
+            200,
+            auth_required=True
+        )
+
+    def test_adc_capture_stop(self):
+        """Test stopping ADC UDP capture"""
+        return self.run_test(
+            "ADC Capture Stop",
+            "POST",
+            "adc/capture/stop",
+            200,
+            auth_required=True
+        )
+
+    def test_adc_get_orders(self):
+        """Test getting ADC orders list"""
+        return self.run_test(
+            "Get ADC Orders",
+            "GET",
+            "adc/orders?limit=10",
+            200,
+            auth_required=True
+        )
+
+    def test_adc_get_captures(self):
+        """Test getting ADC captures list"""
+        return self.run_test(
+            "Get ADC Captures",
+            "GET",
+            "adc/captures?limit=10",
+            200,
+            auth_required=True
+        )
+
+    def test_adc_order_without_station_id(self):
+        """Test ADC order creation without station_id (should fail)"""
+        invalid_data = {
+            "freq_start": 88000000,
+            "freq_stop": 108000000,
+            "freq_step": 25000,
+            "bandwidth": 10000,
+            "detector": "RMS",
+            "priority": 2,
+            "meas_time": -1,
+            "attenuation": "Auto"
+        }
+        return self.run_test(
+            "ADC Order Without Station ID (Error Test)",
+            "POST",
+            "adc/orders/scan",
+            422,  # Expect validation error
+            data=invalid_data,
+            auth_required=True
+        )
+
+    def test_adc_scan_invalid_frequency_range(self):
+        """Test ADC SCAN order with invalid frequency range (stop < start)"""
+        invalid_data = {
+            "station_id": "TestStation_HQ4",
+            "freq_start": 108000000,  # Higher than stop
+            "freq_stop": 88000000,   # Lower than start
+            "freq_step": 25000,
+            "bandwidth": 10000,
+            "detector": "RMS",
+            "priority": 2,
+            "meas_time": -1,
+            "attenuation": "Auto"
+        }
+        return self.run_test(
+            "ADC SCAN Invalid Frequency Range (Error Test)",
+            "POST",
+            "adc/orders/scan",
+            400,  # Expect bad request
+            data=invalid_data,
+            auth_required=True
+        )
+
+    def check_adc_xml_files_in_inbox(self):
+        """Check if ADC XML files are generated in /tmp/argus_inbox and validate ADC structure"""
+        import os
+        import glob
+        import xml.etree.ElementTree as ET
+        
+        print(f"\n🔍 Checking for ADC XML files in /tmp/argus_inbox...")
+        
+        try:
+            inbox_path = "/tmp/argus_inbox"
+            if not os.path.exists(inbox_path):
+                print(f"   ❌ Inbox directory does not exist: {inbox_path}")
+                return False
+            
+            xml_files = glob.glob(os.path.join(inbox_path, "*.xml"))
+            print(f"   Found {len(xml_files)} XML files in inbox")
+            
+            if xml_files:
+                print("   ✅ XML files found:")
+                adc_files_found = False
+                
+                for xml_file in xml_files[-10:]:  # Show last 10 files
+                    file_stat = os.stat(xml_file)
+                    file_time = datetime.fromtimestamp(file_stat.st_mtime)
+                    filename = os.path.basename(xml_file)
+                    print(f"      - {filename} (modified: {file_time})")
+                    
+                    # Check if this is an ADC file
+                    if filename.startswith('ADC_'):
+                        adc_files_found = True
+                        self._validate_adc_xml_structure(xml_file, filename)
+                
+                if adc_files_found:
+                    print("   ✅ ADC XML files detected and validated")
+                else:
+                    print("   ⚠️  No ADC files found (ADC_*)")
+                
+                return True
+            else:
+                print("   ❌ No XML files found in inbox")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Error checking inbox: {str(e)}")
+            return False
+
+    def _validate_adc_xml_structure(self, xml_file_path, filename):
+        """Validate ADC XML structure"""
+        import xml.etree.ElementTree as ET
+        try:
+            tree = ET.parse(xml_file_path)
+            root = tree.getroot()
+            
+            print(f"      📋 Validating ADC XML {filename}:")
+            
+            # Check namespace
+            if root.tag == "ORDER" and "rohde-schwarz.com/ARGUS/ORM_ADC" in str(root.attrib):
+                print(f"         ✅ ADC Namespace: {root.attrib}")
+            else:
+                print(f"         ❌ Missing or incorrect ADC namespace")
+                return
+            
+            # Check HEADER
+            header = root.find("HEADER")
+            if header is not None:
+                cmd = header.find("CMD")
+                order_id = header.find("ID")
+                station = header.find("STATION")
+                order_type = header.find("ORDER_TYPE")
+                
+                if cmd is not None:
+                    print(f"         ✅ CMD: {cmd.text}")
+                if order_id is not None:
+                    print(f"         ✅ ORDER_ID: {order_id.text}")
+                if station is not None:
+                    print(f"         ✅ STATION: {station.text}")
+                if order_type is not None:
+                    print(f"         ✅ ORDER_TYPE: {order_type.text}")
+            else:
+                print(f"         ❌ Missing HEADER element")
+                return
+            
+            # Check BODY
+            body = root.find("BODY")
+            if body is not None:
+                # Check for frequency parameters
+                freq_start = body.find("FREQ_START")
+                freq_stop = body.find("FREQ_STOP")
+                frequency = body.find("FREQUENCY")
+                
+                if freq_start is not None and freq_stop is not None:
+                    start_hz = int(freq_start.text)
+                    stop_hz = int(freq_stop.text)
+                    print(f"         ✅ SCAN Range: {start_hz/1e6:.1f} - {stop_hz/1e6:.1f} MHz")
+                elif frequency is not None:
+                    freq_hz = int(frequency.text)
+                    print(f"         ✅ Single Frequency: {freq_hz/1e6:.1f} MHz")
+                
+                # Check other parameters
+                bandwidth = body.find("BANDWIDTH")
+                detector = body.find("DETECTOR")
+                meas_time = body.find("MEAS_TIME")
+                
+                if bandwidth is not None:
+                    print(f"         ✅ Bandwidth: {bandwidth.text} Hz")
+                if detector is not None:
+                    print(f"         ✅ Detector: {detector.text}")
+                if meas_time is not None:
+                    print(f"         ✅ Meas Time: {meas_time.text} ms")
+                
+                print(f"         ✅ ADC XML structure valid")
+            else:
+                print(f"         ❌ Missing BODY element")
+                
+        except Exception as e:
+            print(f"         ❌ ADC XML validation error: {str(e)}")
+
     def check_xml_files_in_inbox(self):
         """Check if XML files are generated in /tmp/argus_inbox and validate SMDI structure"""
         import os
