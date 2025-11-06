@@ -152,7 +152,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center mt-4">
               <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-              <p className="text-xs text-slate-400">All operational</p>
+              <p className="text-xs text-slate-400">{t('dashboard.stations_available')}</p>
             </div>
           </CardContent>
         </Card>
@@ -161,9 +161,9 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-400">System Health</p>
+                <p className="text-sm font-medium text-slate-400">{t('dashboard.pending_orders')}</p>
                 <p className={`text-2xl font-bold ${getStatusColor(systemStatus?.system_health)}`}>
-                  {systemStatus?.system_health || 'Unknown'}
+                  {recentOrders?.length || 0}
                 </p>
               </div>
               {systemStatus?.system_health === 'Good' ? (
@@ -174,7 +174,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center mt-4">
               <Clock className="w-4 h-4 text-slate-400 mr-2" />
-              <p className="text-xs text-slate-400">Real-time monitoring</p>
+              <p className="text-xs text-slate-400">{t('dashboard.orders_in_queue')}</p>
             </div>
           </CardContent>
         </Card>
