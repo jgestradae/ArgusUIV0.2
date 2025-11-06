@@ -311,7 +311,7 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
     @router.get("/orders")
     async def get_adc_orders(
         limit: int = 50,
-        current_user: dict = Depends(get_current_user)
+        current_user: User = Depends(get_current_user)
     ):
         """Get list of ADC orders"""
         try:
