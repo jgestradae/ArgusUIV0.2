@@ -10,6 +10,7 @@ import logging
 import os
 
 from auth import get_current_user
+from models import User
 from adc_order_generator import ADCOrderGenerator
 from udp_listener import UDPListener
 
