@@ -894,36 +894,36 @@ class ArgusAPITester:
             print(f"         ❌ XML validation error: {str(e)}")
 
 def main():
-    print("🚀 Starting ArgusUI Backend API Tests - System Logs Module Focus")
-    print("=" * 60)
+    print("🚀 Starting ArgusUI Backend API Tests - ORM-ADC Direct Measurement Module Focus")
+    print("=" * 80)
     
     tester = ArgusAPITester()
     
-    # Test sequence - focusing on System Logs Module as requested
+    # Test sequence - focusing on ADC Module as requested
     tests = [
+        # Authentication first (as requested)
         ("Health Check", tester.test_health_check),
-        ("Login", tester.test_login),
+        ("Login (admin/admin123)", tester.test_login),
         ("Get Current User", tester.test_get_current_user),
         
-        # System Logs Module Tests - Primary Focus
-        ("System Logs - Basic", tester.test_system_logs),
-        ("System Logs - With Filters", tester.test_system_logs_with_filters),
-        ("System Logs - Statistics", tester.test_system_logs_stats),
-        ("System Logs - Sources", tester.test_system_logs_sources),
-        ("System Logs - Levels", tester.test_system_logs_levels),
-        ("Authentication Logging Test", tester.test_authentication_logging),
-        ("Measurement Orders (existing endpoint)", tester.test_measurement_orders),
+        # ADC Module Tests - Primary Focus
+        ("ADC Capture Status (Initial)", tester.test_adc_capture_status_initial),
+        ("ADC SCAN Order Creation", tester.test_adc_scan_order),
+        ("ADC Single Frequency Order", tester.test_adc_single_freq_order),
+        ("ADC Capture Start", tester.test_adc_capture_start),
+        ("ADC Capture Status (Running)", tester.test_adc_capture_status_running),
+        ("ADC Capture Stop", tester.test_adc_capture_stop),
+        ("Get ADC Orders", tester.test_adc_get_orders),
+        ("Get ADC Captures", tester.test_adc_get_captures),
         
-        # Additional tests to verify system functionality
+        # Error Handling Tests
+        ("ADC Order Without Station ID (Error)", tester.test_adc_order_without_station_id),
+        ("ADC SCAN Invalid Frequency Range (Error)", tester.test_adc_scan_invalid_frequency_range),
+        
+        # System functionality verification
         ("System Status", tester.test_system_status),
-        ("Request GSP", tester.test_request_gsp),
-        ("Get Signal Paths", tester.test_get_signal_paths),
-        ("AMM Dashboard Stats", tester.test_amm_dashboard_stats),
-        ("Get AMM Configurations", tester.test_get_amm_configurations),
-        ("Execute AMM Now", tester.test_execute_amm_now),
-        ("System Parameters", tester.test_system_parameters),
-        ("Direct Measurement", tester.test_direct_measurement),
-        ("Measurement Configs", tester.test_measurement_configs),
+        ("System Logs - Basic", tester.test_system_logs),
+        ("Measurement Orders (existing endpoint)", tester.test_measurement_orders),
         ("Unauthorized Access", tester.test_unauthorized_access),
     ]
     
@@ -938,10 +938,16 @@ def main():
             print(f"❌ {test_name} - Exception: {str(e)}")
             failed_tests.append(test_name)
     
+    # Check XML file generation
+    print(f"\n🔍 Verifying XML File Generation...")
+    xml_check_success = tester.check_adc_xml_files_in_inbox()
+    if not xml_check_success:
+        failed_tests.append("ADC XML File Generation")
+    
     # Print final results
-    print("\n" + "=" * 50)
-    print("📊 FINAL TEST RESULTS")
-    print("=" * 50)
+    print("\n" + "=" * 60)
+    print("📊 FINAL TEST RESULTS - ADC MODULE")
+    print("=" * 60)
     print(f"Tests Run: {tester.tests_run}")
     print(f"Tests Passed: {tester.tests_passed}")
     print(f"Tests Failed: {len(failed_tests)}")
