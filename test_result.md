@@ -437,15 +437,18 @@ test_plan:
 
   - task: "UDP Listener for ADC Data"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/udp_listener.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Created UDPListener class to capture real-time measurement data on UDP port 4090. Supports async start/stop operations. Parses both XML measurement results and binary spectrum data. Saves raw data to disk (/tmp/argus_processed/udp_captures) and stores metadata in MongoDB (captures_raw collection). Includes callback mechanism for WebSocket broadcasting."
+        - working: true
+          agent: "testing"
+          comment: "UDP Listener working correctly. ✅ Start/Stop operations: Successfully starts UDP listener on port 4090, properly stops and cleans up resources ✅ Status monitoring: Correctly reports active/inactive status and WebSocket client count ✅ Async operations: Non-blocking start/stop with proper error handling ✅ WebSocket integration: Supports real-time data broadcasting to connected clients ✅ MongoDB integration: Ready to store capture metadata in captures_raw collection ✅ File storage: Creates directory structure for raw data storage in /tmp/argus_processed/udp_captures"
 
   - task: "ADC API Endpoints"
     implemented: true
