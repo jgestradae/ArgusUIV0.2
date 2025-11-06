@@ -723,8 +723,9 @@ class ArgusAPITester:
                 print(f"         ❌ Missing or incorrect ADC namespace. Root tag: {root.tag}")
                 return
             
-            # Check HEADER
-            header = root.find("HEADER")
+            # Check HEADER (need to include namespace)
+            ns = {'adc': 'http://www.rohde-schwarz.com/ARGUS/ORM_ADC'}
+            header = root.find("adc:HEADER", ns)
             if header is not None:
                 cmd = header.find("CMD")
                 order_id = header.find("ID")
