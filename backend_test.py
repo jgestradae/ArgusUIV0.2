@@ -761,9 +761,9 @@ class ArgusAPITester:
                     print(f"         ✅ Single Frequency: {freq_hz/1e6:.1f} MHz")
                 
                 # Check other parameters
-                bandwidth = body.find("BANDWIDTH")
-                detector = body.find("DETECTOR")
-                meas_time = body.find("MEAS_TIME")
+                bandwidth = body.find("adc:BANDWIDTH", ns)
+                detector = body.find("adc:DETECTOR", ns)
+                meas_time = body.find("adc:MEAS_TIME", ns)
                 
                 if bandwidth is not None:
                     print(f"         ✅ Bandwidth: {bandwidth.text} Hz")
