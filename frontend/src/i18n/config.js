@@ -24,7 +24,6 @@ i18n
   .init({
     resources,
     fallbackLng: 'es', // Default language (Spanish for Colombian government)
-    lng: 'es', // Force initial language to Spanish
     debug: false,
     
     interpolation: {
@@ -32,15 +31,20 @@ i18n
     },
     
     detection: {
-      order: ['localStorage', 'cookie', 'sessionStorage', 'navigator'],
+      // Check localStorage first, then use fallback
+      order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
       lookupLocalStorage: 'i18nextLng',
+      // Explicitly set the key name
+      lookupCookie: 'i18next',
+      lookupSessionStorage: 'i18nextLng',
     },
     
     // Support for language codes like 'es-CO', 'en-US' -> 'es', 'en'
     load: 'languageOnly',
     supportedLngs: ['es', 'en'],
     nonExplicitSupportedLngs: true,
+    cleanCode: true, // Clean up language codes
   });
 
 export default i18n;
