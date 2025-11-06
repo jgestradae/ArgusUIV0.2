@@ -55,6 +55,47 @@ export const AccessibilityProvider = ({ children }) => {
       setTimeout(() => {
         banner.setAttribute('aria-live', 'assertive');
       }, 100);
+
+      // Add event listeners for reading content on focus/click
+      const handleFocus = (e) => {
+        const element = e.target;
+        let textToRead = '';
+        
+        // Get text content based on element type
+        if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+          textToRead = element.getAttribute('aria-label') || 
+                      element.textContent || 
+                      element.getAttribute('title') || '';
+        } else if (element.tagName === 'INPUT') {
+          const label = document.querySelector(`label[for="${element.id}"]`) || 
+                       element.closest('label');
+          textToRead = element.getAttribute('aria-label') || 
+                      (label ? label.textContent : '') || 
+                      element.getAttribute('placeholder') || '';
+        } else if (element.getAttribute('role') === 'button') {
+          textToRead = element.getAttribute('aria-label') || element.textContent || '';
+        } else {
+          textToRead = element.textContent || '';
+        }
+        
+        if (textToRead.trim()) {
+          speak(textToRead.trim().substring(0, 200)); // Limit to 200 chars
+        }
+      };
+
+      document.addEventListener('focus', handleFocus, true);
+      document.addEventListener('click', handleFocus, true);
+      
+      // Store cleanup function
+      const cleanup = () => {
+        document.removeEventListener('focus', handleFocus, true);
+        document.removeEventListener('click', handleFocus, true);
+      };
+      
+      // Return cleanup
+      return () => {
+        cleanup();
+      };
     } else {
       document.documentElement.classList.remove('screen-reader-mode');
       document.documentElement.removeAttribute('data-screen-reader');
