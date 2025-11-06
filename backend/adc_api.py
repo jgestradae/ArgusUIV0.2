@@ -330,7 +330,7 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
     @router.get("/captures")
     async def get_captures(
         limit: int = 100,
-        current_user: dict = Depends(get_current_user)
+        current_user: User = Depends(get_current_user)
     ):
         """Get list of captured UDP data"""
         try:
