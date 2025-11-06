@@ -4,7 +4,7 @@
     "version": "v0.3",
     "description": "Sistema de Gestión de Espectro - R&S Argus",
     "footer": {
-      "organization": "Agencia Nacional de Infraestructura - ANE",
+      "organization": "Agencia Nacional del Espectro - ANE",
       "rights": "Todos los derechos reservados",
       "accessibility": "Declaración de Accesibilidad",
       "version": "Versión {{version}}"
