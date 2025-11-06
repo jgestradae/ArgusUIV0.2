@@ -108,13 +108,13 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
                 'bandwidth': request.bandwidth,
                 'detector': request.detector,
                 'priority': request.priority,
-                'created_by': current_user['username'],
+                'created_by': current_user.username,
                 'created_at': datetime.utcnow().isoformat(),
                 'status': 'submitted',
                 'inbox_path': result['inbox_path']
             })
             
-            logger.info(f"SCAN order created: {order_id} by {current_user['username']}")
+            logger.info(f"SCAN order created: {order_id} by {current_user.username}")
             
             return {
                 'success': True,
