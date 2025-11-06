@@ -127,7 +127,7 @@ def login(base_url):
         return None
 
 def main():
-    base_url = "https://rf-explorer.preview.emergentagent.com"
+    base_url = "https://argus-access.preview.emergentagent.com"
     
     print("🚀 Testing AMM Configuration Creation and Execution")
     print("=" * 60)
