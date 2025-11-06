@@ -452,15 +452,18 @@ test_plan:
 
   - task: "ADC API Endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/adc_api.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Created comprehensive ADC API with endpoints: POST /api/adc/orders/scan (submit SCAN order), POST /api/adc/orders/single-freq (submit single frequency order), POST /api/adc/capture/start (start UDP listener), POST /api/adc/capture/stop (stop UDP listener), GET /api/adc/capture/status (check capture status), GET /api/adc/orders (list orders), GET /api/adc/captures (list captures), WebSocket /api/adc/ws/stream (real-time data streaming). All endpoints require authentication. Orders are stored in adc_orders MongoDB collection."
+        - working: true
+          agent: "testing"
+          comment: "COMPREHENSIVE ADC API TESTING COMPLETED: ✅ Authentication: All endpoints require valid JWT token ✅ POST /api/adc/orders/scan: Creates SCAN orders with frequency range validation, stores in MongoDB, generates XML files ✅ POST /api/adc/orders/single-freq: Creates single frequency orders with proper validation ✅ POST /api/adc/capture/start: Starts UDP listener on port 4090 successfully ✅ GET /api/adc/capture/status: Returns correct status (active/inactive) and WebSocket client count ✅ POST /api/adc/capture/stop: Stops UDP listener and cleans up resources ✅ GET /api/adc/orders: Lists ADC orders from MongoDB (fixed ObjectId serialization issue) ✅ GET /api/adc/captures: Lists captured UDP data ✅ Error handling: Proper validation for missing station_id and invalid frequency ranges ✅ Fixed User object serialization issues in all endpoints"
 
 frontend:
   - task: "Direct Measurement ADC Interface"
