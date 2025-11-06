@@ -57,7 +57,7 @@ def create_adc_router(db, adc_generator: ADCOrderGenerator) -> APIRouter:
     @router.post("/orders/scan")
     async def create_scan_order(
         request: ScanOrderRequest,
-        current_user: dict = Depends(get_current_user)
+        current_user: User = Depends(get_current_user)
     ):
         """
         Create and submit a SCAN order to Argus INBOX
