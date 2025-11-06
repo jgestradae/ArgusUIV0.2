@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -24,6 +25,7 @@ const API = `${BACKEND_URL}/api`;
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [systemStatus, setSystemStatus] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
