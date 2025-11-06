@@ -488,6 +488,39 @@ body {
 /* ============================================
    SCREEN READER MODE ENHANCEMENTS
    ============================================ */
+
+/* Screen Reader Mode Banner */
+.screen-reader-banner {
+  position: fixed;
+  top: 3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9998;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 2px solid #60a5fa;
+  animation: slideDown 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 .screen-reader-mode {
   /* Enhance focus indicators */
 }
@@ -495,11 +528,32 @@ body {
 .screen-reader-mode *:focus {
   outline: 4px solid #3b82f6 !important;
   outline-offset: 4px !important;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3) !important;
 }
 
 .screen-reader-mode [aria-hidden="true"] {
   /* Ensure decorative elements don't interfere */
   pointer-events: none;
+}
+
+/* Enhanced visible focus for interactive elements in screen reader mode */
+.screen-reader-mode button:focus,
+.screen-reader-mode a:focus,
+.screen-reader-mode input:focus,
+.screen-reader-mode select:focus,
+.screen-reader-mode textarea:focus {
+  outline: 4px solid #3b82f6 !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.2) !important;
+  position: relative;
+  z-index: 100;
+}
+
+/* High contrast screen reader banner */
+.high-contrast .screen-reader-banner {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
 }
 
 /* Screen reader only class (WCAG technique) */
