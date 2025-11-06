@@ -498,9 +498,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "ADC Order Generator"
-    - "UDP Listener for ADC Data"
-    - "ADC API Endpoints"
     - "Direct Measurement ADC Interface"
     - "Live UDP Monitor Interface"
   stuck_tasks: []
