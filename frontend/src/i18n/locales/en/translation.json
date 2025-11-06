@@ -4,7 +4,7 @@
     "version": "v0.3",
     "description": "Spectrum Management System - R&S Argus",
     "footer": {
-      "organization": "National Infrastructure Agency - ANE",
+      "organization": "National Spectrum Agency - ANE",
       "rights": "All rights reserved",
       "accessibility": "Accessibility Statement",
       "version": "Version {{version}}"
