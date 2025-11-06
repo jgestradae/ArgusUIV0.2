@@ -17,10 +17,14 @@ const AccessibilityToolbar = () => {
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
+    localStorage.setItem('i18nextLng', lng);
     setIsOpen(false);
+    // Force reload to ensure all components update
+    window.location.reload();
   };
 
-  const currentLanguage = i18n.language || 'es';
+  // Normalize language code (handle en-US, es-CO, etc.)
+  const currentLanguage = (i18n.language || 'es').split('-')[0].toLowerCase();
 
   return (
     <div className="accessibility-toolbar" role="toolbar" aria-label={t('accessibility.menu')}>
