@@ -15,8 +15,11 @@ import {
   Wifi,
   WifiOff
 } from 'lucide-react';
-import Plot from 'react-plotly.js';
+import Plotly from 'plotly.js-dist-min';
+import createPlotlyComponent from 'react-plotly.js/factory';
 import { toast } from 'sonner';
+
+const Plot = createPlotlyComponent(Plotly);
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
