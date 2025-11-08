@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { 
-  Activity, 
-  Radio, 
-  Zap, 
+import {
+  Activity,
+  Radio,
+  Zap,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -32,7 +32,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboardData();
-    // Refresh every 30 seconds
     const interval = setInterval(loadDashboardData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -43,12 +42,12 @@ export default function Dashboard() {
         axios.get(`${API}/system/status`),
         axios.get(`${API}/measurements/orders`)
       ]);
-      
+
       setSystemStatus(statusResponse.data);
-      setRecentOrders(ordersResponse.data.slice(0, 5)); // Latest 5 orders
+      setRecentOrders(ordersResponse.data.slice(0, 5));
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-      toast.error('Failed to load dashboard data');
+      toast.error(t('dashboard.load_error'));
     } finally {
       setLoading(false);
     }
@@ -107,6 +106,7 @@ export default function Dashboard() {
 
       {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Argus Status */}
         <Card className="glass-card border-0 interactive-hover">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -120,11 +120,14 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center mt-4">
               <div className={`status-indicator ${systemStatus?.argus_running ? 'online' : 'offline'} mr-2`}></div>
-              <p className="text-xs text-slate-400">{t('dashboard.last_updated')}: {new Date(systemStatus?.last_update).toLocaleTimeString()}</p>
+              <p className="text-xs text-slate-400">
+                {t('dashboard.last_updated')}: {new Date(systemStatus?.last_update).toLocaleTimeString()}
+              </p>
             </div>
           </CardContent>
         </Card>
 
+        {/* Active Measurements */}
         <Card className="glass-card border-0 interactive-hover">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -141,6 +144,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Monitoring Stations */}
         <Card className="glass-card border-0 interactive-hover">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -157,6 +161,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Pending Orders */}
         <Card className="glass-card border-0 interactive-hover">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -183,49 +188,49 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <Card className="glass-card border-0">
         <CardHeader>
-          <CardTitle className="text-xl text-white">Quick Actions</CardTitle>
-          <CardDescription>Common spectrum monitoring tasks</CardDescription>
+          <CardTitle className="text-xl text-white">{t('dashboard.quick_actions_title')}</CardTitle>
+          <CardDescription>{t('dashboard.quick_actions_description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Link to="/direct-measurement">
               <Button className="w-full h-20 btn-spectrum flex-col space-y-2">
                 <Zap className="w-6 h-6" />
-                <span>Start Measurement</span>
+                <span>{t('dashboard.start_measurement')}</span>
               </Button>
             </Link>
             <Link to="/system-status">
               <Button variant="secondary" className="w-full h-20 btn-secondary flex-col space-y-2">
                 <Activity className="w-6 h-6" />
-                <span>System Status</span>
+                <span>{t('navigation.system_status')}</span>
               </Button>
             </Link>
             <Link to="/data-navigator">
               <Button variant="secondary" className="w-full h-20 btn-secondary flex-col space-y-2">
                 <Database className="w-6 h-6" />
-                <span>Data Navigator</span>
+                <span>{t('navigation.data_navigator')}</span>
               </Button>
             </Link>
             <Link to="/configuration">
               <Button variant="secondary" className="w-full h-20 btn-secondary flex-col space-y-2">
                 <Settings className="w-6 h-6" />
-                <span>Configuration</span>
+                <span>{t('navigation.configuration')}</span>
               </Button>
             </Link>
           </div>
         </CardContent>
       </Card>
 
-      {/* Recent Orders and System Overview */}
+      {/* Recent Orders & System Devices */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Orders */}
         <Card className="glass-card border-0">
           <CardHeader>
             <CardTitle className="text-xl text-white flex items-center">
               <FileText className="w-5 h-5 mr-2" />
-              Recent Orders
+              {t('dashboard.recent_orders_title')}
             </CardTitle>
-            <CardDescription>Latest measurement requests</CardDescription>
+            <CardDescription>{t('dashboard.recent_orders_description')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -233,19 +238,21 @@ export default function Dashboard() {
                 <div key={order.id} className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg">
                   <div>
                     <p className="font-medium text-white">{order.order_name}</p>
-                    <p className="text-sm text-slate-400">{order.order_type} - {new Date(order.created_at).toLocaleString()}</p>
+                    <p className="text-sm text-slate-400">
+                      {order.order_type} - {new Date(order.created_at).toLocaleString()}
+                    </p>
                   </div>
                   <Badge className={getOrderStateColor(order.order_state)}>
                     {order.order_state}
                   </Badge>
                 </div>
               )) : (
-                <p className="text-slate-400 text-center py-4">No recent orders</p>
+                <p className="text-slate-400 text-center py-4">{t('dashboard.no_recent_orders')}</p>
               )}
             </div>
             <Link to="/logs">
               <Button variant="ghost" className="w-full mt-4 text-blue-400 hover:text-blue-300">
-                View All Orders →
+                {t('dashboard.view_all_orders')} →
               </Button>
             </Link>
           </CardContent>
@@ -256,9 +263,9 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="text-xl text-white flex items-center">
               <Radio className="w-5 h-5 mr-2" />
-              System Devices
+              {t('dashboard.system_devices')}
             </CardTitle>
-            <CardDescription>Connected monitoring equipment</CardDescription>
+            <CardDescription>{t('dashboard.connected_equipment')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -271,7 +278,7 @@ export default function Dashboard() {
                       <p className="text-sm text-slate-400 capitalize">{device.state}</p>
                     </div>
                   </div>
-                  <Badge className={device.state === 'operational' 
+                  <Badge className={device.state === 'operational'
                     ? 'bg-green-500/20 text-green-300 border-green-500/30'
                     : 'bg-red-500/20 text-red-300 border-red-500/30'
                   }>
@@ -279,7 +286,7 @@ export default function Dashboard() {
                   </Badge>
                 </div>
               )) : (
-                <p className="text-slate-400 text-center py-4">No devices detected</p>
+                <p className="text-slate-400 text-center py-4">{t('dashboard.no_devices_detected')}</p>
               )}
             </div>
           </CardContent>
@@ -288,3 +295,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

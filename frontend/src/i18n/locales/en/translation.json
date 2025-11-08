@@ -67,7 +67,18 @@
     "stations_available": "Stations available",
     "orders_in_queue": "Orders in queue",
     "recent_measurements": "Recent Measurements",
-    "recent_orders": "Recent Orders"
+    "recent_orders": "Recent Orders",
+    "quick_actions_title": "Quick Actions",
+    "quick_actions_description": "Common spectrum monitoring tasks",
+    "start_measurement": "Start Measurement",
+    "recent_orders_title": "Recent Orders",
+    "recent_orders_description": "Latest measurement requests",
+    "no_recent_orders": "No recent orders",
+    "view_all_orders": "View All Orders",
+    "system_devices": "System Devices",
+    "connected_equipment": "Connected monitoring equipment",
+    "no_devices_detected": "No devices detected",
+    "load_error": "Failed to load dashboard data"
   },
   "system_status": {
     "title": "System Status",

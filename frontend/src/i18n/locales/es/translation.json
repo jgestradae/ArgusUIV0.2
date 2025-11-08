@@ -67,7 +67,18 @@
     "stations_available": "Estaciones disponibles",
     "orders_in_queue": "Órdenes en cola",
     "recent_measurements": "Mediciones Recientes",
-    "recent_orders": "Órdenes Recientes"
+    "recent_orders": "Órdenes Recientes",
+    "quick_actions_title": "Acciones Rápidas",
+    "quick_actions_description": "Tareas comunes de monitoreo del espectro",
+    "start_measurement": "Iniciar Medición",
+    "recent_orders_title": "Órdenes Recientes",
+    "recent_orders_description": "Solicitudes de medición más recientes",
+    "no_recent_orders": "No hay órdenes recientes",
+    "view_all_orders": "Ver todas las órdenes",
+    "system_devices": "Dispositivos del Sistema",
+    "connected_equipment": "Equipos de monitoreo conectados",
+    "no_devices_detected": "No se detectaron dispositivos",
+    "load_error": "Error al cargar los datos del panel"
   },
   "system_status": {
     "title": "Estado del Sistema",
