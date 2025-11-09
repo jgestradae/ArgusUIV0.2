@@ -8,6 +8,7 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 import logging
 import uuid
+import os
 
 from auth import get_current_user
 from models import User
