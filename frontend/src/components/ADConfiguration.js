@@ -79,7 +79,7 @@ export default function ADConfiguration() {
       console.error('Error testing AD connection:', error);
       toast.error('Failed to test connection');
     } finally {
-      set{t('ad.testing')}lse);
+      setTesting(false);
     }
   };
 
