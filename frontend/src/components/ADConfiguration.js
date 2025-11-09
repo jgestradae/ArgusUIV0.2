@@ -9,7 +9,7 @@ import {
   CheckCircle, 
   XCircle, 
   AlertCircle,
-  {t('ad.refresh')}Cw,
+  RefreshCw,
   Settings
 } from 'lucide-react';
 import axios from 'axios';
