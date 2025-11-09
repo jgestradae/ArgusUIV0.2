@@ -80,7 +80,8 @@ export default function AutomaticMode() {
   const [loading, setLoading] = useState(true);
   
   // AMM Wizard State
-  const [wizardStep, setWizardStep] = useState(1);
+  const [wizardStep, setWizardStep] = useState(0); // Start at 0 for measurement category selection
+  const [measurementCategory, setMeasurementCategory] = useState(null); // 'location' or 'other'
   const [availableStations, setAvailableStations] = useState([]);
   const [availableMeasurementTypes, setAvailableMeasurementTypes] = useState([]);
   const [selectedSignalPath, setSelectedSignalPath] = useState(null);
@@ -89,7 +90,7 @@ export default function AutomaticMode() {
   const [signalPaths, setSignalPaths] = useState([]);
   const [loadingSignalPaths, setLoadingSignalPaths] = useState(false);
   const [wizardData, setWizardData] = useState({
-    // Station Selection (New Step 1)
+    // Station Selection (Step 1)
     selected_station: null,
     
     // Basic Info
