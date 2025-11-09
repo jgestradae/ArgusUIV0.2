@@ -195,5 +195,5 @@ def calculate_df_intersection(bearings: List[Dict[str, Any]]) -> Dict[str, Any]:
         }
         
     except Exception as e:
-        logger.error(f\"Error calculating DF intersection: {str(e)}\")
+        logger.error(f"Error calculating DF intersection: {str(e)}")
         return None
