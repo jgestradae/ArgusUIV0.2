@@ -208,7 +208,7 @@ export default function ADConfiguration() {
 
                 <div className="p-3 bg-gray-900 rounded-lg">
                   <div className="text-xs text-gray-500 mb-1">SSL/TLS</div>
-                  <div className="text-white font-mono text-sm">{config?.use_ssl ? '{t('ad.enabled')}' : '{t('ad.disabled')}'}</div>
+                  <div className="text-white font-mono text-sm">{config?.use_ssl ? t('ad.enabled') : t('ad.disabled')}</div>
                 </div>
               </div>
             </div>
