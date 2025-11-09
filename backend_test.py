@@ -1155,36 +1155,39 @@ class ArgusAPITester:
             print(f"         ❌ XML validation error: {str(e)}")
 
 def main():
-    print("🚀 Starting ArgusUI Backend API Tests - ORM-ADC Direct Measurement Module Focus")
+    print("🚀 Starting ArgusUI Backend API Tests - DF/TDOA Location Measurements + Active Directory APIs")
     print("=" * 80)
     
     tester = ArgusAPITester()
     
-    # Test sequence - focusing on ADC Module as requested
+    # Test sequence - focusing on DF/TDOA Location Measurements and Active Directory APIs
     tests = [
-        # Authentication first (as requested)
+        # Phase 1: Authentication (admin/admin123)
         ("Health Check", tester.test_health_check),
         ("Login (admin/admin123)", tester.test_login),
         ("Get Current User", tester.test_get_current_user),
         
-        # ADC Module Tests - Primary Focus
-        ("ADC Capture Status (Initial)", tester.test_adc_capture_status_initial),
-        ("ADC SCAN Order Creation", tester.test_adc_scan_order),
-        ("ADC Single Frequency Order", tester.test_adc_single_freq_order),
-        ("ADC Capture Start", tester.test_adc_capture_start),
-        ("ADC Capture Status (Running)", tester.test_adc_capture_status_running),
-        ("ADC Capture Stop", tester.test_adc_capture_stop),
-        ("Get ADC Orders", tester.test_adc_get_orders),
-        ("Get ADC Captures", tester.test_adc_get_captures),
+        # Phase 2: Active Directory API Tests (Admin Only)
+        ("AD Configuration", tester.test_ad_config),
+        ("AD Status", tester.test_ad_status),
+        ("AD Test Connection", tester.test_ad_test_connection),
         
-        # Error Handling Tests
-        ("ADC Order Without Station ID (Error)", tester.test_adc_order_without_station_id),
-        ("ADC SCAN Invalid Frequency Range (Error)", tester.test_adc_scan_invalid_frequency_range),
+        # Phase 3: Location Measurements API Tests
+        ("Location Capabilities", tester.test_location_capabilities),
+        ("List Location Measurements", tester.test_location_measurements_list),
+        ("Create DF Measurement", tester.test_df_measurement_creation),
+        ("Create TDOA Measurement", tester.test_tdoa_measurement_creation),
+        ("Get Measurement Results", tester.test_location_measurement_results),
+        ("List DF Measurements (Filtered)", tester.test_location_measurements_filtered),
+        
+        # Phase 4: Error Handling Tests
+        ("DF - Insufficient Stations (Error)", tester.test_df_measurement_insufficient_stations),
+        ("TDOA - Insufficient Stations (Error)", tester.test_tdoa_measurement_insufficient_stations),
+        ("AD Unauthorized Access (Error)", tester.test_ad_unauthorized_access),
         
         # System functionality verification
         ("System Status", tester.test_system_status),
         ("System Logs - Basic", tester.test_system_logs),
-        ("Measurement Orders (existing endpoint)", tester.test_measurement_orders),
         ("Unauthorized Access", tester.test_unauthorized_access),
     ]
     
