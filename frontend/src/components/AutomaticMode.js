@@ -888,8 +888,8 @@ export default function AutomaticMode() {
               </div>
               
               <div className="flex justify-between">
-                <Button onClick={() => setWizardStep(1)} variant="outline">
-                  Back
+                <Button onClick={() => setWizardStep(0)} variant="outline">
+                  Back to Category Selection
                 </Button>
                 <Button 
                   onClick={() => setWizardStep(3)} 
