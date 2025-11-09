@@ -152,6 +152,17 @@ async def lifespan(app: FastAPI):
     app.include_router(adc_router)
     logger.info(f"ADC Module initialized - INBOX: {adc_inbox_path}")
     
+    # Initialize Active Directory API
+    import ad_api
+    app.include_router(ad_api.router, prefix="/api", tags=["Active Directory"])
+    logger.info("Active Directory API initialized")
+    
+    # Initialize Location Measurements (DF/TDOA) API
+    import location_api
+    location_router = location_api.create_location_router(db, xml_processor)
+    app.include_router(location_router)
+    logger.info("Location Measurements (DF/TDOA) API initialized")
+    
     # Initialize SOAP Web Services (Optional - requires Python 3.11/3.12)
     global soap_app
     try:
