@@ -23,7 +23,7 @@ export default function ADConfiguration() {
   const [config, setConfig] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [testing, set{t('ad.testing')} useState(false);
+  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     loadADStatus();
