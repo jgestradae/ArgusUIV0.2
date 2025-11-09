@@ -163,7 +163,9 @@ export default function Layout({ children }) {
 
             {/* Navigation */}
             <nav className="flex-1 p-4 space-y-2" role="navigation" aria-label="Main navigation">
-              {navigationItems.map((item) => {
+              {navigationItems
+                .filter(item => !item.adminOnly || (user && user.role === 'admin'))
+                .map((item) => {
                 const isActive = location.pathname === item.path;
                 const Icon = item.icon;
                 
