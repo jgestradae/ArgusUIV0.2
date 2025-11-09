@@ -18,6 +18,7 @@ import {
   Database,
   Clock,
   Map,
+  MapPin,
   Server,
   Download
 } from 'lucide-react';
