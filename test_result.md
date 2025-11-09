@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implement ORM-ADC Direct Measurement module: ADC-compatible XML order generation (SCAN and SINGLE_FREQ), file-based order placement to Argus INBOX, UDP listener on port 4090 for real-time data capture, WebSocket streaming to frontend, MongoDB storage, and Live UDP Monitor interface with text/graph views."
+user_problem_statement: "Implement DF/TDOA Location Measurements + Active Directory Authentication: 1) AMM and Direct Mode support for Direction Finding (DF) and Time Difference of Arrival (TDOA) with multi-station selection, three visualization types (spreadsheet, polar, map), real-time UDP capture. 2) Active Directory (LDAP) authentication with local fallback, configuration via .env, admin panel for AD status monitoring."
 
 backend:
   - task: "Authentication System"
