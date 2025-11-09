@@ -19,9 +19,14 @@ class MeasurementType(str, Enum):
     PSCAN = "PSCAN"
     FLSCAN = "FLSCAN"  # Frequency List Scan
     TLSCAN = "TLSCAN"  # Transmitter List Scan
-    LOCATION = "LOCATION"
+    LOCATION = "LOCATION"  # DF/TDOA measurements
     COVERAGE = "COVERAGE"
     DIGITAL = "DIGITAL"
+
+class LocationMeasurementType(str, Enum):
+    """Location measurement sub-types"""
+    DF = "DF"      # Direction Finding (bearing measurements)
+    TDOA = "TDOA"  # Time Difference of Arrival
 
 class AlarmType(str, Enum):
     OVERSHOOT = "overshoot"
