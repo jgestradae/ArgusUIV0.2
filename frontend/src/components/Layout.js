@@ -58,6 +58,12 @@ export default function Layout({ children }) {
       description: 'Station map & direction finding'
     },
     {
+      name: 'Location Results',
+      path: '/location-results',
+      icon: MapPin,
+      description: 'DF/TDOA measurement results'
+    },
+    {
       name: 'Direct Measurement',
       path: '/direct-measurement',
       icon: Zap,
