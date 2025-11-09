@@ -65,7 +65,7 @@ def detect_tdoa_capability(signal_path_data: Dict[str, Any]) -> bool:
         tdoa_devices = ['EB500', 'EM100XT', 'EM100', 'EB500_DF']
         
         # Check if any TDOA device is present
-        all_text = f\"{device_name} {device_type} {signal_path}\"
+        all_text = f"{device_name} {device_type} {signal_path}"
         
         for device in tdoa_devices:
             if device in all_text:
