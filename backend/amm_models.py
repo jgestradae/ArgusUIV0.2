@@ -308,6 +308,66 @@ class AMMExecutionSummary(BaseModel):
 class AMMDashboardStats(BaseModel):
     total_amm_configs: int
     active_amm_configs: int
+
+# DF/TDOA Location Measurement Models
+
+class DFBearingData(BaseModel):
+    """Direction Finding bearing measurement data"""
+    station_id: str
+    station_name: str
+    frequency: float  # Hz
+    bearing: float  # degrees (0-360, North = 0)
+    bearing_accuracy: Optional[float] = None  # degrees
+    signal_level: Optional[float] = None  # dBμV
+    confidence: Optional[float] = None  # 0-100%
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+class TDOAMeasurementData(BaseModel):
+    """TDOA measurement data between station pairs"""
+    station_pair: List[str]  # [station1_id, station2_id]
+    frequency: float  # Hz
+    time_difference: float  # microseconds
+    distance_difference: float  # meters (c * time_difference)
+    signal_levels: List[float]  # dBμV at each station
+    confidence: Optional[float] = None  # 0-100%
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    station_coords: List[Dict[str, float]]  # [{lat, lon}, {lat, lon}]
+
+class LocationMeasurementResult(BaseModel):
+    """Combined location measurement result"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    measurement_id: str
+    measurement_type: LocationMeasurementType
+    frequency: float  # Hz
+    
+    # DF Data
+    df_bearings: List[DFBearingData] = []
+    
+    # TDOA Data
+    tdoa_measurements: List[TDOAMeasurementData] = []
+    
+    # Calculated position (if available)
+    calculated_position: Optional[Dict[str, float]] = None  # {lat, lon, accuracy}
+    
+    # Metadata
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    order_id: Optional[str] = None
+    amm_config_id: Optional[str] = None
+
+class StationCapability(BaseModel):
+    """Station measurement capabilities"""
+    station_id: str
+    station_name: str
+    signal_paths: List[str]
+    supports_df: bool = False  # Has bearing parameter
+    supports_tdoa: bool = False  # Has EB500 or EM100XT
+    df_capable_paths: List[str] = []
+    tdoa_capable_paths: List[str] = []
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
     running_executions: int
     executions_last_24h: int
     alarms_last_24h: int
