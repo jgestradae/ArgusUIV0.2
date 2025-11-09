@@ -179,7 +179,7 @@ export default function ADConfiguration() {
                 disabled={testing || !config?.enabled}
                 className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700"
               >
-                {testing ? '{t('ad.testing')}' : '{t('ad.test_connection')}'}
+                {testing ? t('ad.testing') : t('ad.test_connection')}
               </Button>
             </div>
 
