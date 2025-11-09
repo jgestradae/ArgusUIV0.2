@@ -107,7 +107,7 @@ export default function ADConfiguration() {
           variant="outline"
           className="border-gray-600 text-gray-300 hover:bg-gray-700"
         >
-          <{t('ad.refresh')}Cw className="mr-2 h-4 w-4" />
+          <RefreshCw className="mr-2 h-4 w-4" />
           {t('ad.refresh')}
         </Button>
       </div>
