@@ -97,6 +97,13 @@ export default function Layout({ children }) {
       path: '/logs',
       icon: FileText,
       description: 'Event logs and history'
+    },
+    {
+      name: 'AD Configuration',
+      path: '/ad-configuration',
+      icon: Shield,
+      description: 'Active Directory settings',
+      adminOnly: true
     }
   ];
 
