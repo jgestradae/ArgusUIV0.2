@@ -86,7 +86,7 @@ export default function ADConfiguration() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-400">Loading AD configuration...</div>
+        <div className="text-gray-400">{t('common.loading')}</div>
       </div>
     );
   }
