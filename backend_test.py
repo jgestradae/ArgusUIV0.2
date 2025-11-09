@@ -714,7 +714,7 @@ class ArgusAPITester:
                     print(f"      - {filename} (modified: {file_time})")
                     
                     # Check if this is a DF or TDOA file
-                    if filename.startswith(('DF_', 'TDOA_')):
+                    if filename.startswith(('DF', 'TDO')):
                         location_files_found = True
                         self._validate_location_xml_structure(xml_file, filename)
                 
