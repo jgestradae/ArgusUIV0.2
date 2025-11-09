@@ -155,6 +155,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/location-results" element={
+              <ProtectedRoute>
+                <Layout>
+                  <LocationMeasurementResults />
+                </Layout>
+              </ProtectedRoute>
+            } />
           </Routes>
           <Toaster position="top-right" />
         </div>
