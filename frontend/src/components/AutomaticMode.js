@@ -183,12 +183,20 @@ export default function AutomaticMode() {
     return () => clearInterval(interval);
   }, []);
 
-  // Load available stations when wizard tab is opened
+  // Load available stations when wizard tab is opened and on step 1
   useEffect(() => {
     if (activeTab === 'wizard' && wizardStep === 1) {
       loadAvailableStations();
     }
   }, [activeTab, wizardStep]);
+  
+  // Reset wizard when changing tabs
+  useEffect(() => {
+    if (activeTab !== 'wizard') {
+      setWizardStep(0);
+      setMeasurementCategory(null);
+    }
+  }, [activeTab]);
 
   const loadSystemParameters = async () => {
     try {
