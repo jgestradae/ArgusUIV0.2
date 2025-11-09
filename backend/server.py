@@ -154,7 +154,7 @@ async def lifespan(app: FastAPI):
     
     # Initialize Active Directory API
     import ad_api
-    app.include_router(ad_api.router, prefix="/api", tags=["Active Directory"])
+    app.include_router(ad_api.router, tags=["Active Directory"])
     logger.info("Active Directory API initialized")
     
     # Initialize Location Measurements (DF/TDOA) API
