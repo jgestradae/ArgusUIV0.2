@@ -134,14 +134,14 @@ def analyze_station_capabilities(gsp_data: Dict[str, Any]) -> List[StationCapabi
             
             station_capabilities.append(capability)
         
-        logger.info(f\"Analyzed {len(station_capabilities)} stations: \"
-                   f\"{sum(1 for s in station_capabilities if s.supports_df)} DF-capable, \"
-                   f\"{sum(1 for s in station_capabilities if s.supports_tdoa)} TDOA-capable\")
+        logger.info(f"Analyzed {len(station_capabilities)} stations: "
+                   f"{sum(1 for s in station_capabilities if s.supports_df)} DF-capable, "
+                   f"{sum(1 for s in station_capabilities if s.supports_tdoa)} TDOA-capable")
         
         return station_capabilities
         
     except Exception as e:
-        logger.error(f\"Error analyzing station capabilities: {str(e)}\")
+        logger.error(f"Error analyzing station capabilities: {str(e)}")
         return []
 
 
