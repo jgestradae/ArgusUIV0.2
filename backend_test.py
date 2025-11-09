@@ -1204,13 +1204,13 @@ def main():
     
     # Check XML file generation
     print(f"\n🔍 Verifying XML File Generation...")
-    xml_check_success = tester.check_adc_xml_files_in_inbox()
+    xml_check_success = tester.check_location_xml_files_in_inbox()
     if not xml_check_success:
-        failed_tests.append("ADC XML File Generation")
+        failed_tests.append("DF/TDOA XML File Generation")
     
     # Print final results
     print("\n" + "=" * 60)
-    print("📊 FINAL TEST RESULTS - ADC MODULE")
+    print("📊 FINAL TEST RESULTS - DF/TDOA LOCATION MEASUREMENTS + ACTIVE DIRECTORY")
     print("=" * 60)
     print(f"Tests Run: {tester.tests_run}")
     print(f"Tests Passed: {tester.tests_passed}")
