@@ -498,8 +498,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Direct Measurement ADC Interface"
-    - "Live UDP Monitor Interface"
+    - "Active Directory Authentication API"
+    - "DF/TDOA Location Measurements API"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
