@@ -55,7 +55,7 @@ export default function ADConfiguration() {
   };
 
   const testConnection = async () => {
-    set{t('ad.testing')}ue);
+    setTesting(true);
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
