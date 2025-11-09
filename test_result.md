@@ -504,8 +504,38 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "Active Directory Authentication API"
+    implemented: true
+    working: true
+    file: "backend/ad_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented Active Directory (LDAP) authentication API with admin-only endpoints: GET /api/ad/config (sanitized config), GET /api/ad/status (config + connection status), POST /api/ad/test-connection (connection test). Uses auth_ad.py module with ldap3 library. Supports NTLM and SIMPLE authentication, multiple user DN formats, group membership extraction. Environment variables: AD_ENABLED, AD_SERVER, AD_PORT, AD_DOMAIN, AD_BASE_DN, AD_BIND_USER, AD_BIND_PASSWORD, AD_USE_SSL."
+        - working: true
+          agent: "testing"
+          comment: "ACTIVE DIRECTORY API TESTING COMPLETED: ✅ GET /api/ad/config returns sanitized configuration (enabled=false, server, port, domain) ✅ GET /api/ad/status returns config and connection status (AD disabled) ✅ POST /api/ad/test-connection returns connection test results ✅ All endpoints require admin authentication ✅ Unauthorized access properly returns 403 Forbidden ✅ Fixed router registration issue (double prefix /api/api/ad -> /api/ad) ✅ AD authentication is properly disabled in environment. All AD endpoints functional and secure."
+
+  - task: "DF/TDOA Location Measurements API"
+    implemented: true
+    working: true
+    file: "backend/location_api.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented Direction Finding (DF) and Time Difference of Arrival (TDOA) location measurement APIs. Endpoints: GET /api/location/capabilities (station DF/TDOA capabilities), GET /api/location/measurements (list measurements with filtering), POST /api/location/df-measurement (create DF orders for 2+ stations), POST /api/location/tdoa-measurement (create TDOA orders for 3+ stations), GET /api/location/results/{id} (measurement results). Uses location_utils.py for capability detection, amm_models.py for data structures. XML orders generated via xml_processor, stored in MongoDB location_measurements collection."
+        - working: true
+          agent: "testing"
+          comment: "DF/TDOA LOCATION MEASUREMENTS API TESTING COMPLETED: ✅ GET /api/location/capabilities returns station capabilities (empty as expected, no GSP data) ✅ GET /api/location/measurements returns measurement list (initially empty, then populated) ✅ POST /api/location/df-measurement creates DF orders for multiple stations (2+ required) ✅ POST /api/location/tdoa-measurement creates TDOA orders for multiple stations (3+ required) ✅ GET /api/location/results/{id} returns measurement data structure ✅ GET /api/location/measurements?measurement_type=DF filters by type correctly ✅ Error handling: DF with 1 station returns 400, TDOA with 2 stations returns 400 ✅ XML file generation: DF*.xml and TDOA*.xml files created in /tmp/argus_inbox ✅ MongoDB integration: 10 measurement orders stored correctly ✅ All validation and business logic working properly. Location measurements API fully functional."
+
 agent_communication:
     - agent: "main"
-      message: "ORM-ADC Direct Measurement Module Implementation Complete. Backend: Created adc_order_generator.py (ADC XML order generation for SCAN/SINGLE_FREQ), udp_listener.py (UDP port 4090 listener with XML/binary parsing), adc_api.py (REST + WebSocket endpoints). Corrected implementation from initial wrong TCP-based approach to correct file-based ADC orders written to Argus INBOX. Frontend: Created DirectMeasurementADC.js (order creation UI with tabs), LiveUDPMonitor.js (real-time data viewer with Plotly graphs). Integrated into server.py with proper initialization. Added react-plotly.js dependency. Environment variables configured in backend/.env (ADC_INBOX_PATH, UDP_CAPTURE_PORT). All modules initialized successfully in backend logs. Ready for backend testing."
+      message: "DF/TDOA Location Measurements + Active Directory Authentication Implementation Complete. Backend: Created location_api.py (DF/TDOA measurement endpoints), ad_api.py (AD authentication endpoints), auth_ad.py (LDAP integration with ldap3), location_utils.py (capability detection), amm_models.py (data structures). Location API supports multi-station DF/TDOA measurements with XML order generation, MongoDB storage, and proper validation. AD API provides admin-only endpoints for configuration, status, and connection testing with local fallback. Environment variables configured for AD integration. All modules initialized successfully."
     - agent: "testing"
-      message: "ADC BACKEND MODULE TESTING COMPLETED SUCCESSFULLY: ✅ All 17 API tests passed (100% success rate) ✅ Authentication working with admin/admin123 credentials ✅ ADC Order Creation: Both SCAN and SINGLE_FREQ orders create proper XML files in /tmp/argus_inbox with correct ADC namespace ✅ UDP Capture Control: Start/stop operations working correctly on port 4090 ✅ Data Retrieval: Orders and captures endpoints functioning properly ✅ Error Handling: Proper validation for missing parameters and invalid ranges ✅ XML File Generation: Verified ADC_*.xml files with proper namespace http://www.rohde-schwarz.com/ARGUS/ORM_ADC ✅ Fixed User object serialization issues in ADC API ✅ MongoDB integration working for order storage. Backend ADC module is fully functional and ready for production use."
+      message: "DF/TDOA LOCATION MEASUREMENTS + ACTIVE DIRECTORY TESTING COMPLETED SUCCESSFULLY: ✅ All 19 API tests passed (100% success rate) ✅ Authentication working with admin/admin123 credentials ✅ Active Directory API: All 3 endpoints working (config, status, test-connection) with proper admin-only access control ✅ Location Measurements API: All 6 endpoints working (capabilities, measurements list, DF creation, TDOA creation, results, filtering) ✅ Error Handling: Proper validation for insufficient stations (DF needs 2+, TDOA needs 3+) ✅ XML File Generation: DF and TDOA XML files created in /tmp/argus_inbox with correct structure ✅ MongoDB Integration: 10 location measurement orders stored correctly ✅ Fixed AD router registration issue (double prefix) ✅ All business logic, validation, and security working correctly. Both APIs fully functional and ready for production use."
