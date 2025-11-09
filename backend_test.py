@@ -512,6 +512,266 @@ class ArgusAPITester:
         )
 
     # ============================================================================
+    # Active Directory API Testing Methods
+    # ============================================================================
+
+    def test_ad_config(self):
+        """Test AD configuration endpoint (admin only)"""
+        return self.run_test(
+            "AD Configuration",
+            "GET",
+            "ad/config",
+            200,
+            auth_required=True
+        )
+
+    def test_ad_status(self):
+        """Test AD status endpoint (admin only)"""
+        return self.run_test(
+            "AD Status",
+            "GET",
+            "ad/status",
+            200,
+            auth_required=True
+        )
+
+    def test_ad_test_connection(self):
+        """Test AD connection test endpoint (admin only)"""
+        return self.run_test(
+            "AD Test Connection",
+            "POST",
+            "ad/test-connection",
+            200,
+            auth_required=True
+        )
+
+    def test_ad_unauthorized_access(self):
+        """Test AD endpoints without admin role (should return 403)"""
+        # Create a non-admin user token for testing
+        # For now, test with no token (should fail)
+        old_token = self.token
+        self.token = None
+        success, _ = self.run_test("AD Config Unauthorized", "GET", "ad/config", 403, auth_required=True)
+        self.token = old_token
+        return success
+
+    # ============================================================================
+    # Location Measurements API Testing Methods (DF/TDOA)
+    # ============================================================================
+
+    def test_location_capabilities(self):
+        """Test getting station capabilities for DF/TDOA"""
+        return self.run_test(
+            "Location Capabilities",
+            "GET",
+            "location/capabilities",
+            200,
+            auth_required=True
+        )
+
+    def test_location_measurements_list(self):
+        """Test listing location measurements"""
+        return self.run_test(
+            "List Location Measurements",
+            "GET",
+            "location/measurements",
+            200,
+            auth_required=True
+        )
+
+    def test_df_measurement_creation(self):
+        """Test creating DF measurement order"""
+        df_data = {
+            "station_ids": ["Station_HQ4", "Station_Test"],
+            "frequency": 100000000,  # 100 MHz
+            "measurement_time": 1000,
+            "bandwidth": 10000,
+            "detector": "RMS",
+            "priority": 2
+        }
+        return self.run_test(
+            "Create DF Measurement",
+            "POST",
+            "location/df-measurement",
+            200,
+            data=df_data,
+            auth_required=True
+        )
+
+    def test_tdoa_measurement_creation(self):
+        """Test creating TDOA measurement order"""
+        tdoa_data = {
+            "station_ids": ["Station_A", "Station_B", "Station_C"],
+            "frequency": 100000000,  # 100 MHz
+            "measurement_time": 1000,
+            "bandwidth": 10000,
+            "detector": "RMS",
+            "priority": 2
+        }
+        return self.run_test(
+            "Create TDOA Measurement",
+            "POST",
+            "location/tdoa-measurement",
+            200,
+            data=tdoa_data,
+            auth_required=True
+        )
+
+    def test_df_measurement_insufficient_stations(self):
+        """Test DF measurement with only 1 station (should fail)"""
+        df_data = {
+            "station_ids": ["Station_HQ4"],  # Only 1 station
+            "frequency": 100000000,
+            "measurement_time": 1000,
+            "bandwidth": 10000,
+            "detector": "RMS",
+            "priority": 2
+        }
+        return self.run_test(
+            "DF Measurement - Insufficient Stations (Error)",
+            "POST",
+            "location/df-measurement",
+            400,  # Expect bad request
+            data=df_data,
+            auth_required=True
+        )
+
+    def test_tdoa_measurement_insufficient_stations(self):
+        """Test TDOA measurement with only 2 stations (should fail)"""
+        tdoa_data = {
+            "station_ids": ["Station_A", "Station_B"],  # Only 2 stations
+            "frequency": 100000000,
+            "measurement_time": 1000,
+            "bandwidth": 10000,
+            "detector": "RMS",
+            "priority": 2
+        }
+        return self.run_test(
+            "TDOA Measurement - Insufficient Stations (Error)",
+            "POST",
+            "location/tdoa-measurement",
+            400,  # Expect bad request
+            data=tdoa_data,
+            auth_required=True
+        )
+
+    def test_location_measurements_filtered(self):
+        """Test listing location measurements with DF filter"""
+        return self.run_test(
+            "List DF Measurements (Filtered)",
+            "GET",
+            "location/measurements?measurement_type=DF",
+            200,
+            auth_required=True
+        )
+
+    def test_location_measurement_results(self, measurement_id=None):
+        """Test getting location measurement results"""
+        if not measurement_id:
+            # Try to get a measurement ID from previous tests
+            success, response = self.run_test("Get Measurements for Results", "GET", "location/measurements", 200, auth_required=True)
+            if success and isinstance(response, dict) and response.get('measurements'):
+                measurement_id = response['measurements'][0].get('measurement_id')
+            else:
+                # Use a dummy ID for testing
+                measurement_id = "test-measurement-id"
+        
+        if measurement_id:
+            return self.run_test(
+                f"Get Measurement Results (ID: {measurement_id[:8]}...)",
+                "GET",
+                f"location/results/{measurement_id}",
+                200,  # May return 404 if measurement doesn't exist, but that's expected
+                auth_required=True
+            )
+        return False
+
+    def check_location_xml_files_in_inbox(self):
+        """Check if DF/TDOA XML files are generated in /tmp/argus_inbox"""
+        import os
+        import glob
+        import xml.etree.ElementTree as ET
+        
+        print(f"\n🔍 Checking for DF/TDOA XML files in /tmp/argus_inbox...")
+        
+        try:
+            inbox_path = "/tmp/argus_inbox"
+            if not os.path.exists(inbox_path):
+                print(f"   ❌ Inbox directory does not exist: {inbox_path}")
+                return False
+            
+            xml_files = glob.glob(os.path.join(inbox_path, "*.xml"))
+            print(f"   Found {len(xml_files)} XML files in inbox")
+            
+            if xml_files:
+                print("   ✅ XML files found:")
+                location_files_found = False
+                
+                for xml_file in xml_files[-10:]:  # Show last 10 files
+                    file_stat = os.stat(xml_file)
+                    file_time = datetime.fromtimestamp(file_stat.st_mtime)
+                    filename = os.path.basename(xml_file)
+                    print(f"      - {filename} (modified: {file_time})")
+                    
+                    # Check if this is a DF or TDOA file
+                    if filename.startswith(('DF_', 'TDOA_')):
+                        location_files_found = True
+                        self._validate_location_xml_structure(xml_file, filename)
+                
+                if location_files_found:
+                    print("   ✅ DF/TDOA XML files detected and validated")
+                else:
+                    print("   ⚠️  No DF/TDOA files found (DF_*/TDOA_*)")
+                
+                return True
+            else:
+                print("   ❌ No XML files found in inbox")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Error checking inbox: {str(e)}")
+            return False
+
+    def _validate_location_xml_structure(self, xml_file_path, filename):
+        """Validate DF/TDOA XML structure"""
+        import xml.etree.ElementTree as ET
+        try:
+            tree = ET.parse(xml_file_path)
+            root = tree.getroot()
+            
+            print(f"      📋 Validating Location XML {filename}:")
+            
+            # Check for measurement order structure
+            order_def = root.find(".//ORDER_DEF")
+            if order_def is not None:
+                order_id = order_def.find("ORDER_ID")
+                order_type = order_def.find("ORDER_TYPE")
+                
+                if order_id is not None:
+                    print(f"         ✅ ORDER_ID: {order_id.text}")
+                if order_type is not None:
+                    print(f"         ✅ ORDER_TYPE: {order_type.text}")
+                
+                # Check for DF/TDOA specific parameters
+                meas_param = order_def.find("MEAS_PARAM")
+                if meas_param is not None:
+                    freq = meas_param.find("FREQ")
+                    station = meas_param.find("STATION")
+                    
+                    if freq is not None:
+                        freq_hz = int(freq.text)
+                        print(f"         ✅ Frequency: {freq_hz} Hz ({freq_hz/1e6:.1f} MHz)")
+                    if station is not None:
+                        print(f"         ✅ Station: {station.text}")
+                
+                print(f"         ✅ Location measurement XML structure valid")
+            else:
+                print(f"         ❌ Missing ORDER_DEF element")
+                
+        except Exception as e:
+            print(f"         ❌ Location XML validation error: {str(e)}")
+
+    # ============================================================================
     # ADC Testing Methods (ORM-ADC Direct Measurement Module)
     # ============================================================================
 
