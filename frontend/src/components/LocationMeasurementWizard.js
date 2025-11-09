@@ -10,10 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { MapPin, Radio, Navigation, Target, AlertCircle, CheckCircle2 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function LocationMeasurementWizard({ onComplete, onCancel }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [locationType, setLocationType] = useState(''); // 'DF' or 'TDOA'
   const [stationCapabilities, setStationCapabilities] = useState([]);
