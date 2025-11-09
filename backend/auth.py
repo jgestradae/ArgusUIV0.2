@@ -42,7 +42,66 @@ class AuthManager:
         return encoded_jwt
     
     async def authenticate_user(self, username: str, password: str) -> Optional[User]:
-        """Authenticate user with username and password"""
+        """
+        Authenticate user with username and password
+        Tries AD authentication first (if enabled), then falls back to local
+        """
+        # Try Active Directory authentication first
+        try:
+            from auth_ad import ad_authenticator
+            
+            if ad_authenticator.enabled:
+                ad_result = ad_authenticator.authenticate(username, password)
+                
+                if ad_result['success']:
+                    # AD authentication successful
+                    user_info = ad_result['user_info']
+                    
+                    # Check if user exists in local database
+                    user_doc = await self.db.users.find_one({"username": username})
+                    
+                    if user_doc:
+                        # Update existing user
+                        user = User(**user_doc)
+                        await self.db.users.update_one(
+                            {"id": user.id},
+                            {"$set": {
+                                "last_login": datetime.utcnow(),
+                                "auth_provider": "ad",
+                                "email": user_info.get('email') or user.email
+                            }}
+                        )
+                    else:
+                        # Create new user from AD
+                        from models import AuthProvider
+                        user = User(
+                            username=username,
+                            email=user_info.get('email'),
+                            role=UserRole.OPERATOR,  # Default role for AD users
+                            auth_provider=AuthProvider.ACTIVE_DIRECTORY,
+                            is_active=True
+                        )
+                        await self.db.users.insert_one(user.dict())
+                    
+                    # Log successful AD login
+                    try:
+                        from system_logger import SystemLogger
+                        await SystemLogger.info(
+                            SystemLogger.AUTH,
+                            f"Successful AD login: {username}",
+                            user_id=user.id,
+                            details={"username": username, "auth_provider": "ad"}
+                        )
+                    except:
+                        pass
+                    
+                    return user
+        except Exception as e:
+            # AD authentication error, fall back to local
+            import logging
+            logging.warning(f"AD authentication failed, falling back to local: {str(e)}")
+        
+        # Fallback to local authentication
         user_doc = await self.db.users.find_one({"username": username, "is_active": True})
         if not user_doc:
             # Log failed login attempt - user not found
@@ -58,6 +117,22 @@ class AuthManager:
             return None
         
         user = User(**user_doc)
+        
+        # Check if user has password_hash (local auth)
+        if "password_hash" not in user_doc:
+            # User exists but has no local password (AD-only user)
+            try:
+                from system_logger import SystemLogger
+                await SystemLogger.warning(
+                    SystemLogger.AUTH,
+                    f"Failed login attempt: User '{username}' is AD-only, no local password",
+                    user_id=user.id,
+                    details={"username": username, "reason": "ad_only_user"}
+                )
+            except:
+                pass
+            return None
+        
         if not self.verify_password(password, user_doc["password_hash"]):
             # Log failed login attempt - incorrect password
             try:
