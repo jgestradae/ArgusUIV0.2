@@ -74,7 +74,7 @@ def detect_tdoa_capability(signal_path_data: Dict[str, Any]) -> bool:
         return False
         
     except Exception as e:
-        logger.error(f\"Error detecting TDOA capability: {str(e)}\")
+        logger.error(f"Error detecting TDOA capability: {str(e)}")
         return False
 
 
