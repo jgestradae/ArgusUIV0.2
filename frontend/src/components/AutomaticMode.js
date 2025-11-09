@@ -684,8 +684,91 @@ export default function AutomaticMode() {
 
   const renderWizardStep = () => {
     switch (wizardStep) {
+      case 0:
+        // NEW STEP 0: Select Measurement Category
+        return (
+          <Card className="glass-card border-0">
+            <CardHeader>
+              <CardTitle className="text-xl text-white flex items-center">
+                <Target className="w-5 h-5 mr-2" />
+                Step 0: Select Measurement Category
+              </CardTitle>
+              <CardDescription>Choose between Location Measurements (DF/TDOA) or Other Measurement Types</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <Button
+                  onClick={() => {
+                    setMeasurementCategory('location');
+                    setWizardStep(0.5); // Go to location wizard
+                  }}
+                  variant={measurementCategory === 'location' ? 'default' : 'outline'}
+                  className={`h-40 flex flex-col items-center justify-center gap-4 ${
+                    measurementCategory === 'location' 
+                      ? 'bg-emerald-600 hover:bg-emerald-700 border-emerald-500' 
+                      : 'border-gray-600 hover:bg-gray-700'
+                  }`}
+                >
+                  <Target className="h-16 w-16" />
+                  <div className="text-center">
+                    <div className="font-bold text-lg">Location Measurements</div>
+                    <div className="text-xs opacity-80 mt-2">Direction Finding (DF) & TDOA</div>
+                  </div>
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    setMeasurementCategory('other');
+                    setWizardStep(1); // Continue to regular AMM wizard
+                  }}
+                  variant={measurementCategory === 'other' ? 'default' : 'outline'}
+                  className={`h-40 flex flex-col items-center justify-center gap-4 ${
+                    measurementCategory === 'other' 
+                      ? 'bg-emerald-600 hover:bg-emerald-700 border-emerald-500' 
+                      : 'border-gray-600 hover:bg-gray-700'
+                  }`}
+                >
+                  <Radio className="h-16 w-16" />
+                  <div className="text-center">
+                    <div className="font-bold text-lg">Other Measurements</div>
+                    <div className="text-xs opacity-80 mt-2">FFM, SCAN, PSCAN, Coverage, etc.</div>
+                  </div>
+                </Button>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <Button 
+                  onClick={() => setActiveTab('dashboard')} 
+                  variant="outline"
+                  className="border-gray-600"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 0.5:
+        // Location Measurement Wizard (embedded)
+        return (
+          <LocationMeasurementWizard
+            onComplete={(result) => {
+              toast.success('Location measurement created successfully');
+              setActiveTab('dashboard');
+              setWizardStep(0);
+              setMeasurementCategory(null);
+              loadAMMConfigs();
+            }}
+            onCancel={() => {
+              setWizardStep(0);
+              setMeasurementCategory(null);
+            }}
+          />
+        );
+
       case 1:
-        // NEW STEP 1: Station Selection
+        // STEP 1: Station Selection (for other measurements)
         return (
           <Card className="glass-card border-0">
             <CardHeader>
