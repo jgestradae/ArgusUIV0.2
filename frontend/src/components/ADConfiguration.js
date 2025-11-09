@@ -9,7 +9,7 @@ import {
   CheckCircle, 
   XCircle, 
   AlertCircle,
-  RefreshCw,
+  {t('ad.refresh')}Cw,
   Settings
 } from 'lucide-react';
 import axios from 'axios';
@@ -23,7 +23,7 @@ export default function ADConfiguration() {
   const [config, setConfig] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [testing, setTesting] = useState(false);
+  const [testing, set{t('ad.testing')} useState(false);
 
   useEffect(() => {
     loadADStatus();
@@ -55,7 +55,7 @@ export default function ADConfiguration() {
   };
 
   const testConnection = async () => {
-    setTesting(true);
+    set{t('ad.testing')}ue);
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
@@ -79,7 +79,7 @@ export default function ADConfiguration() {
       console.error('Error testing AD connection:', error);
       toast.error('Failed to test connection');
     } finally {
-      setTesting(false);
+      set{t('ad.testing')}lse);
     }
   };
 
@@ -98,17 +98,17 @@ export default function ADConfiguration() {
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-2">
             <Shield className="h-8 w-8 text-emerald-500" />
-            Active Directory Configuration
+            {t("ad.title")}
           </h1>
-          <p className="text-gray-400 mt-1">Manage LDAP authentication settings</p>
+          <p className="text-gray-400 mt-1">{t("ad.description")}</p>
         </div>
         <Button
           onClick={loadADStatus}
           variant="outline"
           className="border-gray-600 text-gray-300 hover:bg-gray-700"
         >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          <{t('ad.refresh')}Cw className="mr-2 h-4 w-4" />
+          {t('ad.refresh')}
         </Button>
       </div>
 
@@ -117,17 +117,17 @@ export default function ADConfiguration() {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Server className="h-5 w-5" />
-            Current Status
+            {t('ad.status')}
           </CardTitle>
           <CardDescription>Active Directory authentication status and configuration</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <h3 className="text-sm font-medium text-gray-400 mb-3">Authentication Status</h3>
+              <h3 className="text-sm font-medium text-gray-400 mb-3">{t('ad.authentication_status')}</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-gray-900 rounded-lg">
-                  <span className="text-gray-300">AD Authentication</span>
+                  <span className="text-gray-300">{t('ad.ad_auth')}</span>
                   <Badge
                     variant={config?.enabled ? 'default' : 'secondary'}
                     className={config?.enabled ? 'bg-green-600' : 'bg-gray-600'}
@@ -135,19 +135,19 @@ export default function ADConfiguration() {
                     {config?.enabled ? (
                       <>
                         <CheckCircle className="mr-1 h-3 w-3" />
-                        Enabled
+                        {t('ad.enabled')}
                       </>
                     ) : (
                       <>
                         <XCircle className="mr-1 h-3 w-3" />
-                        Disabled
+                        {t('ad.disabled')}
                       </>
                     )}
                   </Badge>
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-gray-900 rounded-lg">
-                  <span className="text-gray-300">Connection Status</span>
+                  <span className="text-gray-300">{t('ad.connection_status')}</span>
                   <Badge
                     variant={connectionStatus?.success ? 'default' : 'destructive'}
                     className={connectionStatus?.success ? 'bg-green-600' : 'bg-red-600'}
@@ -155,12 +155,12 @@ export default function ADConfiguration() {
                     {connectionStatus?.success ? (
                       <>
                         <CheckCircle className="mr-1 h-3 w-3" />
-                        Connected
+                        {t('ad.connected')}
                       </>
                     ) : (
                       <>
                         <AlertCircle className="mr-1 h-3 w-3" />
-                        Not Connected
+                        Not {t('ad.connected')}
                       </>
                     )}
                   </Badge>
@@ -179,12 +179,12 @@ export default function ADConfiguration() {
                 disabled={testing || !config?.enabled}
                 className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700"
               >
-                {testing ? 'Testing...' : 'Test Connection'}
+                {testing ? '{t('ad.testing')}' : '{t('ad.test_connection')}'}
               </Button>
             </div>
 
             <div>
-              <h3 className="text-sm font-medium text-gray-400 mb-3">Server Configuration</h3>
+              <h3 className="text-sm font-medium text-gray-400 mb-3">{t('ad.server_config')}</h3>
               <div className="space-y-2">
                 <div className="p-3 bg-gray-900 rounded-lg">
                   <div className="text-xs text-gray-500 mb-1">Server</div>
@@ -208,7 +208,7 @@ export default function ADConfiguration() {
 
                 <div className="p-3 bg-gray-900 rounded-lg">
                   <div className="text-xs text-gray-500 mb-1">SSL/TLS</div>
-                  <div className="text-white font-mono text-sm">{config?.use_ssl ? 'Enabled' : 'Disabled'}</div>
+                  <div className="text-white font-mono text-sm">{config?.use_ssl ? '{t('ad.enabled')}' : '{t('ad.disabled')}'}</div>
                 </div>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function ADConfiguration() {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Configuration Guide
+            {t('ad.config_guide')}
           </CardTitle>
         </CardHeader>
         <CardContent>
