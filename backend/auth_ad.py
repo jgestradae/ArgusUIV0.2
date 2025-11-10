@@ -13,19 +13,79 @@ logger = logging.getLogger(__name__)
 class ADAuthenticator:
     """Active Directory authentication handler"""
     
-    def __init__(self):
-        self.enabled = os.getenv('AD_ENABLED', 'false').lower() == 'true'
-        self.server_url = os.getenv('AD_SERVER', 'ldap://192.168.10.20')
-        self.port = int(os.getenv('AD_PORT', '389'))
-        self.domain = os.getenv('AD_DOMAIN', 'ANE.LOCAL')
-        self.base_dn = os.getenv('AD_BASE_DN', 'DC=ANE,DC=LOCAL')
-        self.bind_user = os.getenv('AD_BIND_USER', '')
-        self.bind_password = os.getenv('AD_BIND_PASSWORD', '')
-        self.use_ssl = os.getenv('AD_USE_SSL', 'false').lower() == 'true'
+    def __init__(self, db=None):
+        # Try to load from encrypted database first, fallback to .env
+        self.db = db
+        self.load_config()
+    
+    def load_config(self):
+        """Load configuration from encrypted database or .env"""
+        # Default values
+        self.enabled = False
+        self.server_url = 'ldap://192.168.10.20'
+        self.port = 389
+        self.domain = 'ANE.LOCAL'
+        self.base_dn = 'DC=ANE,DC=LOCAL'
+        self.bind_user = ''
+        self.bind_password = ''
+        self.use_ssl = False
+        
+        # Try encrypted database first
+        if self.db is not None:
+            try:
+                import asyncio
+                # Get the event loop
+                try:
+                    loop = asyncio.get_event_loop()
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                
+                # Load from database
+                config_doc = loop.run_until_complete(
+                    self.db.ad_configuration.find_one({'_id': 'ad_config'})
+                )
+                
+                if config_doc and config_doc.get('encrypted'):
+                    # Decrypt configuration
+                    from crypto_utils import get_encryption
+                    encryption = get_encryption()
+                    
+                    sensitive_fields = ['server', 'domain', 'base_dn', 'bind_user', 'bind_password']
+                    decrypted = encryption.decrypt_dict(config_doc, sensitive_fields)
+                    
+                    self.enabled = decrypted.get('enabled', False)
+                    self.server_url = decrypted.get('server', self.server_url)
+                    self.port = decrypted.get('port', 389)
+                    self.domain = decrypted.get('domain', self.domain)
+                    self.base_dn = decrypted.get('base_dn', self.base_dn)
+                    self.bind_user = decrypted.get('bind_user', '')
+                    self.bind_password = decrypted.get('bind_password', '')
+                    self.use_ssl = decrypted.get('use_ssl', False)
+                    
+                    logger.info("AD configuration loaded from encrypted database")
+            except Exception as e:
+                logger.warning(f"Could not load from database, using .env: {str(e)}")
+        
+        # Fallback to .env if not loaded from database
+        if not hasattr(self, '_loaded_from_db'):
+            self.enabled = os.getenv('AD_ENABLED', 'false').lower() == 'true'
+            self.server_url = os.getenv('AD_SERVER', self.server_url)
+            self.port = int(os.getenv('AD_PORT', str(self.port)))
+            self.domain = os.getenv('AD_DOMAIN', self.domain)
+            self.base_dn = os.getenv('AD_BASE_DN', self.base_dn)
+            self.bind_user = os.getenv('AD_BIND_USER', self.bind_user)
+            self.bind_password = os.getenv('AD_BIND_PASSWORD', self.bind_password)
+            self.use_ssl = os.getenv('AD_USE_SSL', 'false').lower() == 'true'
         
         logger.info(f"AD Authentication: {'Enabled' if self.enabled else 'Disabled'}")
         if self.enabled:
             logger.info(f"AD Server: {self.server_url}:{self.port} | Domain: {self.domain}")
+    
+    def reload_from_database(self, db):
+        """Reload configuration from database"""
+        self.db = db
+        self.load_config()
     
     def authenticate(self, username: str, password: str) -> Dict[str, Any]:
         """
