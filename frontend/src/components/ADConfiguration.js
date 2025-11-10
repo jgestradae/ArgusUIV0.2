@@ -134,7 +134,7 @@ export default function ADConfiguration() {
   const testConnection = async () => {
     setTesting(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await axios.post(
         `${BACKEND_URL}/api/ad/test-connection`,
         {},
