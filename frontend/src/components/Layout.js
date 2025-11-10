@@ -169,12 +169,23 @@ export default function Layout({ children }) {
             </header>
 
             {/* Navigation */}
-            <nav className="flex-1 p-4 space-y-2" role="navigation" aria-label="Main navigation">
+            <nav 
+              className="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden" 
+              role="navigation" 
+              aria-label="Main navigation"
+              style={{
+                maxHeight: 'calc(100vh - 14rem)',
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(148, 163, 184, 0.5) transparent'
+              }}
+            >
               {navigationItems
                 .filter(item => !item.adminOnly || (user && user.role === 'admin'))
                 .map((item) => {
                 const isActive = location.pathname === item.path;
                 const Icon = item.icon;
+                const itemName = t(item.nameKey);
+                const itemDesc = t(item.descKey);
                 
                 return (
                   <Link
@@ -190,12 +201,12 @@ export default function Layout({ children }) {
                       group
                     `}
                     aria-current={isActive ? 'page' : undefined}
-                    aria-label={`${item.name}: ${item.description}`}
+                    aria-label={`${itemName}: ${itemDesc}`}
                   >
                     <Icon className={`w-5 h-5 ${isActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-400'} transition-colors`} aria-hidden="true" />
                     <div className="flex-1">
-                      <div className="font-medium">{item.name}</div>
-                      <div className="text-xs text-slate-500 group-hover:text-slate-400">{item.description}</div>
+                      <div className="font-medium">{itemName}</div>
+                      <div className="text-xs text-slate-500 group-hover:text-slate-400">{itemDesc}</div>
                     </div>
                   </Link>
                 );
