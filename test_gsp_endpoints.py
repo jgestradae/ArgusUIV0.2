@@ -7,7 +7,7 @@ import requests
 import json
 
 class GSPEndpointTester:
-    def __init__(self, base_url="https://argus-access.preview.emergentagent.com"):
+    def __init__(self, base_url="https://sigint-portal.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.session = requests.Session()

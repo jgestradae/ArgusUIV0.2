@@ -14,7 +14,7 @@ def test_complete_gsp_workflow():
     print("🚀 FINAL GSP WORKFLOW TEST")
     print("=" * 60)
     
-    base_url = "https://argus-access.preview.emergentagent.com"
+    base_url = "https://sigint-portal.preview.emergentagent.com"
     session = requests.Session()
     session.headers.update({'Content-Type': 'application/json'})
     
