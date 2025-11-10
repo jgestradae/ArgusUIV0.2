@@ -152,6 +152,11 @@ async def lifespan(app: FastAPI):
     app.include_router(adc_router)
     logger.info(f"ADC Module initialized - INBOX: {adc_inbox_path}")
     
+    # Initialize Active Directory with database for encrypted config
+    from auth_ad import initialize_ad_authenticator
+    initialize_ad_authenticator(db)
+    logger.info("Active Directory authenticator initialized with encrypted config support")
+    
     # Initialize Active Directory API
     import ad_api
     app.include_router(ad_api.router, tags=["Active Directory"])
