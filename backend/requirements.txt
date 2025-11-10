@@ -87,3 +87,4 @@ watchdog==3.0.0
 watchfiles==1.1.0
 zeep==4.3.2
 ldap3
+cryptography
