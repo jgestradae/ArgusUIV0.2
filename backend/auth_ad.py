@@ -325,5 +325,11 @@ class ADAuthenticator:
         }
 
 
-# Global AD authenticator instance
-ad_authenticator = ADAuthenticator()
+# Global AD authenticator instance (will be initialized with db in server.py)
+ad_authenticator = None
+
+def initialize_ad_authenticator(db):
+    """Initialize AD authenticator with database connection"""
+    global ad_authenticator
+    ad_authenticator = ADAuthenticator(db)
+    return ad_authenticator
