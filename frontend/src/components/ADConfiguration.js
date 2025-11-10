@@ -52,7 +52,7 @@ export default function ADConfiguration() {
   const loadADStatus = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await axios.get(
         `${BACKEND_URL}/api/ad/status`,
         { headers: { Authorization: `Bearer ${token}` } }
