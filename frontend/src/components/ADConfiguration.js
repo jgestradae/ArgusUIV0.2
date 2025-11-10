@@ -76,7 +76,7 @@ export default function ADConfiguration() {
 
   const loadConfigForEdit = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await axios.get(
         `${BACKEND_URL}/api/ad/config/encrypted`,
         { headers: { Authorization: `Bearer ${token}` } }
