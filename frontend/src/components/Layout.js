@@ -34,82 +34,82 @@ export default function Layout({ children }) {
 
   const navigationItems = [
     {
-      name: 'Dashboard',
+      nameKey: 'navigation.dashboard',
+      descKey: 'navigation.dashboard_desc',
       path: '/dashboard',
-      icon: BarChart3,
-      description: 'System overview and status'
+      icon: BarChart3
     },
     {
-      name: 'System Status',
+      nameKey: 'navigation.system_status',
+      descKey: 'navigation.system_status_desc',
       path: '/system-status',
-      icon: Activity,
-      description: 'Live Argus monitoring'
+      icon: Activity
     },
     {
-      name: 'System Parameters',
+      nameKey: 'navigation.system_parameters',
+      descKey: 'navigation.system_parameters_desc',
       path: '/system-parameters',
-      icon: Server,
-      description: 'Signal paths & device config'
+      icon: Server
     },
     {
-      name: 'Geolocation',
+      nameKey: 'navigation.geolocation',
+      descKey: 'navigation.geolocation_desc',
       path: '/geolocation',
-      icon: Map,
-      description: 'Station map & direction finding'
+      icon: Map
     },
     {
-      name: 'Location Results',
+      nameKey: 'navigation.location_results',
+      descKey: 'navigation.location_results_desc',
       path: '/location-results',
-      icon: MapPin,
-      description: 'DF/TDOA measurement results'
+      icon: MapPin
     },
     {
-      name: 'Direct Measurement',
+      nameKey: 'navigation.direct_measurement',
+      descKey: 'navigation.direct_measurement_desc',
       path: '/direct-measurement',
-      icon: Zap,
-      description: 'Real-time measurements'
+      icon: Zap
     },
     {
-      name: 'Automatic Mode',
+      nameKey: 'navigation.automatic_mode',
+      descKey: 'navigation.automatic_mode_desc',
       path: '/automatic-mode',
-      icon: Clock,
-      description: 'Scheduled measurements'
+      icon: Clock
     },
     {
-      name: 'Data Navigator',
+      nameKey: 'navigation.data_navigator',
+      descKey: 'navigation.data_navigator_desc',
       path: '/data-navigator',
-      icon: Database,
-      description: 'Browse measurement data'
+      icon: Database
     },
     {
-      name: 'Database Import',
+      nameKey: 'navigation.database_import',
+      descKey: 'navigation.database_import_desc',
       path: '/database-import',
-      icon: Download,
-      description: 'Import frequency & transmitter lists'
+      icon: Download
     },
     {
-      name: 'Reports',
+      nameKey: 'navigation.reports',
+      descKey: 'navigation.reports_desc',
       path: '/reports/list',
-      icon: FileText,
-      description: 'View & download reports'
+      icon: FileText
     },
     {
-      name: 'Configuration',
+      nameKey: 'navigation.configuration',
+      descKey: 'navigation.configuration_desc',
       path: '/configuration',
-      icon: Settings,
-      description: 'System configuration'
+      icon: Settings
     },
     {
-      name: 'System Logs',
+      nameKey: 'navigation.system_logs',
+      descKey: 'navigation.system_logs_desc',
       path: '/logs',
-      icon: FileText,
-      description: 'Event logs and history'
+      icon: FileText
     },
     {
-      name: 'AD Configuration',
+      nameKey: 'navigation.ad_configuration',
+      descKey: 'navigation.ad_configuration_desc',
       path: '/ad-configuration',
       icon: Shield,
-      description: 'Active Directory settings',
       adminOnly: true
     }
   ];
