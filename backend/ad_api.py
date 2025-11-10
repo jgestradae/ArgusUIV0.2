@@ -4,16 +4,30 @@ Admin-only endpoints for AD configuration and testing
 """
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import logging
+from datetime import datetime
 
 from auth import get_current_user, require_admin
 from models import User
 from auth_ad import ad_authenticator
+from crypto_utils import get_encryption
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/ad", tags=["Active Directory"])
+
+
+class ADConfigRequest(BaseModel):
+    """Request model for AD configuration (will be encrypted)"""
+    enabled: bool
+    server: str
+    port: int
+    domain: str
+    base_dn: str
+    bind_user: Optional[str] = ""
+    bind_password: Optional[str] = ""
+    use_ssl: bool = False
 
 
 class ADTestRequest(BaseModel):
