@@ -44,7 +44,7 @@ export default function LiveUDPMonitor() {
 
   const checkCaptureStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await fetch(`${BACKEND_URL}/api/adc/capture/status`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -115,7 +115,7 @@ export default function LiveUDPMonitor() {
 
   const startCapture = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await fetch(`${BACKEND_URL}/api/adc/capture/start`, {
         method: 'POST',
         headers: {
@@ -142,7 +142,7 @@ export default function LiveUDPMonitor() {
 
   const stopCapture = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await fetch(`${BACKEND_URL}/api/adc/capture/stop`, {
         method: 'POST',
         headers: {
@@ -174,7 +174,7 @@ export default function LiveUDPMonitor() {
 
   const loadRecentCaptures = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await fetch(`${BACKEND_URL}/api/adc/captures?limit=50`, {
         headers: {
           'Authorization': `Bearer ${token}`

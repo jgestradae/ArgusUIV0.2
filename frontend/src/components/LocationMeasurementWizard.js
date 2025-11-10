@@ -38,7 +38,7 @@ export default function LocationMeasurementWizard({ onComplete, onCancel }) {
   const loadStationCapabilities = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await axios.get(
         `${BACKEND_URL}/api/location/capabilities`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -68,7 +68,7 @@ export default function LocationMeasurementWizard({ onComplete, onCancel }) {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const endpoint = locationType === 'DF' ? '/api/location/df-measurement' : '/api/location/tdoa-measurement';
       
       const payload = {

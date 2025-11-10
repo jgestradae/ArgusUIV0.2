@@ -55,7 +55,7 @@ export default function DirectMeasurementADC() {
 
   const loadRecentOrders = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await fetch(`${BACKEND_URL}/api/adc/orders?limit=20`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -79,7 +79,7 @@ export default function DirectMeasurementADC() {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await fetch(`${BACKEND_URL}/api/adc/orders/scan`, {
         method: 'POST',
         headers: {
@@ -119,7 +119,7 @@ export default function DirectMeasurementADC() {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await fetch(`${BACKEND_URL}/api/adc/orders/single-freq`, {
         method: 'POST',
         headers: {

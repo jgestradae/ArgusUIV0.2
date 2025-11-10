@@ -25,7 +25,7 @@ export default function LocationMeasurementResults() {
   const loadMeasurements = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await axios.get(
         `${BACKEND_URL}/api/location/measurements?limit=50`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -44,7 +44,7 @@ export default function LocationMeasurementResults() {
 
   const viewResults = async (measurementId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('argus_token');
       const response = await axios.get(
         `${BACKEND_URL}/api/location/results/${measurementId}`,
         { headers: { Authorization: `Bearer ${token}` } }
