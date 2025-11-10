@@ -28,8 +28,8 @@ class ConfigEncryption:
         if isinstance(master_key, str):
             master_key = master_key.encode()
         
-        # Use PBKDF2 to derive a proper Fernet key
-        kdf = PBKDF2(
+        # Use PBKDF2HMAC to derive a proper Fernet key
+        kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
             salt=b'argusui_salt_2024',  # Fixed salt for consistent key derivation
