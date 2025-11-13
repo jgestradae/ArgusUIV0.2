@@ -1806,6 +1806,12 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     } else if (graphType === GRAPH_TYPES.VIEW_3D) {
       // Prepare 3D surface plot data
       return render3DView();
+    } else if (graphType === GRAPH_TYPES.BAND_OCCUPANCY) {
+      // Render band occupancy graph
+      return renderBandOccupancyView();
+    } else if (graphType === GRAPH_TYPES.FREQUENCY_OCCUPANCY) {
+      // Render frequency occupancy time series
+      return renderFrequencyOccupancyView();
     }
 
     const handleChartClick = (data) => {
