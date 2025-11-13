@@ -1084,6 +1084,8 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
             <SelectItem value={GRAPH_TYPES.LEVEL_VS_FREQUENCY}>Level vs Frequency</SelectItem>
             <SelectItem value={GRAPH_TYPES.SPECTROGRAM_2D}>2D Spectrogram</SelectItem>
             <SelectItem value={GRAPH_TYPES.VIEW_3D}>3D Surface View</SelectItem>
+            <SelectItem value={GRAPH_TYPES.BAND_OCCUPANCY}>Band Occupancy</SelectItem>
+            <SelectItem value={GRAPH_TYPES.FREQUENCY_OCCUPANCY}>Frequency Occupancy (Time Series)</SelectItem>
           </SelectContent>
         </Select>
       </div>
