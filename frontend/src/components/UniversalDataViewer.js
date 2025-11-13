@@ -213,7 +213,9 @@ const GRAPH_TYPES = {
   LEVEL_VS_TIME: 'level_vs_time',
   LEVEL_VS_FREQUENCY: 'level_vs_frequency',
   SPECTROGRAM_2D: 'spectrogram_2d',
-  VIEW_3D: 'view_3d'
+  VIEW_3D: 'view_3d',
+  BAND_OCCUPANCY: 'band_occupancy',
+  FREQUENCY_OCCUPANCY: 'frequency_occupancy'
 };
 
 export default function UniversalDataViewer({ item, dataType, onClose, onSave }) {
