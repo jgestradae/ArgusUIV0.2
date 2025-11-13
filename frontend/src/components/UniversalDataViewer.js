@@ -233,6 +233,11 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
   const [selectedFrequency, setSelectedFrequency] = useState(null); // For Level vs Time: selected frequency to track
   const [availableFrequencies, setAvailableFrequencies] = useState([]); // List of available frequencies
   const plotly3DRef = React.useRef(null); // Ref for 3D plot container
+  
+  // Occupancy graph state
+  const [occupancyThreshold, setOccupancyThreshold] = useState(-80); // dBm threshold
+  const [timeInterval, setTimeInterval] = useState(60); // seconds (1 minute default)
+  const [occupancyFrequency, setOccupancyFrequency] = useState(null); // For frequency occupancy
 
   useEffect(() => {
     loadItemData();
