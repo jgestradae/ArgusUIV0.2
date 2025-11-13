@@ -1061,6 +1061,485 @@ export default function UniversalDataViewer({ item, dataType, onClose, onSave })
     );
   };
 
+  // Render Band Occupancy Graph (Frequency vs Occupancy %)
+  const renderBandOccupancyView = () => {
+    if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+          <p className="text-slate-400">No data available for band occupancy</p>
+        </div>
+      );
+    }
+
+    // Calculate occupancy per frequency
+    const frequencyStats = {};
+    
+    itemData.data_points.forEach(point => {
+      const freq = parseInt(point.frequency_hz);
+      const level = parseFloat(point.level_dbm);
+      
+      if (!frequencyStats[freq]) {
+        frequencyStats[freq] = {
+          totalSamples: 0,
+          samplesAboveThreshold: 0,
+          frequency: freq / 1000000 // Convert to MHz
+        };
+      }
+      
+      frequencyStats[freq].totalSamples++;
+      if (level >= occupancyThreshold) {
+        frequencyStats[freq].samplesAboveThreshold++;
+      }
+    });
+
+    // Calculate occupancy percentage
+    const occupancyData = Object.values(frequencyStats).map(stat => ({
+      frequency: stat.frequency,
+      occupancy: (stat.samplesAboveThreshold / stat.totalSamples) * 100,
+      totalSamples: stat.totalSamples,
+      samplesAbove: stat.samplesAboveThreshold
+    })).sort((a, b) => a.frequency - b.frequency);
+
+    // Prepare Plotly data
+    const plotlyBandOccupancyRef = React.useRef(null);
+    
+    React.useEffect(() => {
+      if (plotlyBandOccupancyRef.current && occupancyData.length > 0) {
+        const colors = occupancyData.map(d => {
+          if (d.occupancy >= 75) return '#ef4444'; // Red
+          if (d.occupancy >= 50) return '#f97316'; // Orange
+          if (d.occupancy >= 25) return '#eab308'; // Yellow
+          return '#22c55e'; // Green
+        });
+
+        const trace = {
+          x: occupancyData.map(d => d.frequency.toFixed(3)),
+          y: occupancyData.map(d => d.occupancy),
+          type: 'bar',
+          marker: {
+            color: colors,
+            line: { color: 'rgba(255,255,255,0.3)', width: 1 }
+          },
+          text: occupancyData.map(d => `${d.occupancy.toFixed(1)}%`),
+          textposition: 'outside',
+          hovertemplate: 
+            '<b>Frequency:</b> %{x} MHz<br>' +
+            '<b>Occupancy:</b> %{y:.1f}%<br>' +
+            '<b>Samples Above Threshold:</b> %{customdata[0]}<br>' +
+            '<b>Total Samples:</b> %{customdata[1]}<br>' +
+            '<extra></extra>',
+          customdata: occupancyData.map(d => [d.samplesAbove, d.totalSamples])
+        };
+
+        const layout = {
+          title: {
+            text: `Band Occupancy (Threshold: ${occupancyThreshold} dBm)`,
+            font: { size: 16, color: '#e2e8f0' }
+          },
+          xaxis: {
+            title: 'Frequency (MHz)',
+            color: '#94a3b8',
+            gridcolor: '#334155'
+          },
+          yaxis: {
+            title: 'Occupancy (%)',
+            color: '#94a3b8',
+            gridcolor: '#334155',
+            range: [0, 100]
+          },
+          plot_bgcolor: '#1e293b',
+          paper_bgcolor: '#1e293b',
+          font: { color: '#e2e8f0' },
+          margin: { t: 60, r: 30, b: 60, l: 60 },
+          hovermode: 'closest'
+        };
+
+        const config = {
+          responsive: true,
+          displayModeBar: true,
+          modeBarButtonsToAdd: ['toImage'],
+          toImageButtonOptions: {
+            format: 'png',
+            filename: `band_occupancy_${Date.now()}`,
+            height: 800,
+            width: 1200,
+            scale: 2
+          }
+        };
+
+        Plotly.newPlot(plotlyBandOccupancyRef.current, [trace], layout, config);
+      }
+    }, [occupancyData, occupancyThreshold]);
+
+    // Export function
+    const exportData = (format) => {
+      if (format === 'csv') {
+        const csvContent = [
+          ['Frequency (MHz)', 'Occupancy (%)', 'Samples Above Threshold', 'Total Samples'],
+          ...occupancyData.map(d => [
+            d.frequency.toFixed(6),
+            d.occupancy.toFixed(2),
+            d.samplesAbove,
+            d.totalSamples
+          ])
+        ].map(row => row.join(',')).join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `band_occupancy_${Date.now()}.csv`;
+        a.click();
+        toast.success('CSV exported successfully');
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        {/* Controls */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center space-x-3">
+            <Select value={graphType} onValueChange={setGraphType}>
+              <SelectTrigger className="w-64 input-spectrum">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={GRAPH_TYPES.LEVEL_VS_TIME}>Level vs Time</SelectItem>
+                <SelectItem value={GRAPH_TYPES.LEVEL_VS_FREQUENCY}>Level vs Frequency</SelectItem>
+                <SelectItem value={GRAPH_TYPES.SPECTROGRAM_2D}>2D Spectrogram</SelectItem>
+                <SelectItem value={GRAPH_TYPES.VIEW_3D}>3D Surface View</SelectItem>
+                <SelectItem value={GRAPH_TYPES.BAND_OCCUPANCY}>Band Occupancy</SelectItem>
+                <SelectItem value={GRAPH_TYPES.FREQUENCY_OCCUPANCY}>Frequency Occupancy (Time Series)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <Label className="text-slate-300 text-sm">Threshold (dBm):</Label>
+            <Input
+              type="number"
+              value={occupancyThreshold}
+              onChange={(e) => setOccupancyThreshold(parseFloat(e.target.value))}
+              className="w-24 input-spectrum"
+              step="1"
+            />
+            <Button
+              onClick={() => exportData('csv')}
+              className="btn-spectrum"
+              size="sm"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
+        </div>
+
+        {/* Graph */}
+        <div className="bg-slate-800/30 rounded-lg p-4">
+          <div ref={plotlyBandOccupancyRef} style={{ width: '100%', height: '600px' }}></div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-4">
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Frequencies Analyzed</div>
+            <div className="text-sm font-semibold text-white">{occupancyData.length}</div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Avg Occupancy</div>
+            <div className="text-sm font-semibold text-white">
+              {(occupancyData.reduce((sum, d) => sum + d.occupancy, 0) / occupancyData.length).toFixed(1)}%
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Max Occupancy</div>
+            <div className="text-sm font-semibold text-white">
+              {Math.max(...occupancyData.map(d => d.occupancy)).toFixed(1)}%
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Threshold</div>
+            <div className="text-sm font-semibold text-white">{occupancyThreshold} dBm</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render Frequency Occupancy (Time Series) Graph
+  const renderFrequencyOccupancyView = () => {
+    if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+          <p className="text-slate-400">No data available for frequency occupancy</p>
+        </div>
+      );
+    }
+
+    // Get available frequencies
+    const freqs = [...new Set(itemData.data_points.map(p => parseInt(p.frequency_hz)))].sort((a, b) => a - b);
+    
+    // If no frequency is selected, select the first one
+    if (!occupancyFrequency && freqs.length > 0) {
+      setOccupancyFrequency(freqs[0]);
+    }
+
+    // Filter data for selected frequency
+    const frequencyData = itemData.data_points
+      .filter(p => parseInt(p.frequency_hz) === occupancyFrequency)
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    if (frequencyData.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-slate-400">No data available for selected frequency</p>
+        </div>
+      );
+    }
+
+    // Group data by time intervals
+    const timeIntervalMs = timeInterval * 1000; // Convert seconds to milliseconds
+    const firstTimestamp = new Date(frequencyData[0].timestamp).getTime();
+    const lastTimestamp = new Date(frequencyData[frequencyData.length - 1].timestamp).getTime();
+    
+    const intervals = [];
+    for (let t = firstTimestamp; t <= lastTimestamp; t += timeIntervalMs) {
+      intervals.push({
+        start: t,
+        end: t + timeIntervalMs,
+        samples: [],
+        samplesAbove: 0
+      });
+    }
+
+    // Assign samples to intervals
+    frequencyData.forEach(point => {
+      const pointTime = new Date(point.timestamp).getTime();
+      const level = parseFloat(point.level_dbm);
+      
+      for (const interval of intervals) {
+        if (pointTime >= interval.start && pointTime < interval.end) {
+          interval.samples.push(point);
+          if (level >= occupancyThreshold) {
+            interval.samplesAbove++;
+          }
+          break;
+        }
+      }
+    });
+
+    // Calculate occupancy for each interval
+    const occupancyByTime = intervals
+      .filter(interval => interval.samples.length > 0)
+      .map(interval => ({
+        time: new Date(interval.start).toLocaleTimeString(),
+        timestamp: interval.start,
+        occupancy: (interval.samplesAbove / interval.samples.length) * 100,
+        totalSamples: interval.samples.length,
+        samplesAbove: interval.samplesAbove
+      }));
+
+    // Prepare Plotly data
+    const plotlyFreqOccupancyRef = React.useRef(null);
+    
+    React.useEffect(() => {
+      if (plotlyFreqOccupancyRef.current && occupancyByTime.length > 0) {
+        const colors = occupancyByTime.map(d => {
+          if (d.occupancy >= 75) return '#ef4444'; // Red
+          if (d.occupancy >= 50) return '#f97316'; // Orange
+          if (d.occupancy >= 25) return '#eab308'; // Yellow
+          return '#22c55e'; // Green
+        });
+
+        const trace = {
+          x: occupancyByTime.map(d => d.time),
+          y: occupancyByTime.map(d => d.occupancy),
+          type: 'bar',
+          marker: {
+            color: colors,
+            line: { color: 'rgba(255,255,255,0.3)', width: 1 }
+          },
+          text: occupancyByTime.map(d => `${d.occupancy.toFixed(1)}%`),
+          textposition: 'outside',
+          hovertemplate: 
+            '<b>Time:</b> %{x}<br>' +
+            '<b>Occupancy:</b> %{y:.1f}%<br>' +
+            '<b>Samples Above Threshold:</b> %{customdata[0]}<br>' +
+            '<b>Total Samples:</b> %{customdata[1]}<br>' +
+            '<extra></extra>',
+          customdata: occupancyByTime.map(d => [d.samplesAbove, d.totalSamples])
+        };
+
+        const layout = {
+          title: {
+            text: `Frequency Occupancy - ${(occupancyFrequency / 1000000).toFixed(3)} MHz (Threshold: ${occupancyThreshold} dBm)`,
+            font: { size: 16, color: '#e2e8f0' }
+          },
+          xaxis: {
+            title: `Time (${timeInterval}s intervals)`,
+            color: '#94a3b8',
+            gridcolor: '#334155'
+          },
+          yaxis: {
+            title: 'Occupancy (%)',
+            color: '#94a3b8',
+            gridcolor: '#334155',
+            range: [0, 100]
+          },
+          plot_bgcolor: '#1e293b',
+          paper_bgcolor: '#1e293b',
+          font: { color: '#e2e8f0' },
+          margin: { t: 60, r: 30, b: 80, l: 60 },
+          hovermode: 'closest'
+        };
+
+        const config = {
+          responsive: true,
+          displayModeBar: true,
+          modeBarButtonsToAdd: ['toImage'],
+          toImageButtonOptions: {
+            format: 'png',
+            filename: `frequency_occupancy_${Date.now()}`,
+            height: 800,
+            width: 1200,
+            scale: 2
+          }
+        };
+
+        Plotly.newPlot(plotlyFreqOccupancyRef.current, [trace], layout, config);
+      }
+    }, [occupancyByTime, occupancyFrequency, occupancyThreshold, timeInterval]);
+
+    // Export function
+    const exportData = (format) => {
+      if (format === 'csv') {
+        const csvContent = [
+          ['Time', 'Occupancy (%)', 'Samples Above Threshold', 'Total Samples'],
+          ...occupancyByTime.map(d => [
+            d.time,
+            d.occupancy.toFixed(2),
+            d.samplesAbove,
+            d.totalSamples
+          ])
+        ].map(row => row.join(',')).join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `frequency_occupancy_${Date.now()}.csv`;
+        a.click();
+        toast.success('CSV exported successfully');
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        {/* Controls */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center space-x-3">
+            <Select value={graphType} onValueChange={setGraphType}>
+              <SelectTrigger className="w-64 input-spectrum">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={GRAPH_TYPES.LEVEL_VS_TIME}>Level vs Time</SelectItem>
+                <SelectItem value={GRAPH_TYPES.LEVEL_VS_FREQUENCY}>Level vs Frequency</SelectItem>
+                <SelectItem value={GRAPH_TYPES.SPECTROGRAM_2D}>2D Spectrogram</SelectItem>
+                <SelectItem value={GRAPH_TYPES.VIEW_3D}>3D Surface View</SelectItem>
+                <SelectItem value={GRAPH_TYPES.BAND_OCCUPANCY}>Band Occupancy</SelectItem>
+                <SelectItem value={GRAPH_TYPES.FREQUENCY_OCCUPANCY}>Frequency Occupancy (Time Series)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center space-x-3 flex-wrap">
+            <div className="flex items-center space-x-2">
+              <Label className="text-slate-300 text-sm">Frequency:</Label>
+              <Select value={occupancyFrequency?.toString()} onValueChange={(v) => setOccupancyFrequency(parseInt(v))}>
+                <SelectTrigger className="w-40 input-spectrum">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {freqs.map(freq => (
+                    <SelectItem key={freq} value={freq.toString()}>
+                      {(freq / 1000000).toFixed(3)} MHz
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Label className="text-slate-300 text-sm">Threshold:</Label>
+              <Input
+                type="number"
+                value={occupancyThreshold}
+                onChange={(e) => setOccupancyThreshold(parseFloat(e.target.value))}
+                className="w-20 input-spectrum"
+                step="1"
+              />
+              <span className="text-slate-400 text-sm">dBm</span>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Label className="text-slate-300 text-sm">Interval:</Label>
+              <Input
+                type="number"
+                value={timeInterval}
+                onChange={(e) => setTimeInterval(parseInt(e.target.value))}
+                className="w-20 input-spectrum"
+                step="1"
+                min="1"
+              />
+              <span className="text-slate-400 text-sm">sec</span>
+            </div>
+            
+            <Button
+              onClick={() => exportData('csv')}
+              className="btn-spectrum"
+              size="sm"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
+        </div>
+
+        {/* Graph */}
+        <div className="bg-slate-800/30 rounded-lg p-4">
+          <div ref={plotlyFreqOccupancyRef} style={{ width: '100%', height: '600px' }}></div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-4">
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Time Intervals</div>
+            <div className="text-sm font-semibold text-white">{occupancyByTime.length}</div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Avg Occupancy</div>
+            <div className="text-sm font-semibold text-white">
+              {(occupancyByTime.reduce((sum, d) => sum + d.occupancy, 0) / occupancyByTime.length).toFixed(1)}%
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Max Occupancy</div>
+            <div className="text-sm font-semibold text-white">
+              {Math.max(...occupancyByTime.map(d => d.occupancy)).toFixed(1)}%
+            </div>
+          </div>
+          <div className="bg-slate-800/30 rounded-lg p-3">
+            <div className="text-xs text-slate-400">Interval Size</div>
+            <div className="text-sm font-semibold text-white">{timeInterval}s</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Render 2D Spectrogram (Frequency vs Time with Level as Color)
   const renderSpectrogramView = () => {
     if (!itemData || !itemData.data_points || itemData.data_points.length === 0) {
