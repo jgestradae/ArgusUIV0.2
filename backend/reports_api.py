@@ -92,6 +92,10 @@ async def generate_report_async(report_id: str, request: ReportCreationRequest):
                     filepath = report_generator.generate_docx(report_content)
                 elif format_type == "XML":
                     filepath = report_generator.generate_xml(report_content)
+                elif format_type == "TXT":
+                    filepath = report_generator.generate_txt(report_content)
+                elif format_type == "JASPER":
+                    filepath = report_generator.generate_jasper_xml(report_content)
                 else:
                     continue
                 
