@@ -213,18 +213,20 @@ const ReportGeneration = () => {
             <label className="block text-sm font-medium text-slate-300 mb-3">
               Export Format
             </label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-4 gap-3">
               {exportFormats.map(format => (
                 <button
-                  key={format}
-                  onClick={() => setExportFormat(format)}
-                  className={`px-4 py-2 rounded-md font-medium transition-all ${
-                    exportFormat === format
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-slate-300 hover:bg-gray-200'
+                  key={format.value}
+                  onClick={() => setExportFormat(format.value)}
+                  className={`px-3 py-3 rounded-lg font-medium transition-all text-left ${
+                    exportFormat === format.value
+                      ? 'bg-blue-600 text-white border-2 border-blue-400'
+                      : 'bg-slate-800/30 text-slate-300 hover:bg-slate-700/50 border-2 border-slate-600/30'
                   }`}
+                  title={format.description}
                 >
-                  {format}
+                  <div className="font-semibold">{format.label}</div>
+                  <div className="text-xs opacity-75 mt-1">{format.description}</div>
                 </button>
               ))}
             </div>
