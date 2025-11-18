@@ -22,7 +22,15 @@ const ReportGeneration = () => {
     { value: 'frequency_occupancy', label: 'Frequency Occupancy', description: 'Spectrum utilization analysis' }
   ];
 
-  const exportFormats = ['PDF', 'CSV', 'EXCEL', 'DOCX', 'XML'];
+  const exportFormats = [
+    { value: 'PDF', label: 'PDF', description: 'Portable Document Format' },
+    { value: 'CSV', label: 'CSV', description: 'Comma Separated Values' },
+    { value: 'EXCEL', label: 'Excel', description: 'Microsoft Excel Spreadsheet' },
+    { value: 'DOCX', label: 'Word', description: 'Microsoft Word Document' },
+    { value: 'XML', label: 'XML', description: 'Extensible Markup Language' },
+    { value: 'TXT', label: 'TXT', description: 'Plain Text File' },
+    { value: 'JASPER', label: 'JasperReports', description: 'JasperReports/iReport XML' }
+  ];
 
   const handleGenerateReport = async () => {
     if (!reportName.trim()) {
