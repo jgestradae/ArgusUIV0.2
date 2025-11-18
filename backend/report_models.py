@@ -36,7 +36,7 @@ class ReportCreationRequest(BaseModel):
     report_name: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None
     filters: ReportFilterParams = Field(default_factory=ReportFilterParams)
-    export_format: Optional[Literal["PDF", "CSV", "EXCEL", "DOCX", "XML"]] = None
+    export_format: Optional[Literal["PDF", "CSV", "EXCEL", "DOCX", "XML", "TXT", "JASPER"]] = None
     include_charts: bool = True
     include_summary: bool = True
     
