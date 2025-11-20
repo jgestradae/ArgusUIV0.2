@@ -137,6 +137,18 @@ async def lifespan(app: FastAPI):
     app.include_router(reports_api.router, prefix="/api", tags=["Reports"])
     logger.info("Reports Module initialized")
     
+    # Initialize Report Templates API
+    import report_templates_api
+    report_templates_api.init_db(db)
+    app.include_router(report_templates_api.router, tags=["Report Templates"])
+    logger.info("Report Templates API initialized")
+    
+    # Initialize Graph Storage API
+    import graph_storage_api
+    graph_storage_api.init_db(db)
+    app.include_router(graph_storage_api.router, tags=["Graph Storage"])
+    logger.info("Graph Storage API initialized")
+    
     # Initialize System Logs API
     import system_logs_api
     app.include_router(system_logs_api.router, prefix="/api", tags=["System Logs"])
