@@ -668,64 +668,52 @@ class ReportGenerator:
                     filter_elem.set('name', key)
                     filter_elem.text = str(value)
             
-            # Report sections
-            sections_elem = SubElement(root, 'Sections')
-            
-            for section in report_content.sections:
-                section_elem = SubElement(sections_elem, 'Section')
-                section_elem.set('title', section.title)
+            # Data Section
+            if report_content.data:
+                data_section = SubElement(root, 'DataSection')
+                data_section.set('title', 'Measurement Data')
                 
-                if section.content:
-                    SubElement(section_elem, 'Content').text = section.content
-                
-                # Tables - each table becomes a DataSet
-                if section.tables:
-                    tables_elem = SubElement(section_elem, 'Tables')
+                # Get headers from first data item
+                if report_content.data:
+                    headers = list(report_content.data[0].keys())
                     
-                    for table_idx, table in enumerate(section.tables):
-                        table_elem = SubElement(tables_elem, 'Table')
-                        table_elem.set('name', table.get('title', f'Table_{table_idx}'))
-                        
-                        headers = table.get('headers', [])
-                        rows = table.get('rows', [])
-                        
-                        # Headers
-                        headers_elem = SubElement(table_elem, 'Headers')
+                    # Headers
+                    headers_elem = SubElement(data_section, 'Headers')
+                    for header in headers:
+                        SubElement(headers_elem, 'Header').text = str(header)
+                    
+                    # Rows
+                    rows_elem = SubElement(data_section, 'Rows')
+                    for item in report_content.data:
+                        row_elem = SubElement(rows_elem, 'Row')
                         for header in headers:
-                            SubElement(headers_elem, 'Header').text = str(header)
-                        
-                        # Rows
-                        rows_elem = SubElement(table_elem, 'Rows')
-                        for row in rows:
-                            row_elem = SubElement(rows_elem, 'Row')
-                            for idx, cell in enumerate(row):
-                                cell_elem = SubElement(row_elem, 'Cell')
-                                cell_elem.set('column', headers[idx] if idx < len(headers) else f'Col{idx}')
-                                cell_elem.text = str(cell)
-                
-                # Statistics
-                if section.statistics:
-                    stats_elem = SubElement(section_elem, 'Statistics')
-                    for stat in section.statistics:
-                        stat_elem = SubElement(stats_elem, 'Statistic')
-                        stat_elem.set('label', stat.get('label', ''))
-                        stat_elem.text = str(stat.get('value', ''))
-                
-                # Charts
-                if section.charts:
-                    charts_elem = SubElement(section_elem, 'Charts')
-                    for chart in section.charts:
-                        chart_elem = SubElement(charts_elem, 'Chart')
-                        chart_elem.set('type', chart.get('type', 'line'))
-                        chart_elem.set('title', chart.get('title', ''))
-                        
-                        # Chart data
-                        if 'data' in chart:
-                            data_elem = SubElement(chart_elem, 'Data')
-                            for data_point in chart['data']:
-                                point_elem = SubElement(data_elem, 'Point')
-                                for key, value in data_point.items():
-                                    SubElement(point_elem, key).text = str(value)
+                            cell_elem = SubElement(row_elem, 'Cell')
+                            cell_elem.set('column', header)
+                            cell_elem.text = str(item.get(header, ''))
+            
+            # Statistics Section
+            if report_content.statistics:
+                stats_section = SubElement(root, 'Statistics')
+                for key, value in report_content.statistics.items():
+                    stat_elem = SubElement(stats_section, 'Statistic')
+                    stat_elem.set('label', key)
+                    stat_elem.text = str(value)
+            
+            # Charts Section
+            if report_content.charts:
+                charts_section = SubElement(root, 'Charts')
+                for chart in report_content.charts:
+                    chart_elem = SubElement(charts_section, 'Chart')
+                    chart_elem.set('type', chart.get('type', 'line'))
+                    chart_elem.set('title', chart.get('title', ''))
+                    
+                    # Chart data
+                    if 'data' in chart:
+                        data_elem = SubElement(chart_elem, 'Data')
+                        for data_point in chart['data']:
+                            point_elem = SubElement(data_elem, 'Point')
+                            for key, value in data_point.items():
+                                SubElement(point_elem, key).text = str(value)
             
             # Summary data (useful for report-level aggregations)
             if report_content.summary:
