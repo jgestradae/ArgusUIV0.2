@@ -556,56 +556,52 @@ class ReportGenerator:
                     f.write(f"Description: {metadata.description}\n")
                 f.write("\n" + "-" * 80 + "\n\n")
                 
-                # Sections
-                for section in report_content.sections:
-                    f.write(f"\n{section.title}\n")
-                    f.write("=" * len(section.title) + "\n\n")
+                # Summary
+                if report_content.summary:
+                    f.write("Summary\n")
+                    f.write("=" * 7 + "\n\n")
+                    for key, value in report_content.summary.items():
+                        f.write(f"{key}: {value}\n")
+                    f.write("\n" + "-" * 80 + "\n\n")
+                
+                # Statistics
+                if report_content.statistics:
+                    f.write("Statistics\n")
+                    f.write("=" * 10 + "\n\n")
+                    for key, value in report_content.statistics.items():
+                        f.write(f"{key}: {value}\n")
+                    f.write("\n" + "-" * 80 + "\n\n")
+                
+                # Data Table
+                if report_content.data:
+                    f.write("Data\n")
+                    f.write("=" * 4 + "\n\n")
                     
-                    if section.content:
-                        f.write(f"{section.content}\n\n")
-                    
-                    # Tables
-                    if section.tables:
-                        for table in section.tables:
-                            f.write(f"\n{table.get('title', 'Table')}\n")
-                            f.write("-" * len(table.get('title', 'Table')) + "\n\n")
-                            
-                            headers = table.get('headers', [])
-                            rows = table.get('rows', [])
-                            
-                            if headers and rows:
-                                # Calculate column widths
-                                col_widths = []
-                                for i, header in enumerate(headers):
-                                    max_width = len(str(header))
-                                    for row in rows:
-                                        if i < len(row):
-                                            max_width = max(max_width, len(str(row[i])))
-                                    col_widths.append(min(max_width + 2, 30))  # Max 30 chars per column
-                                
-                                # Print headers
-                                header_line = " | ".join(str(h).ljust(w) for h, w in zip(headers, col_widths))
-                                f.write(header_line + "\n")
-                                f.write("-" * len(header_line) + "\n")
-                                
-                                # Print rows
-                                for row in rows:
-                                    row_line = " | ".join(
-                                        str(row[i] if i < len(row) else "").ljust(w) 
-                                        for i, w in enumerate(col_widths)
-                                    )
-                                    f.write(row_line + "\n")
-                                
-                                f.write("\n")
-                    
-                    # Statistics
-                    if section.statistics:
-                        f.write("\nStatistics:\n")
-                        f.write("-" * 20 + "\n")
-                        for stat in section.statistics:
-                            label = stat.get('label', 'Unknown')
-                            value = stat.get('value', 'N/A')
-                            f.write(f"{label}: {value}\n")
+                    # Get headers from first data item
+                    if report_content.data:
+                        headers = list(report_content.data[0].keys())
+                        
+                        # Calculate column widths
+                        col_widths = []
+                        for header in headers:
+                            max_width = len(str(header))
+                            for item in report_content.data:
+                                max_width = max(max_width, len(str(item.get(header, ""))))
+                            col_widths.append(min(max_width + 2, 30))  # Max 30 chars per column
+                        
+                        # Print headers
+                        header_line = " | ".join(str(h).ljust(w) for h, w in zip(headers, col_widths))
+                        f.write(header_line + "\n")
+                        f.write("-" * len(header_line) + "\n")
+                        
+                        # Print rows
+                        for item in report_content.data:
+                            row_line = " | ".join(
+                                str(item.get(h, "")).ljust(w) 
+                                for h, w in zip(headers, col_widths)
+                            )
+                            f.write(row_line + "\n")
+                        
                         f.write("\n")
                 
                 # Footer
