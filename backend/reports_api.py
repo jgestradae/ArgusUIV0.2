@@ -104,10 +104,14 @@ async def generate_report_async(report_id: str, request: ReportCreationRequest):
             except Exception as e:
                 logger.error(f"Error generating {format_type}: {e}")
         
+        # Create file_paths_dict to map format to file path
+        file_paths_dict = {fmt: path for fmt, path in zip(export_formats, file_paths)}
+        
         update_data = {
             "status": "completed",
             "export_formats": export_formats,
             "file_path": file_paths[0] if file_paths else None,
+            "file_paths": file_paths_dict,  # Store all file paths
             "file_size": os.path.getsize(file_paths[0]) if file_paths else 0
         }
         
