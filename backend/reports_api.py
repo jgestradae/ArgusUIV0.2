@@ -293,25 +293,47 @@ async def download_report(
         if report.get("status") != "completed":
             raise HTTPException(status_code=400, detail="Report not ready")
         
-        file_path = report.get("file_path")
+        # Try to get file path from file_paths dict first
+        file_paths = report.get("file_paths", {})
+        file_path = file_paths.get(format.upper())
         
-        if not file_path or not os.path.exists(file_path):
-            raise HTTPException(status_code=404, detail="Report file not found")
-        
-        if format.upper() != "PDF":
-            base_dir = os.path.dirname(os.path.dirname(file_path))
-            format_dir = os.path.join(base_dir, format.lower())
-            filename = os.path.basename(file_path).replace(".pdf", f".{format.lower()}")
-            if format.upper() == "EXCEL":
-                filename = filename.replace(f".{format.lower()}", ".xlsx")
-            file_path = os.path.join(format_dir, filename)
+        # Fallback to old logic if file_paths dict doesn't exist
+        if not file_path:
+            file_path = report.get("file_path")
+            
+            if not file_path:
+                raise HTTPException(status_code=404, detail="Report file not found")
+            
+            # Try to construct path for other formats
+            if format.upper() != "PDF":
+                base_dir = os.path.dirname(os.path.dirname(file_path))
+                format_dir = os.path.join(base_dir, format.lower())
+                filename = os.path.basename(file_path).replace(".pdf", f".{format.lower()}")
+                if format.upper() == "EXCEL":
+                    filename = filename.replace(f".{format.lower()}", ".xlsx")
+                elif format.upper() == "JASPER":
+                    filename = filename.replace(f".{format.lower()}", "_jasper.xml")
+                file_path = os.path.join(format_dir, filename)
         
         if not os.path.exists(file_path):
-            raise HTTPException(status_code=404, detail=f"{format} not available")
+            raise HTTPException(status_code=404, detail=f"{format} file not found at {file_path}")
+        
+        # Determine media type
+        media_types = {
+            "PDF": "application/pdf",
+            "CSV": "text/csv",
+            "EXCEL": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "DOCX": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "XML": "application/xml",
+            "TXT": "text/plain",
+            "JASPER": "application/xml"
+        }
+        
+        media_type = media_types.get(format.upper(), "application/octet-stream")
         
         return FileResponse(
             file_path,
-            media_type="application/octet-stream",
+            media_type=media_type,
             filename=os.path.basename(file_path)
         )
     except HTTPException:
