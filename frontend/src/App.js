@@ -15,6 +15,7 @@ import DataNavigator from './components/DataNavigator';
 import DatabaseImport from './components/DatabaseImport';
 import ReportGeneration from './components/ReportGeneration';
 import ReportList from './components/ReportList';
+import ReportTemplates from './components/ReportTemplates';
 import GeolocationMap from './components/GeolocationMap';
 import AMMCalendarView from './components/AMMCalendarView';
 import AccessibilityStatement from './components/AccessibilityStatement';
