@@ -94,6 +94,13 @@ export default function Layout({ children }) {
       icon: FileText
     },
     {
+      nameKey: 'navigation.report_templates',
+      descKey: 'navigation.report_templates_desc',
+      path: '/reports/templates',
+      icon: FileText,
+      adminOnly: true
+    },
+    {
       nameKey: 'navigation.configuration',
       descKey: 'navigation.configuration_desc',
       path: '/configuration',
