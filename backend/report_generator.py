@@ -652,13 +652,15 @@ class ReportGenerator:
             
             # Report metadata
             report_meta = SubElement(root, 'ReportMetadata')
-            SubElement(report_meta, 'ReportID').text = metadata.id
-            SubElement(report_meta, 'ReportType').text = metadata.report_type
-            SubElement(report_meta, 'ReportName').text = metadata.report_name
-            SubElement(report_meta, 'Description').text = metadata.description or ""
-            SubElement(report_meta, 'CreatedBy').text = metadata.created_by
-            SubElement(report_meta, 'CreatedAt').text = metadata.created_at
-            SubElement(report_meta, 'Status').text = metadata.status
+            SubElement(report_meta, 'ReportID').text = str(metadata.id)
+            SubElement(report_meta, 'ReportType').text = str(metadata.report_type)
+            SubElement(report_meta, 'ReportName').text = str(metadata.report_name)
+            SubElement(report_meta, 'Description').text = str(metadata.description or "")
+            SubElement(report_meta, 'CreatedBy').text = str(metadata.created_by)
+            # Convert datetime to string if needed
+            created_at_str = metadata.created_at if isinstance(metadata.created_at, str) else metadata.created_at.isoformat()
+            SubElement(report_meta, 'CreatedAt').text = created_at_str
+            SubElement(report_meta, 'Status').text = str(metadata.status)
             
             # Filters
             if metadata.filters:
