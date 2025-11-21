@@ -169,10 +169,10 @@ async def build_report_content(report_id: str, request: ReportCreationRequest, t
     return report_content
 
 
-async def build_measurement_report(content, query, filters):
+async def build_measurement_report(content, query, filters, limit=10000):
     """Build measurement results report"""
-    cursor = db.measurement_results.find(query).sort("measurement_start", -1).limit(1000)
-    measurements = await cursor.to_list(length=1000)
+    cursor = db.measurement_results.find(query).sort("measurement_start", -1).limit(limit)
+    measurements = await cursor.to_list(length=limit)
     
     for m in measurements:
         content.data.append({
