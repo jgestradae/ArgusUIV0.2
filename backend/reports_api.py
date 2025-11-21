@@ -78,10 +78,6 @@ async def generate_report_async(report_id: str, request: ReportCreationRequest):
         
         report_content = await build_report_content(report_id, request, template)
         
-        # Add template settings to metadata for reference
-        if template:
-            report_content.template = template
-        
         export_formats = []
         file_paths = []
         
