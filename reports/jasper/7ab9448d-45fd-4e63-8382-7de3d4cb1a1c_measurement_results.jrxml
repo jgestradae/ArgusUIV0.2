@@ -1,0 +1,79 @@
+<?xml version="1.0" ?>
+<JasperReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" reportName="Kl">
+  <ReportMetadata>
+    <ReportID>7ab9448d-45fd-4e63-8382-7de3d4cb1a1c</ReportID>
+    <ReportType>measurement_results</ReportType>
+    <ReportName>Kl</ReportName>
+    <Description/>
+    <CreatedBy>admin</CreatedBy>
+    <CreatedAt>2025-11-21T00:30:07.724000</CreatedAt>
+    <Status>generating</Status>
+    <Filters>
+      <Filter name="start_date">None</Filter>
+      <Filter name="end_date">None</Filter>
+      <Filter name="station_ids">None</Filter>
+      <Filter name="frequency_range">None</Filter>
+      <Filter name="measurement_types">None</Filter>
+      <Filter name="status_filter">None</Filter>
+    </Filters>
+  </ReportMetadata>
+  <DataSection title="Measurement Data">
+    <Headers>
+      <Header>Measurement ID</Header>
+      <Header>Station</Header>
+      <Header>Type</Header>
+      <Header>Frequency (MHz)</Header>
+      <Header>Timestamp</Header>
+      <Header>Status</Header>
+    </Headers>
+    <Rows>
+      <Row>
+        <Cell column="Measurement ID">OR251103161416395</Cell>
+        <Cell column="Station">unknown</Cell>
+        <Cell column="Type">FFM</Cell>
+        <Cell column="Frequency (MHz)">N/A</Cell>
+        <Cell column="Timestamp">2025-11-03 22:18:03.422000</Cell>
+        <Cell column="Status">completed</Cell>
+      </Row>
+      <Row>
+        <Cell column="Measurement ID">OR251031102936642</Cell>
+        <Cell column="Station">UMS300-100823</Cell>
+        <Cell column="Type">FFM</Cell>
+        <Cell column="Frequency (MHz)">100.000</Cell>
+        <Cell column="Timestamp">2025-10-31 10:29:45.459000</Cell>
+        <Cell column="Status">Finished</Cell>
+      </Row>
+      <Row>
+        <Cell column="Measurement ID">OR251031102936642</Cell>
+        <Cell column="Station">UMS300-100823</Cell>
+        <Cell column="Type">FFM</Cell>
+        <Cell column="Frequency (MHz)">100.000</Cell>
+        <Cell column="Timestamp">2025-10-31 10:29:45.459000</Cell>
+        <Cell column="Status">Finished</Cell>
+      </Row>
+      <Row>
+        <Cell column="Measurement ID">None</Cell>
+        <Cell column="Station">Station_001</Cell>
+        <Cell column="Type">FFM</Cell>
+        <Cell column="Frequency (MHz)">N/A</Cell>
+        <Cell column="Timestamp">N/A</Cell>
+        <Cell column="Status">completed</Cell>
+      </Row>
+      <Row>
+        <Cell column="Measurement ID">None</Cell>
+        <Cell column="Station">Station_002</Cell>
+        <Cell column="Type">SCAN</Cell>
+        <Cell column="Frequency (MHz)">N/A</Cell>
+        <Cell column="Timestamp">N/A</Cell>
+        <Cell column="Status">completed</Cell>
+      </Row>
+    </Rows>
+  </DataSection>
+  <Statistics>
+    <Statistic label="Total Measurements">5</Statistic>
+    <Statistic label="Stations">4</Statistic>
+  </Statistics>
+  <Summary>
+    <Item key="Total Measurements">5</Item>
+  </Summary>
+</JasperReport>
