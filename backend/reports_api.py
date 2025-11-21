@@ -312,7 +312,7 @@ async def download_report(
                 if format.upper() == "EXCEL":
                     filename = filename.replace(f".{format.lower()}", ".xlsx")
                 elif format.upper() == "JASPER":
-                    filename = filename.replace(f".{format.lower()}", "_jasper.xml")
+                    filename = filename.replace(f".{format.lower()}", ".jrxml")
                 file_path = os.path.join(format_dir, filename)
         
         if not os.path.exists(file_path):
