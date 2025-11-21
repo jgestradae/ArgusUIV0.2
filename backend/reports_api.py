@@ -132,10 +132,14 @@ async def generate_report_async(report_id: str, request: ReportCreationRequest):
         )
 
 
-async def build_report_content(report_id: str, request: ReportCreationRequest) -> ReportContent:
+async def build_report_content(report_id: str, request: ReportCreationRequest, template: dict = None) -> ReportContent:
     """Build report content based on type and filters"""
     report_meta_doc = await db.reports.find_one({"id": report_id})
     report_meta = ReportMetadata(**report_meta_doc)
+    
+    # Apply template header title if available
+    if template and template.get("header_title"):
+        report_meta.report_name = template.get("header_title")
     
     report_content = ReportContent(
         metadata=report_meta,
@@ -145,6 +149,9 @@ async def build_report_content(report_id: str, request: ReportCreationRequest) -
         statistics={}
     )
     
+    # Get data row limit from template
+    data_limit = template.get("data_row_limit", 10000) if template else 10000
+    
     filters = request.filters
     query = {}
     if filters.start_date:
@@ -153,7 +160,7 @@ async def build_report_content(report_id: str, request: ReportCreationRequest) -
         query.setdefault("created_at", {})["$lte"] = filters.end_date
     
     if request.report_type == "measurement_results":
-        return await build_measurement_report(report_content, query, filters)
+        return await build_measurement_report(report_content, query, filters, data_limit)
     elif request.report_type == "station_status":
         return await build_station_status_report(report_content, query, filters)
     elif request.report_type == "system_performance":
