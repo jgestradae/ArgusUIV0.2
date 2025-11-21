@@ -635,7 +635,7 @@ class ReportGenerator:
         """
         try:
             metadata = report_content.metadata
-            filename = f"{metadata.id}_{metadata.report_type}_jasper.xml"
+            filename = f"{metadata.id}_{metadata.report_type}.jrxml"
             filepath = os.path.join(self.reports_dir, "jasper", filename)
             
             # Ensure jasper directory exists
