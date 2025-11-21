@@ -34,6 +34,8 @@
     "reports_desc": "Ver y descargar reportes",
     "reports_generate": "Generar Reportes",
     "reports_list": "Lista de Reportes",
+    "report_templates": "Plantillas de Reportes",
+    "report_templates_desc": "Personalizar apariencia de reportes",
     "geolocation_map": "Mapa de Geolocalización",
     "geolocation_ala": "Modo ALA",
     "geolocation_tdoa": "Modo TDOA",
