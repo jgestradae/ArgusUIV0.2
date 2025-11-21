@@ -73,7 +73,14 @@ async def create_report(
 async def generate_report_async(report_id: str, request: ReportCreationRequest):
     """Background task to generate report"""
     try:
-        report_content = await build_report_content(report_id, request)
+        # Load active template
+        template = await db.report_templates.find_one({"is_active": True})
+        
+        report_content = await build_report_content(report_id, request, template)
+        
+        # Add template settings to metadata for reference
+        if template:
+            report_content.template = template
         
         export_formats = []
         file_paths = []
@@ -83,13 +90,13 @@ async def generate_report_async(report_id: str, request: ReportCreationRequest):
         for format_type in formats:
             try:
                 if format_type == "PDF":
-                    filepath = report_generator.generate_pdf(report_content)
+                    filepath = report_generator.generate_pdf(report_content, template)
                 elif format_type == "CSV":
                     filepath = report_generator.generate_csv(report_content)
                 elif format_type == "EXCEL":
                     filepath = report_generator.generate_excel(report_content)
                 elif format_type == "DOCX":
-                    filepath = report_generator.generate_docx(report_content)
+                    filepath = report_generator.generate_docx(report_content, template)
                 elif format_type == "XML":
                     filepath = report_generator.generate_xml(report_content)
                 elif format_type == "TXT":
