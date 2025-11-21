@@ -55,7 +55,18 @@ const ReportList = () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `report_${reportId}.${format.toLowerCase()}`;
+        
+        // Get proper extension
+        let extension = format.toLowerCase();
+        if (format.toUpperCase() === 'JASPER') {
+          extension = 'jrxml';
+        } else if (format.toUpperCase() === 'EXCEL') {
+          extension = 'xlsx';
+        } else if (format.toUpperCase() === 'DOCX') {
+          extension = 'docx';
+        }
+        
+        a.download = `report_${reportId}.${extension}`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
