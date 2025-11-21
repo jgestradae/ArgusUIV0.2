@@ -154,12 +154,13 @@ class ReportGenerator:
     # PDF Report Generation
     # ========================================================================
     
-    def generate_pdf(self, report_content: ReportContent) -> str:
+    def generate_pdf(self, report_content: ReportContent, template: dict = None) -> str:
         """
-        Generate PDF report
+        Generate PDF report with template support
         
         Args:
             report_content: Complete report content
+            template: Report template with logo, header, etc.
             
         Returns:
             File path of generated PDF
@@ -202,9 +203,48 @@ class ReportGenerator:
                 spaceBefore=12
             )
             
-            # Title
-            story.append(Paragraph(metadata.report_name, title_style))
+            # Add logo if template has one
+            if template and template.get('logo_path'):
+                try:
+                    logo_path = template.get('logo_path')
+                    if os.path.exists(logo_path):
+                        logo = Image(logo_path, width=2*inch, height=1*inch, kind='proportional')
+                        logo.hAlign = 'CENTER'
+                        story.append(logo)
+                        story.append(Spacer(1, 0.2 * inch))
+                except Exception as e:
+                    logger.warning(f"Could not add logo: {e}")
+            
+            # Add organization name if from template
+            if template and template.get('organization'):
+                org_style = ParagraphStyle(
+                    'Organization',
+                    parent=styles['Normal'],
+                    fontSize=12,
+                    textColor=colors.HexColor('#64748b'),
+                    alignment=TA_CENTER,
+                    spaceAfter=10
+                )
+                story.append(Paragraph(template.get('organization'), org_style))
+            
+            # Title (use template header_title if available)
+            report_title = template.get('header_title', metadata.report_name) if template else metadata.report_name
+            story.append(Paragraph(report_title, title_style))
             story.append(Spacer(1, 0.2 * inch))
+            
+            # Add description if from template
+            if template and template.get('description'):
+                desc_style = ParagraphStyle(
+                    'Description',
+                    parent=styles['Normal'],
+                    fontSize=11,
+                    textColor=colors.HexColor('#475569'),
+                    alignment=TA_LEFT,
+                    spaceBefore=10,
+                    spaceAfter=20
+                )
+                story.append(Paragraph(template.get('description'), desc_style))
+                story.append(Spacer(1, 0.2 * inch))
             
             # Metadata section
             meta_data = [
