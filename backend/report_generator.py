@@ -340,6 +340,20 @@ class ReportGenerator:
                         story.append(Image(chart_data['image_path'], width=5*inch, height=3*inch))
                         story.append(Spacer(1, 0.2 * inch))
             
+            # Add operator signature if from template
+            if template and template.get('operator_name'):
+                story.append(Spacer(1, 0.5 * inch))
+                story.append(Paragraph("<b>Prepared by:</b>", styles['Normal']))
+                story.append(Spacer(1, 0.1 * inch))
+                signature_style = ParagraphStyle(
+                    'Signature',
+                    parent=styles['Normal'],
+                    fontSize=11,
+                    textColor=colors.HexColor('#1e40af'),
+                    spaceAfter=5
+                )
+                story.append(Paragraph(template.get('operator_name'), signature_style))
+            
             # Footer
             story.append(Spacer(1, 0.5 * inch))
             story.append(Paragraph(
