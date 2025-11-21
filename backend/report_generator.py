@@ -59,6 +59,98 @@ class ReportGenerator:
             os.makedirs(os.path.join(reports_dir, format_dir), exist_ok=True)
     
     # ========================================================================
+    # Graph/Chart Generation
+    # ========================================================================
+    
+    def generate_measurement_graph(self, data: List[Dict], graph_type: str = "level_vs_frequency") -> str:
+        """
+        Generate a graph from measurement data
+        
+        Args:
+            data: List of measurement data points
+            graph_type: Type of graph (level_vs_frequency, level_vs_time)
+            
+        Returns:
+            Path to generated graph image
+        """
+        try:
+            if not data:
+                return None
+            
+            fig, ax = plt.subplots(figsize=(10, 6))
+            
+            if graph_type == "level_vs_frequency":
+                # Extract frequency and level data
+                frequencies = []
+                levels = []
+                for item in data:
+                    freq_str = item.get('Frequency (MHz)', '0')
+                    level_str = item.get('Level (dBm)', '0')
+                    try:
+                        # Handle different formats
+                        if isinstance(freq_str, str):
+                            freq = float(freq_str.replace(' MHz', '').replace(',', '.'))
+                        else:
+                            freq = float(freq_str)
+                        
+                        if isinstance(level_str, str):
+                            level = float(level_str.replace(' dBm', '').replace(',', '.'))
+                        else:
+                            level = float(level_str)
+                        
+                        frequencies.append(freq)
+                        levels.append(level)
+                    except (ValueError, AttributeError):
+                        continue
+                
+                if frequencies and levels:
+                    ax.plot(frequencies, levels, 'b-', linewidth=2, marker='o', markersize=4)
+                    ax.set_xlabel('Frequency (MHz)', fontsize=12)
+                    ax.set_ylabel('Level (dBm)', fontsize=12)
+                    ax.set_title('Signal Level vs Frequency', fontsize=14, fontweight='bold')
+                    ax.grid(True, alpha=0.3)
+            
+            elif graph_type == "level_vs_time":
+                # Extract timestamp and level data
+                times = []
+                levels = []
+                for item in data:
+                    timestamp = item.get('Timestamp', '')
+                    level_str = item.get('Level (dBm)', '0')
+                    try:
+                        if isinstance(level_str, str):
+                            level = float(level_str.replace(' dBm', '').replace(',', '.'))
+                        else:
+                            level = float(level_str)
+                        times.append(timestamp)
+                        levels.append(level)
+                    except (ValueError, AttributeError):
+                        continue
+                
+                if times and levels:
+                    ax.plot(range(len(times)), levels, 'r-', linewidth=2, marker='o', markersize=4)
+                    ax.set_xlabel('Measurement Index', fontsize=12)
+                    ax.set_ylabel('Level (dBm)', fontsize=12)
+                    ax.set_title('Signal Level Over Time', fontsize=14, fontweight='bold')
+                    ax.grid(True, alpha=0.3)
+            
+            plt.tight_layout()
+            
+            # Save graph
+            filename = f"graph_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{graph_type}.png"
+            filepath = os.path.join(self.reports_dir, "charts", filename)
+            plt.savefig(filepath, dpi=150, bbox_inches='tight')
+            plt.close()
+            
+            logger.info(f"Graph generated: {filepath}")
+            return filepath
+            
+        except Exception as e:
+            logger.error(f"Error generating graph: {e}", exc_info=True)
+            plt.close()
+            return None
+    
+    # ========================================================================
     # PDF Report Generation
     # ========================================================================
     
