@@ -497,7 +497,7 @@ class ReportGenerator:
     # DOCX Report Generation
     # ========================================================================
     
-    def generate_docx(self, report_content: ReportContent) -> str:
+    def generate_docx(self, report_content: ReportContent, template: dict = None) -> str:
         """
         Generate DOCX (Word) report
         
