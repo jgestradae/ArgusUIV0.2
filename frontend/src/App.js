@@ -111,6 +111,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/reports/templates" element={
+              <ProtectedRoute>
+                <Layout>
+                  <ReportTemplates />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/configuration" element={
               <ProtectedRoute>
                 <Layout>
